@@ -2,7 +2,7 @@ package net.a.g.excel.util;
 
 public class ExcelConstants {
 
-	public static final String EXCEL_STATIC_LOAD = "excel.static.load";
+	public static final String EXCEL_STATIC_READONLY = "excel.static.readonly";
 	public static final String EXCEL_CELL_PATTERN = "([A-Z]{1,5})([0-9]{1,5})";
 	public static final String DATE_FORMAT = "yyyy-MM-dd";
 	public static final String EXCEL_STATIC_RESOURCE_URI = "excel.static.resouces.uri";

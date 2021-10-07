@@ -15,8 +15,8 @@ public class ExcelConfiguration {
 
 	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = "../Classeur1.xlsx")
 	String resouceUri;
-	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_LOAD, defaultValue = ExcelConstants.TRUE)
-	boolean load;
+	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_READONLY, defaultValue = ExcelConstants.TRUE)
+	boolean readOnly;
 	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_NAME, defaultValue = ExcelConstants.EXCEL)
 	String name;
 
@@ -24,8 +24,8 @@ public class ExcelConfiguration {
 		return resouceUri;
 	}
 
-	public boolean isLoad() {
-		return load;
+	public boolean isReadOnly() {
+		return readOnly;
 	}
 
 	public String getName() {
@@ -36,7 +36,7 @@ public class ExcelConfiguration {
 	
 	@Override
 	public String toString() {
-		return "ExcelConfiguration [resouceUri=" + resouceUri + ", load=" + load + ", name=" + name + "]";
+		return "ExcelConfiguration [resouceUri=" + resouceUri + ", readOnly=" + isReadOnly() + ", name=" + name + "]";
 	}
 
 	@PostConstruct

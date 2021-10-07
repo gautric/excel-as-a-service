@@ -277,7 +277,7 @@ public class ExcelEngine {
 
 	@PostConstruct
 	public void loadFile() {
-		if (conf.isLoad()) {
+		if (conf.isReadOnly()) {
 			LOG.info("Static import");
 			try {
 				addFile(conf.getName(), new FileInputStream(conf.getResouceUri()));

@@ -53,7 +53,7 @@ public class ExcelResource {
 
 		JSONObject ret = new JSONObject();
 
-		if (conf.isLoad()) {
+		if (conf.isReadOnly()) {
 			ret.accumulate("_error", "Service is on readonly mode, you cannot upload file");
 			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(ret.toString()).build();
 		}
