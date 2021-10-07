@@ -1,8 +1,6 @@
 package net.a.g.excel.rest;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -46,23 +44,23 @@ public class ExcelResource {
 	@Context
 	UriInfo uriInfo;
 
-	@POST
-	@Consumes({ "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel" })
-	public Response add(String title, File file) {
-
-		if (!conf.isLoad()) {
-			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
-		}
-		try {
-			engine.add(title, new FileInputStream(file));
-		} catch (FileNotFoundException ex) {
-			LOG.error(null, ex);
-		}
-
-		engine.listOfSheet(title);
-
-		return Response.status(Response.Status.ACCEPTED).build();
-	}
+//	@POST
+//	@Consumes({ "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel" })
+//	public Response add(String title, File file) {
+//
+//		if (!conf.isLoad()) {
+//			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+//		}
+//		try {
+//			engine.add(title, new FileInputStream(file));
+//		} catch (FileNotFoundException ex) {
+//			LOG.error(null, ex);
+//		}
+//
+//		engine.listOfSheet(title);
+//
+//		return Response.status(Response.Status.ACCEPTED).build();
+//	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
