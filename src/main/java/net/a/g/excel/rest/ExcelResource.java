@@ -1,6 +1,5 @@
 package net.a.g.excel.rest;
 
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -20,15 +19,18 @@ import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.a.g.excel.ExcelEngine;
 import net.a.g.excel.util.ExcelConfiguration;
+import net.a.g.excel.util.MultipartBody;
 
 @Path("/")
 public class ExcelResource {
@@ -44,23 +46,28 @@ public class ExcelResource {
 	@Context
 	UriInfo uriInfo;
 
-//	@POST
-//	@Consumes({ "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel" })
-//	public Response add(String title, File file) {
-//
-//		if (!conf.isLoad()) {
-//			return Response.status(Response.Status.NOT_ACCEPTABLE).build();
-//		}
-//		try {
-//			engine.add(title, new FileInputStream(file));
-//		} catch (FileNotFoundException ex) {
-//			LOG.error(null, ex);
-//		}
-//
-//		engine.listOfSheet(title);
-//
-//		return Response.status(Response.Status.ACCEPTED).build();
-//	}
+	@POST
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response sendMultipartData(@MultipartForm MultipartBody data) {
+
+		JSONObject ret = new JSONObject();
+
+		if (conf.isLoad()) {
+			ret.accumulate("_error", "Service is on readonly mode, you cannot upload file");
+			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(ret.toString()).build();
+		}
+		
+		if(!engine.addFile(data.name, data.is)) {
+			ret.accumulate("_error", "Server cannot accept/recognize format file provided");
+			return Response.status(Status.BAD_REQUEST).entity(ret.toString()).build();
+		}		
+
+		ret.accumulate(data.name, UriBuilder.fromUri(uriInfo.getRequestUri()).path(ExcelResource.class, "listOfSheet")
+				.build(data.name).toString());
+
+		return Response.accepted(ret.toString()).build();
+	}
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -75,9 +82,8 @@ public class ExcelResource {
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		Response response = Response.ok(ret.toString()).links(link).build();
+		return Response.ok(ret.toString()).links(link).build();
 
-		return response;
 	}
 
 	@GET
@@ -85,8 +91,6 @@ public class ExcelResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response listOfSheet(@PathParam("file") String file) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-
-		System.out.println(uriInfo.getBaseUri());
 
 		if (!engine.title(file)) {
 			return Response.status(Response.Status.NOT_FOUND).links(link).build();
@@ -110,7 +114,7 @@ public class ExcelResource {
 
 		Response.Status status = Response.Status.NOT_FOUND;
 		Object entity = null;
-		
+
 		if (engine.sheet(file, sheetName)) {
 			status = Response.Status.OK;
 			entity = engine.cellFormular(file, sheetName);

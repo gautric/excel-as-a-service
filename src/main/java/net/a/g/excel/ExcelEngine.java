@@ -49,7 +49,7 @@ public class ExcelEngine {
 
 	private Map<String, byte[]> map = new HashMap<String, byte[]>();
 
-	public void add(String s, InputStream is) {
+	public boolean addFile(String s, InputStream is) {
 		try {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			int nRead;
@@ -58,10 +58,18 @@ public class ExcelEngine {
 				buffer.write(data, 0, nRead);
 			}
 			buffer.flush();
-			map.put(s, buffer.toByteArray());
+
+			data = buffer.toByteArray();
+
+			if (extractedWorkbook("", data) == null) {
+				return false;
+			}
+			map.put(s, data);
 		} catch (IOException ex) {
 			LOG.error("", ex);
 		}
+		return true;
+
 	}
 
 	public Set<String> list() {
@@ -72,9 +80,17 @@ public class ExcelEngine {
 		return map.containsKey(name);
 	}
 
-	public Workbook workbook(String name) {
+	public Workbook retrieveWorkbook(String name) {
+		byte[] byteArray = map.get(name);
+
+		Workbook workbook = extractedWorkbook(name, byteArray);
+
+		return workbook;
+	}
+
+	private Workbook extractedWorkbook(String name, byte[] byteArray) {
 		Workbook workbook = null;
-		ByteArrayInputStream is = new ByteArrayInputStream(map.get(name));
+		ByteArrayInputStream is = new ByteArrayInputStream(byteArray);
 		try {
 			workbook = new XSSFWorkbook(is);
 			return workbook;
@@ -100,7 +116,7 @@ public class ExcelEngine {
 
 	public List<String> listOfSheet(String name) {
 
-		Workbook workbook = workbook(name);
+		Workbook workbook = retrieveWorkbook(name);
 
 		int numberOfSheet = workbook.getNumberOfSheets();
 
@@ -114,13 +130,13 @@ public class ExcelEngine {
 	}
 
 	public boolean sheet(String excelName, String sheetName) {
-		Workbook workbook = workbook(excelName);
+		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
 		return sheet != null;
 	}
 
 	public Map<String, String> cellFormular(String excelName, String sheetName) {
-		Workbook workbook = workbook(excelName);
+		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
 		Map<String, String> map = new HashMap<String, String>();
 
@@ -138,7 +154,7 @@ public class ExcelEngine {
 	public Map<String, Object> computeCell(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names) {
 
-		Workbook workbook = workbook(excelName);
+		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
 
 		Map<String, Object> map = new HashMap<String, Object>();
@@ -148,10 +164,9 @@ public class ExcelEngine {
 		}
 
 		FormulaEvaluator exec = formula(workbook);
-		
-		
+
 		exec.setDebugEvaluationOutputForNextEval(true);
-		
+
 		for (String cellName : cellNames) {
 
 			map.put(cellName, getRawCell(exec.evaluateInCell(getCell(sheet, cellName))));
@@ -265,7 +280,7 @@ public class ExcelEngine {
 		if (conf.isLoad()) {
 			LOG.info("Static import");
 			try {
-				add(conf.getName(), new FileInputStream(conf.getResouceUri()));
+				addFile(conf.getName(), new FileInputStream(conf.getResouceUri()));
 			} catch (Exception ex) {
 				LOG.error(null, ex);
 			}
