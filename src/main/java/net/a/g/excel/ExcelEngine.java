@@ -162,34 +162,28 @@ public class ExcelEngine {
 			Map<String, List<String>> names) {
 
 		Workbook workbook = retrieveWorkbook(excelName);
-		
-		//Inject Value to the workbook
+
+		// Inject Value to the workbook
 		names.forEach((address, value) -> injectValue(address, value, workbook, sheetName));
 
 		FormulaEvaluator exec = formula(workbook);
 
 		exec.setDebugEvaluationOutputForNextEval(true);
 
-		
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		for (String cellName : cellNames) {
-
-			Cell cell = retrieveCellByAdress(cellName, workbook, sheetName);
-
-			String fullCellName = extracted(cell, sheetName);
-
-			map.put(fullCellName, getRawCell(exec.evaluateInCell(cell)));
-		}
-		
-		LOG.info(map.toString());
+		// Compute All cellNames
+		Map<String, Object> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
+				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName), cell -> computeCell(cell, exec)));
 
 		return map;
 	}
 
-	private String extracted(Cell cell, String defaultSheetName) {
+	private Object computeCell(Cell cell, FormulaEvaluator exec) {
+		return getRawCell(exec.evaluateInCell(cell));
+	}
+
+	private String retrieveFullCellName(Cell cell, String defaultSheetName) {
 		return (defaultSheetName.compareTo(cell.getSheet().getSheetName()) != 0)
-				? cell.getSheet().getSheetName() + "!"+cell.getAddress().formatAsString()
+				? cell.getSheet().getSheetName() + "!" + cell.getAddress().formatAsString()
 				: cell.getAddress().formatAsString();
 	}
 
