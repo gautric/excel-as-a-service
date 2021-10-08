@@ -15,13 +15,15 @@ import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
@@ -160,36 +162,39 @@ public class ExcelEngine {
 			Map<String, List<String>> names) {
 
 		Workbook workbook = retrieveWorkbook(excelName);
-		Sheet sheet = workbook.getSheet(sheetName);
-
-		Map<String, Object> map = new HashMap<String, Object>();
-
-		for (String address : names.keySet()) {
-
-			Cell cell = retrieveCellByAdress(address, workbook, sheetName);
-
-			updateCell(cell, names.get(address).get(0));
-
-		}
+		
+		//Inject Value to the workbook
+		names.forEach((address, value) -> injectValue(address, value, workbook, sheetName));
 
 		FormulaEvaluator exec = formula(workbook);
 
 		exec.setDebugEvaluationOutputForNextEval(true);
 
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+
 		for (String cellName : cellNames) {
 
 			Cell cell = retrieveCellByAdress(cellName, workbook, sheetName);
 
-			String sheetOfCell = (sheetName.compareTo(cell.getSheet().getSheetName()) != 0)
-					? cell.getSheet().getSheetName() + "!"
-					: "";
+			String fullCellName = extracted(cell, sheetName);
 
-			map.put(sheetOfCell + cell.getAddress().formatAsString(), getRawCell(exec.evaluateInCell(cell)));
+			map.put(fullCellName, getRawCell(exec.evaluateInCell(cell)));
 		}
-
+		
 		LOG.info(map.toString());
 
 		return map;
+	}
+
+	private String extracted(Cell cell, String defaultSheetName) {
+		return (defaultSheetName.compareTo(cell.getSheet().getSheetName()) != 0)
+				? cell.getSheet().getSheetName() + "!"+cell.getAddress().formatAsString()
+				: cell.getAddress().formatAsString();
+	}
+
+	private void injectValue(String cellAdress, List<String> value, Workbook workbook, String defaultSheetName) {
+		updateCell(retrieveCellByAdress(cellAdress, workbook, defaultSheetName), value.get(0));
 	}
 
 	private Cell retrieveCellByAdress(String cellAddress, Workbook workbook, String defaultSheetName) {
@@ -312,8 +317,10 @@ public class ExcelEngine {
 			if (Files.isRegularFile(file)) {
 				addFile(file);
 			} else {
-								
-				Files.walk(file, 1).filter(f -> !f.getFileName().toString().startsWith("~") && (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"))).forEach(f -> addFile(f));
+
+				Files.walk(file, 1).filter(f -> !f.getFileName().toString().startsWith("~")
+						&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx")))
+						.forEach(f -> addFile(f));
 			}
 		}
 	}
