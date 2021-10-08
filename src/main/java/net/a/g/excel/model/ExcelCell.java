@@ -21,10 +21,11 @@ public class ExcelCell {
 	public ExcelCell() {
 	};
 
-	public ExcelCell(String adress, String formula, String value) {
+	public ExcelCell(String adress, String formula, String value, String ref) {
 		this.address = adress;
 		this.formula = formula;
 		this.value = value;
+		this.ref = ref;
 	};
 
 }

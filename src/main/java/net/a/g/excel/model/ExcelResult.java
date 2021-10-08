@@ -14,6 +14,9 @@ public class ExcelResult {
 
 	@JsonProperty("_previous")
 	public String previous;
+	
+	@JsonProperty("_self")
+	public String self;
 
 	@JsonProperty("results")
 	public Object results;
