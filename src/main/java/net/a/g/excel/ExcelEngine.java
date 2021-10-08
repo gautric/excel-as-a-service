@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FilenameUtils;
@@ -47,7 +47,7 @@ import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 
-@RequestScoped
+@ApplicationScoped
 public class ExcelEngine {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
