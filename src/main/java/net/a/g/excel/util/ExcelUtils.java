@@ -1,7 +1,10 @@
 package net.a.g.excel.util;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ExcelUtils {
 
@@ -41,18 +44,25 @@ public class ExcelUtils {
 		return ret;
 	}
 
-	
 	public static boolean checkAdress(String address) {
 		Pattern p = Pattern.compile(ExcelConstants.EXCEL_CELL_PATTERN);
 		Matcher m = p.matcher(address);
 		return m.matches();
 	}
-	
-	
+
 	public static boolean checkFullAdress(String address) {
 		Pattern p = Pattern.compile(ExcelConstants.EXCEL_SHEET_CELL_PATTERN);
 		Matcher m = p.matcher(address);
 		return m.matches();
 	}
-	
+
+	public static boolean checkFullAdressStrict(String address) {
+		return Arrays.asList(address.split(",")).stream().allMatch(ExcelUtils::checkFullAdress);
+	}
+
+	public static List<String> retrieveAllValidAdress(String address) {
+		return Arrays.asList(address.split(",")).stream().filter(ExcelUtils::checkFullAdress)
+				.collect(Collectors.toList());
+	}
+
 }
