@@ -1,0 +1,60 @@
+= Excel Engine by Quarkus
+
+== Introduction
+
+This project provides an Excel Engine Executor. It loads couple of Excel file (xls, xlsx) and compute all Cells needed.
+
+
+== 
+
+== Run Application 
+
+To run application 
+
+	mvn compile quarkus:dev -Dexcel.static.resouces.uri=../sample
+
+== Call REST API
+
+
+=== Retrieve all Excel resources available
+
+	curl http://localhost:8080/api
+
+=== Retrieve all Sheet of the Excel resources
+
+	curl http://localhost:8080/api/{resource}
+
+=== Retrieve all Formula from a Sheet of the Excel resources
+
+	curl http://localhost:8080/api/{resource}/{sheet}
+
+=== Compute or Retrieve a Cell 
+
+	curl http://localhost:8080/api/{resource}/{sheet}/{cell}
+
+
+
+== Configuration
+
+.Configuration property
+[%header,cols=3*] 
+|===
+
+|Properties
+|Type 
+|Default
+|Comments
+
+| `excel.static.resouces.uri`
+| String
+| `.`
+| `classpath://` or _directory_ or _file_
+
+| `excel.static.readonly`
+| boolean
+| `false`
+| if `true` you cannot use POST method to add new file 
+
+|===
+
+
