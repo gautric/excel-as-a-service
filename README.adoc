@@ -37,7 +37,7 @@ To run application
 == Configuration
 
 .Configuration property
-[%header,cols=3*] 
+[%header,cols=4*] 
 |===
 
 |Properties
