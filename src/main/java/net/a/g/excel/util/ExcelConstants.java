@@ -11,5 +11,7 @@ public class ExcelConstants {
 	public static final String EXCEL_STATIC_RESOURCE_NAME = "excel.static.resource.name";
 	public static final String EXCEL = "excel";
 	public static final String TRUE = "true";
+	public static final String DOT = ".";
+
 
 }
