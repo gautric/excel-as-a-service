@@ -13,7 +13,7 @@ public class ExcelConfiguration {
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelConfiguration.class);
 
 
-	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = "../Classeur1.xlsx")
+	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = ".")
 	String resouceUri;
 	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_READONLY, defaultValue = ExcelConstants.TRUE)
 	boolean readOnly;
