@@ -9,11 +9,10 @@ import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class ExcelConfiguration {
-	
+
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelConfiguration.class);
 
-
-	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = ".")
+	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = ExcelConstants.DOT)
 	String resouceUri;
 	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_READONLY, defaultValue = ExcelConstants.TRUE)
 	boolean readOnly;
@@ -26,8 +25,6 @@ public class ExcelConfiguration {
 		return readOnly;
 	}
 
-	
-	
 	@Override
 	public String toString() {
 		return "ExcelConfiguration [resouceUri=" + resouceUri + ", readOnly=" + isReadOnly() + "]";
@@ -37,5 +34,5 @@ public class ExcelConfiguration {
 	public void postConstruc() {
 		LOG.info(this.toString());
 	}
-	
+
 }
