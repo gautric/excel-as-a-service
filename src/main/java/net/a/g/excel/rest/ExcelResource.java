@@ -55,13 +55,13 @@ public class ExcelResource {
 
 		if (conf.isReadOnly()) {
 			ret.accumulate("_error", "Service is on readonly mode, you cannot upload file");
-			return Response.status(Response.Status.NOT_ACCEPTABLE).entity(ret.toString()).build();
+			return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity(ret.toString()).build();
 		}
-		
-		if(!engine.addFile(data.name, data.is)) {
+
+		if (!engine.addFile(data.name, data.is)) {
 			ret.accumulate("_error", "Server cannot accept/recognize format file provided");
 			return Response.status(Status.BAD_REQUEST).entity(ret.toString()).build();
-		}		
+		}
 
 		ret.accumulate(data.name, UriBuilder.fromUri(uriInfo.getRequestUri()).path(ExcelResource.class, "listOfSheet")
 				.build(data.name).toString());
@@ -75,7 +75,7 @@ public class ExcelResource {
 
 		JSONObject ret = new JSONObject();
 
-		engine.list().stream()
+		engine.listOfFile().stream()
 				.map(file -> new String[] { file, UriBuilder.fromUri(uriInfo.getRequestUri())
 						.path(ExcelResource.class, "listOfSheet").build(file).toString() })
 				.forEach(uri -> ret.accumulate(uri[0], uri[1]));
@@ -115,9 +115,11 @@ public class ExcelResource {
 		Response.Status status = Response.Status.NOT_FOUND;
 		Object entity = null;
 
-		if (engine.sheet(file, sheetName)) {
-			status = Response.Status.OK;
-			entity = engine.cellFormular(file, sheetName);
+		if (!sheetName.contains("\\!")) {
+			if (engine.sheet(file, sheetName)) {
+				status = Response.Status.OK;
+				entity = engine.cellFormular(file, sheetName);
+			}
 		}
 
 		return Response.status(status).entity(entity).links(link).build();

@@ -3,6 +3,8 @@ package net.a.g.excel.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.poi.ss.formula.functions.Address;
+
 public class ExcelUtils {
 
 	/**
@@ -47,5 +49,19 @@ public class ExcelUtils {
 		Matcher m = p.matcher(address);
 		return m.matches();
 	}
+	
+	
+	public static boolean checkFullAdress(String address) {
+		Pattern p = Pattern.compile(ExcelConstants.EXCEL_SHEET_CELL_PATTERN);
+		Matcher m = p.matcher(address);
+		return m.matches();
+	}
+	
+	
+//	public static Address checkFullAdress(String address) {
+//		Pattern p = Pattern.compile(ExcelConstants.EXCEL_SHEET_CELL_PATTERN);
+//		Matcher m = p.matcher(address);
+//		return m.matches();
+//	}
 	
 }

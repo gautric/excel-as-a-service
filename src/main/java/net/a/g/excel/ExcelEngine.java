@@ -6,9 +6,12 @@ package net.a.g.excel;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
@@ -30,6 +34,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
@@ -39,7 +44,7 @@ import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 
-@ApplicationScoped
+@RequestScoped
 public class ExcelEngine {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
@@ -72,7 +77,7 @@ public class ExcelEngine {
 
 	}
 
-	public Set<String> list() {
+	public Set<String> listOfFile() {
 		return map.keySet();
 	}
 
@@ -159,8 +164,12 @@ public class ExcelEngine {
 
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		for (String string : names.keySet()) {
-			setRawCell(getCell(sheet, string), names.get(string).get(0));
+		for (String address : names.keySet()) {
+
+			Cell cell = retrieveCellByAdress(address, workbook, sheetName);
+
+			updateCell(cell, names.get(address).get(0));
+
 		}
 
 		FormulaEvaluator exec = formula(workbook);
@@ -169,12 +178,27 @@ public class ExcelEngine {
 
 		for (String cellName : cellNames) {
 
-			map.put(cellName, getRawCell(exec.evaluateInCell(getCell(sheet, cellName))));
+			Cell cell = retrieveCellByAdress(cellName, workbook, sheetName);
+
+			String sheetOfCell = (sheetName.compareTo(cell.getSheet().getSheetName()) != 0)
+					? cell.getSheet().getSheetName() + "!"
+					: "";
+
+			map.put(sheetOfCell + cell.getAddress().formatAsString(), getRawCell(exec.evaluateInCell(cell)));
 		}
 
 		LOG.info(map.toString());
 
 		return map;
+	}
+
+	private Cell retrieveCellByAdress(String cellAddress, Workbook workbook, String defaultSheetName) {
+		CellReference cr = new CellReference(cellAddress);
+		String sheetOfCell = (cr.getSheetName() == null) ? defaultSheetName : cr.getSheetName();
+		Sheet mySheet = workbook.getSheet(sheetOfCell);
+		Row row = mySheet.getRow(cr.getRow());
+		Cell cell = row.getCell(cr.getCol());
+		return cell;
 	}
 
 	public Object getRawCell(Cell cell) {
@@ -214,7 +238,7 @@ public class ExcelEngine {
 		return ret;
 	}
 
-	public void setRawCell(Cell cell, String value) {
+	public void updateCell(Cell cell, String value) {
 
 		if (cell != null) {
 
@@ -276,14 +300,32 @@ public class ExcelEngine {
 	}
 
 	@PostConstruct
-	public void loadFile() {
-		if (conf.isReadOnly()) {
-			LOG.info("Static import");
-			try {
-				addFile(conf.getName(), new FileInputStream(conf.getResouceUri()));
-			} catch (Exception ex) {
-				LOG.error(null, ex);
+	public void loadFile() throws Exception {
+
+		InputStream inputStream = ExcelEngine.class.getResourceAsStream(conf.getResouceUri());
+
+		if (inputStream != null) {
+			LOG.info("Load file from classpth://{}", conf.getResouceUri());
+			addFile(conf.getName(), inputStream);
+		} else {
+			Path file = Paths.get(conf.getResouceUri());
+			if (Files.isRegularFile(file)) {
+				addFile(file);
+			} else {
+								
+				Files.walk(file, 1).filter(f -> !f.getFileName().toString().startsWith("~") && (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"))).forEach(f -> addFile(f));
 			}
+		}
+	}
+
+	private void addFile(Path file) {
+		try {
+			LOG.info("Load file from {}", file.getFileName());
+			addFile(file.getFileName().toString().split("\\.")[0], file.toUri().toURL().openStream());
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
 }
