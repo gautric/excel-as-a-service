@@ -12,6 +12,7 @@ public class ExcelConstants {
 	public static final String EXCEL = "excel";
 	public static final String TRUE = "true";
 	public static final String DOT = ".";
-
+	public static final String EXCEL_LIST_MAP = "excel.return.list.or.map";
+	public static final String EXCEL_RETURN_DEFAULT = "LIST";
 
 }
