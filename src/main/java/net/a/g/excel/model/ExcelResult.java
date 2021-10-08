@@ -21,6 +21,14 @@ public class ExcelResult {
 	@JsonProperty("results")
 	public Object results;
 
+	public String getSelf() {
+		return self;
+	}
+
+	public void setSelf(String self) {
+		this.self = self;
+	}
+
 	public ExcelResult() {
 	}
 
