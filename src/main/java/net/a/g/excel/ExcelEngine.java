@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
-import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FilenameUtils;
@@ -47,7 +47,7 @@ import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 
-@ApplicationScoped
+@RequestScoped
 public class ExcelEngine {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
@@ -79,7 +79,11 @@ public class ExcelEngine {
 		return true;
 
 	}
-
+	
+	public int countListOfResource() {
+		return map.keySet().size();
+	}
+	
 	public Set<String> listOfFile() {
 		return map.keySet();
 	}
@@ -143,10 +147,10 @@ public class ExcelEngine {
 		return sheet != null;
 	}
 
-	public Map<String, String> cellFormular(String excelName, String sheetName) {
+	public Map<String, Object> cellFormular(String excelName, String sheetName) {
 		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
-		Map<String, String> map = new HashMap<String, String>();
+		Map<String, Object> map = new HashMap<String, Object>();
 
 		sheet.forEach(row -> {
 			row.forEach(cell -> {

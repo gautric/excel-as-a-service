@@ -34,6 +34,7 @@ import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelResult;
 import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.util.ExcelConfiguration;
+import net.a.g.excel.util.ExcelUtils;
 import net.a.g.excel.util.MultipartBody;
 
 @Path("/")
@@ -94,27 +95,26 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response cellQuery(@PathParam("resource") String fileName, @PathParam("sheet") String sheetName,
-			@PathParam("cells") String cellNames, @QueryParam("raw") @DefaultValue("false") boolean format) {
+	public Response cellQuery(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
+			@PathParam("cells") String cellNames) {
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		if (!engine.sheet(fileName, sheetName)) {
+		if (!engine.sheet(resource, sheetName)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		Map<String, List<String>> query = uriInfo.getQueryParameters();
 
-		Map<String, Object> ret = engine.computeCell(fileName, sheetName, cellNames.split(","), query);
+		Map<String, Object> entity = engine.computeCell(resource, sheetName, cellNames.split(","), query);
 
-		return Response.status(Response.Status.OK).entity(ret).build();
-	}
+		((Map<String, Object>) entity).replaceAll((k, v) -> createCellValueResource(k, v, resource, sheetName));
 
-	private ExcelResource createExcelResource(String resource) {
-		return new ExcelResource(resource, UriBuilder.fromUri(uriInfo.getRequestUri())
-				.path(ExcelRestResource.class, "listOfSheet").build(resource).toString());
-	}
+		ExcelResult ret = new ExcelResult(entity.size(), entity);
 
-	private ExcelSheet createSheetResource(String resource, String sheet) {
-		return new ExcelSheet(sheet, UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "sheet")
-				.build(resource, sheet).toString());
+		if (conf.returnList()) {
+			ret.setResults(entity.values());
+		}
+
+		return returnOK(ret, link);
 	}
 
 	@GET
@@ -131,7 +131,9 @@ public class ExcelRestResource {
 			entity = engine.listOfFile().stream().map(resource -> createExcelResource(resource));
 		}
 
-		return Response.ok(new ExcelResult(engine.countListOfResource(), entity)).links(link).build();
+		ExcelResult ret = new ExcelResult(engine.countListOfResource(), entity);
+
+		return returnOK(ret, link);
 	}
 
 	@GET
@@ -153,8 +155,9 @@ public class ExcelRestResource {
 		} else {
 			entity = listOfSheet.stream().map(sheet -> createSheetResource(file, sheet));
 		}
+		ExcelResult ret = new ExcelResult(listOfSheet.size(), entity);
 
-		return Response.ok(new ExcelResult(listOfSheet.size(), entity)).links(link).build();
+		return returnOK(ret, link);
 	}
 
 	@POST
@@ -190,25 +193,53 @@ public class ExcelRestResource {
 		Map<String, Object> entity = null;
 		ExcelResult ret = null;
 
-		if (engine.sheet(resource, sheetName)) {
-			status = Response.Status.OK;
+		if (!sheetName.contains("!")) {
+			if (engine.sheet(resource, sheetName)) {
+				status = Response.Status.OK;
 
-			entity = engine.cellFormular(resource, sheetName);
-			ret = new ExcelResult(entity.size(), entity);
+				entity = engine.cellFormular(resource, sheetName);
+				ret = new ExcelResult(entity.size(), entity);
 
-			((Map<String, Object>) entity).replaceAll((k, v) -> createCellResource(k, (String)v, resource, sheetName));
+				((Map<String, Object>) entity)
+						.replaceAll((k, f) -> createCellFormulaResource(k, (String) f, resource, sheetName));
 
-			if (conf.returnList()) {
-				ret.setResults(entity.values());
+				if (conf.returnList()) {
+					ret.setResults(entity.values());
+				}
 			}
 		}
-
-		return Response.status(status).entity(ret).links(link).build();
+		return returnOK(ret, link);
 	}
 
-	private ExcelCell createCellResource(String adress, String formula, String file, String sheetName) {
+	private ExcelResource createExcelResource(String resource) {
+		return new ExcelResource(resource, UriBuilder.fromUri(uriInfo.getRequestUri())
+				.path(ExcelRestResource.class, "listOfSheet").build(resource).toString());
+	}
+
+	private ExcelSheet createSheetResource(String resource, String sheet) {
+		return new ExcelSheet(sheet, UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "sheet")
+				.build(resource, sheet).toString());
+	}
+
+	private ExcelCell createCellFormulaResource(String adress, String formula, String file, String sheetName) {
 		return new ExcelCell(adress, (String) formula, null, UriBuilder.fromUri(uriInfo.getBaseUri())
 				.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString());
 	}
 
+	private ExcelCell createCellValueResource(String adress, Object value, String file, String sheetName) {
+
+		if (ExcelUtils.checkFullAdress(adress)) {
+			return new ExcelCell(adress, null, value,
+					UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery")
+							.build(file, adress.replaceAll("!.*", ""), adress.replaceAll(".*!", "")).toString());
+		} else {
+			return new ExcelCell(adress, null, value, UriBuilder.fromUri(uriInfo.getBaseUri())
+					.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString());
+		}
+	}
+
+	private Response returnOK(ExcelResult ret, Link link) {
+		ret.setSelf(link.getUri().toString());
+		return Response.status(Response.Status.OK).entity(ret).links(link).build();
+	}
 }
