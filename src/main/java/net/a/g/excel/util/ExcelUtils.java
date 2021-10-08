@@ -57,11 +57,4 @@ public class ExcelUtils {
 		return m.matches();
 	}
 	
-	
-//	public static Address checkFullAdress(String address) {
-//		Pattern p = Pattern.compile(ExcelConstants.EXCEL_SHEET_CELL_PATTERN);
-//		Matcher m = p.matcher(address);
-//		return m.matches();
-//	}
-	
 }

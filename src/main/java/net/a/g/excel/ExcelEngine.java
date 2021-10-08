@@ -20,13 +20,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -172,7 +173,8 @@ public class ExcelEngine {
 
 		// Compute All cellNames
 		Map<String, Object> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
-				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName), cell -> computeCell(cell, exec)));
+				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
+						cell -> computeCell(cell, exec)));
 
 		return map;
 	}
@@ -301,20 +303,22 @@ public class ExcelEngine {
 	@PostConstruct
 	public void loadFile() throws Exception {
 
+		Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
+				&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
+
 		InputStream inputStream = ExcelEngine.class.getResourceAsStream(conf.getResouceUri());
 
 		if (inputStream != null) {
-			LOG.info("Load file from classpth://{}", conf.getResouceUri());
-			addFile(conf.getName(), inputStream);
+			LOG.info("Load file from classpath://{}", conf.getResouceUri());
+			addFile(FilenameUtils.removeExtension(conf.getResouceUri()), inputStream);
 		} else {
 			Path file = Paths.get(conf.getResouceUri());
 			if (Files.isRegularFile(file)) {
 				addFile(file);
+			} else if (Files.isDirectory(file)) {
+				Files.walk(file, 1).filter(excelFilter).forEach(this::addFile);
 			} else {
-
-				Files.walk(file, 1).filter(f -> !f.getFileName().toString().startsWith("~")
-						&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx")))
-						.forEach(f -> addFile(f));
+				LOG.warn("Cannot read file or directory : {}", conf.getResouceUri());
 			}
 		}
 	}
@@ -322,7 +326,7 @@ public class ExcelEngine {
 	private void addFile(Path file) {
 		try {
 			LOG.info("Load file from {}", file.getFileName());
-			addFile(file.getFileName().toString().split("\\.")[0], file.toUri().toURL().openStream());
+			addFile(FilenameUtils.removeExtension(file.getFileName().toString()), file.toUri().toURL().openStream());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {

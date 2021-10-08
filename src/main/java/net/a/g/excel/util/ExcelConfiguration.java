@@ -17,8 +17,6 @@ public class ExcelConfiguration {
 	String resouceUri;
 	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_READONLY, defaultValue = ExcelConstants.TRUE)
 	boolean readOnly;
-	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_NAME, defaultValue = ExcelConstants.EXCEL)
-	String name;
 
 	public String getResouceUri() {
 		return resouceUri;
@@ -28,13 +26,11 @@ public class ExcelConfiguration {
 		return readOnly;
 	}
 
-	public String getName() {
-		return name;
-	}
+	
 	
 	@Override
 	public String toString() {
-		return "ExcelConfiguration [resouceUri=" + resouceUri + ", readOnly=" + isReadOnly() + ", name=" + name + "]";
+		return "ExcelConfiguration [resouceUri=" + resouceUri + ", readOnly=" + isReadOnly() + "]";
 	}
 
 	@PostConstruct
