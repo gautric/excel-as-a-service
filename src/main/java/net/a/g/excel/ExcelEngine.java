@@ -145,10 +145,16 @@ public class ExcelEngine {
 		return list;
 	}
 
-	public boolean sheet(String excelName, String sheetName) {
+	public boolean ifSheetExists(String excelName, String sheetName) {
 		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
 		return sheet != null;
+	}
+	
+	
+	public Sheet sheet(String excelName, String sheetName) {
+		Workbook workbook = retrieveWorkbook(excelName);
+		return  workbook.getSheet(sheetName);
 	}
 
 	public Map<String, Object> cellFormular(String excelName, String sheetName) {

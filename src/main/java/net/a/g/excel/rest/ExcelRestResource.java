@@ -59,7 +59,7 @@ public class ExcelRestResource {
 			@PathParam("cells") String cell, @QueryParam("raw") @DefaultValue("false") boolean format,
 			final String jsonBody) {
 
-		if (!engine.sheet(title, sheet)) {
+		if (!engine.ifSheetExists(title, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
@@ -81,7 +81,7 @@ public class ExcelRestResource {
 			@PathParam("cells") String cell, @QueryParam("raw") @DefaultValue("false") boolean format,
 			final MultivaluedMap<String, String> queryurlencoded) {
 
-		if (!engine.sheet(title, sheet)) {
+		if (!engine.ifSheetExists(title, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
@@ -99,7 +99,7 @@ public class ExcelRestResource {
 			@PathParam("cells") String cellNames) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		if (!engine.sheet(resource, sheetName)) {
+		if (!engine.ifSheetExists(resource, sheetName)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		Map<String, List<String>> query = uriInfo.getQueryParameters();
@@ -194,7 +194,7 @@ public class ExcelRestResource {
 		ExcelResult ret = null;
 
 		if (!sheetName.contains("!")) {
-			if (engine.sheet(resource, sheetName)) {
+			if (engine.ifSheetExists(resource, sheetName)) {
 				status = Response.Status.OK;
 				
 				entity = engine.cellFormular(resource, sheetName);
