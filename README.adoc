@@ -5,7 +5,6 @@
 This project provides an Excel Engine Executor. It loads couple of Excel file (xls, xlsx) and compute all Cells needed.
 
 
-== 
 
 == Run Application 
 
@@ -28,11 +27,84 @@ To run application
 
 	curl http://localhost:8080/api/{resource}/{sheet}
 
-=== Compute or Retrieve a Cell 
+=== Compute or Retrieve a Cell Value
 
 	curl http://localhost:8080/api/{resource}/{sheet}/{cell}
 
+== Sample Test
 
+with a KYC sample :
+
+	curl 'http://localhost:8080/api/KYC' | jq
+	
+```
+{
+  "_count": 3,
+  "_self": "http://localhost:8080/api/KYC",
+  "results": [
+    {
+      "name": "ComputeKYC",
+      "_ref": "http://localhost:8080/api/KYC/ComputeKYC"
+    },
+    {
+      "name": "COUNTRY",
+      "_ref": "http://localhost:8080/api/KYC/COUNTRY"
+    },
+    {
+      "name": "AMOUNT",
+      "_ref": "http://localhost:8080/api/KYC/AMOUNT"
+    }
+  ]
+}
+
+```
+
+    curl 'http://localhost:8080/api/KYC/ComputeKYC'  | jq
+
+```
+{
+  "_count": 4,
+  "_self": "http://localhost:8080/api/KYC/ComputeKYC",
+  "results": [
+    {
+      "address": "C3",
+      "formula": "VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)",
+      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C3"
+    },
+    {
+      "address": "C4",
+      "formula": "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
+      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C4"
+    },
+    {
+      "address": "C6",
+      "formula": "SUM(C2:C4)",
+      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C6"
+    },
+    {
+      "address": "C2",
+      "formula": "IF(B2,50,0)",
+      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C2"
+    }
+  ]
+}
+```
+
+    curl 'http://localhost:8080/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000' | jq
+
+```
+{
+  "_count": 1,
+  "_self": "http://localhost:8080/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000",
+  "results": [
+    {
+      "address": "C6",
+      "value": 125,
+      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C6"
+    }
+  ]
+}
+```
 
 == Configuration
 
