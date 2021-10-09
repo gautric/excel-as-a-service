@@ -50,6 +50,12 @@ To run application
 | `.`
 | `classpath://` or _directory_ or _file_
 
+| `excel.return.list.or.map`
+| String/Enum
+| `MAP`
+| Return result into List (`LIST`) or Map(`MAP`)
+
+
 | `excel.static.readonly`
 | boolean
 | `false`
