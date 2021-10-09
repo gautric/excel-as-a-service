@@ -24,7 +24,7 @@ public class ExcelCell {
 	public ExcelCell() {
 	};
 
-	public ExcelCell(String adress, String formula, Object value, String ref) {
+	public ExcelCell(String adress, String formula, Object value, String ref, String metadata) {
 		this.address = adress;
 		this.formula = formula;
 		this.value = value;

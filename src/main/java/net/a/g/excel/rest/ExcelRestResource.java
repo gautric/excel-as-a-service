@@ -196,7 +196,7 @@ public class ExcelRestResource {
 		if (!sheetName.contains("!")) {
 			if (engine.sheet(resource, sheetName)) {
 				status = Response.Status.OK;
-
+				
 				entity = engine.cellFormular(resource, sheetName);
 				ret = new ExcelResult(entity.size(), entity);
 
@@ -223,7 +223,7 @@ public class ExcelRestResource {
 
 	private ExcelCell createCellFormulaResource(String adress, String formula, String file, String sheetName) {
 		return new ExcelCell(adress, (String) formula, null, UriBuilder.fromUri(uriInfo.getBaseUri())
-				.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString());
+				.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString(), null);
 	}
 
 	private ExcelCell createCellValueResource(String adress, Object value, String file, String sheetName) {
@@ -231,10 +231,10 @@ public class ExcelRestResource {
 		if (ExcelUtils.checkFullAdress(adress)) {
 			return new ExcelCell(adress, null, value,
 					UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery")
-							.build(file, adress.replaceAll("!.*", ""), adress.replaceAll(".*!", "")).toString());
+							.build(file, adress.replaceAll("!.*", ""), adress.replaceAll(".*!", "")).toString(), null);
 		} else {
 			return new ExcelCell(adress, null, value, UriBuilder.fromUri(uriInfo.getBaseUri())
-					.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString());
+					.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString(), null);
 		}
 	}
 
