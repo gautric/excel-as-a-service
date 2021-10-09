@@ -20,6 +20,17 @@ public class ExcelResult {
 
 	@JsonProperty("results")
 	public Object results;
+	
+	@JsonProperty("_error")
+	public ExcelError error;
+	
+	public ExcelError getError() {
+		return error;
+	}
+
+	public void setError(ExcelError error) {
+		this.error = error;
+	}
 
 	public String getSelf() {
 		return self;
