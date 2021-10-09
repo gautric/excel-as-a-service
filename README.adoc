@@ -112,6 +112,8 @@ with a KYC sample :
 ** client can retrieve the value
 ** Excel engine can deal with the type of the cell
 
+* Use only POI implemented functions
+** https://poi.apache.org/components/spreadsheet/eval-devguide.html#Appendix+A+%E2%80%94+Functions+supported+by+POI[POI function available list]
 
 == Configuration
 
