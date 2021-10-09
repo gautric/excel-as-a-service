@@ -35,6 +35,7 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellReference;
@@ -174,7 +175,7 @@ public class ExcelEngine {
 		FormulaEvaluator exec = formula(workbook);
 
 		exec.setDebugEvaluationOutputForNextEval(true);
-
+	
 		// Compute All cellNames
 		Map<String, Object> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
 				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
@@ -202,7 +203,7 @@ public class ExcelEngine {
 		String sheetOfCell = (cr.getSheetName() == null) ? defaultSheetName : cr.getSheetName();
 		Sheet mySheet = workbook.getSheet(sheetOfCell);
 		Row row = mySheet.getRow(cr.getRow());
-		Cell cell = row.getCell(cr.getCol());
+		Cell cell = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
 		return cell;
 	}
 
@@ -249,7 +250,7 @@ public class ExcelEngine {
 
 			switch (cell.getCellType()) {
 			case BOOLEAN:
-				cell.setCellValue(Boolean.getBoolean(value));
+				cell.setCellValue(Boolean.getBoolean(value.toLowerCase()));
 				break;
 			case NUMERIC:
 
