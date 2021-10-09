@@ -249,8 +249,8 @@ public class ExcelEngine {
 		if (cell != null) {
 
 			switch (cell.getCellType()) {
-			case BOOLEAN:
-				cell.setCellValue(Boolean.getBoolean(value.toLowerCase()));
+			case BOOLEAN:				
+				cell.setCellValue(Boolean.parseBoolean(value));
 				break;
 			case NUMERIC:
 
@@ -260,7 +260,6 @@ public class ExcelEngine {
 						cell.setCellValue(sdf.parse(value));
 					} catch (ParseException ex) {
 						LOG.error("", ex);
-
 					}
 				} else {
 					cell.setCellValue(Double.parseDouble(value));
