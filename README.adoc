@@ -106,6 +106,13 @@ with a KYC sample :
 }
 ```
 
+== Tips for Excel dev
+
+* Include a default value into all Excel cells
+** client can retrieve the value
+** Excel engine can deal with the type of the cell
+
+
 == Configuration
 
 .Configuration property
