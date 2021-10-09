@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
@@ -80,11 +83,11 @@ public class ExcelEngine {
 		return true;
 
 	}
-	
+
 	public int countListOfResource() {
 		return map.keySet().size();
 	}
-	
+
 	public Set<String> listOfFile() {
 		return map.keySet();
 	}
@@ -153,16 +156,16 @@ public class ExcelEngine {
 		Sheet sheet = workbook.getSheet(sheetName);
 		Map<String, Object> map = new HashMap<String, Object>();
 
-		sheet.forEach(row -> {
-			row.forEach(cell -> {
-				if (cell.getCellType() == CellType.FORMULA) {
-					map.put(cell.getAddress().formatAsString(), cell.getCellFormula().toString());
-				}
-			});
+		streamCell(sheet).forEach(cell -> {
+			if (cell.getCellType() == CellType.FORMULA) {
+				map.put(cell.getAddress().formatAsString(), cell.getCellFormula().toString());
+			}
 		});
 
 		return map;
 	}
+
+	
 
 	public Map<String, Object> computeCell(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names) {
@@ -175,7 +178,7 @@ public class ExcelEngine {
 		FormulaEvaluator exec = formula(workbook);
 
 		exec.setDebugEvaluationOutputForNextEval(true);
-	
+
 		// Compute All cellNames
 		Map<String, Object> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
 				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
@@ -249,7 +252,7 @@ public class ExcelEngine {
 		if (cell != null) {
 
 			switch (cell.getCellType()) {
-			case BOOLEAN:				
+			case BOOLEAN:
 				cell.setCellValue(Boolean.parseBoolean(value));
 				break;
 			case NUMERIC:
@@ -302,6 +305,16 @@ public class ExcelEngine {
 		cell = row.getCell(pos[0]); // Also 0-based;
 
 		return cell;
+	}
+	
+	private Stream<Cell> streamCell(Workbook workbook) {
+		return StreamSupport.stream(workbook.spliterator(), false).flatMap(sheet -> StreamSupport
+				.stream(sheet.spliterator(), false).flatMap(r -> StreamSupport.stream(r.spliterator(), false)));
+	}
+
+	private Stream<Cell> streamCell(Sheet sheet) {
+		return StreamSupport.stream(sheet.spliterator(), false)
+				.flatMap(r -> StreamSupport.stream(r.spliterator(), false));
 	}
 
 	@PostConstruct
