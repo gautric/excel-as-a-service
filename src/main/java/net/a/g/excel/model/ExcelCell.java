@@ -14,6 +14,9 @@ public class ExcelCell {
 
 	@JsonProperty("value")
 	public Object value;
+	
+	@JsonProperty("_metadata")
+	public String metadata;
 
 	@JsonProperty("_ref")
 	public String ref;
