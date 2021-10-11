@@ -1,5 +1,6 @@
 package net.a.g.excel.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,6 +13,9 @@ public class ExcelResource {
 	@JsonProperty("file")
 	public String file;
 
+	@JsonIgnore(value = true)
+	public byte[] doc;
+	
 	@JsonProperty("_ref")
 	public String ref;
 
