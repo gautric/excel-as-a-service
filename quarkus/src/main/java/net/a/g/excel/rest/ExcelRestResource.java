@@ -188,7 +188,7 @@ public class ExcelRestResource {
 			return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity(ret.toString()).build();
 		}
 
-		if (!engine.addFile(data.name, data.is)) {
+		if (!engine.addNewResource(data.name, data.is)) {
 			ret.accumulate("_error", "Server cannot accept/recognize format file provided");
 			return Response.status(Status.BAD_REQUEST).entity(ret.toString()).build();
 		}

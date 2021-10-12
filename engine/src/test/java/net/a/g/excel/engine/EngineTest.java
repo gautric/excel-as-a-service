@@ -41,7 +41,7 @@ public class EngineTest {
 	public void setup() {
 		assertNotNull(engine);
 		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
-		assertTrue(engine.addFile("KYC", inputStream));
+		assertTrue(engine.addNewResource("KYC", inputStream));
 
 	}
 

@@ -62,7 +62,7 @@ public class ExcelEngine {
 
 	private Map<String, byte[]> map = new HashMap<String, byte[]>();
 
-	public boolean addFile(String s, InputStream is) {
+	public boolean addNewResource(String s, InputStream is) {
 
 		assert (is != null);
 		try {
@@ -337,7 +337,7 @@ public class ExcelEngine {
 
 			if (inputStream != null) {
 				LOG.info("Load file from classpath://{}", conf.getResouceUri());
-				addFile(FilenameUtils.getBaseName(conf.getResouceUri()), inputStream);
+				addNewResource(FilenameUtils.getBaseName(conf.getResouceUri()), inputStream);
 			} else {
 				Path file = Paths.get(conf.getResouceUri());
 				if (Files.isRegularFile(file)) {
@@ -356,7 +356,7 @@ public class ExcelEngine {
 	private void addFile(Path file) {
 		try {
 			LOG.info("Load file from {}", file.getFileName());
-			addFile(FilenameUtils.removeExtension(file.getFileName().toString()), file.toUri().toURL().openStream());
+			addNewResource(FilenameUtils.removeExtension(file.getFileName().toString()), file.toUri().toURL().openStream());
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
