@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 public class ExcelConfiguration {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelConfiguration.class);
-	
+
 	enum EXCELRETURN {
 		MAP, LIST
 	}
@@ -23,9 +23,18 @@ public class ExcelConfiguration {
 	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_READONLY, defaultValue = ExcelConstants.TRUE)
 	boolean readOnly;
 	@ConfigProperty(name = ExcelConstants.EXCEL_LIST_MAP, defaultValue = ExcelConstants.EXCEL_RETURN_DEFAULT)
-	EXCELRETURN list;
-	
-	
+	EXCELRETURN retourFormat = EXCELRETURN.MAP;
+	@ConfigProperty(name = ExcelConstants.EXCEL_FORMAT_DATE, defaultValue = ExcelConstants.FORMAT_DATE_ISO)
+	String formatDate = ExcelConstants.FORMAT_DATE_ISO;
+
+	public EXCELRETURN getFormatRetour() {
+		return retourFormat;
+	}
+
+	public String getFormatDate() {
+		return formatDate;
+	}
+
 	public String getResouceUri() {
 		return resouceUri;
 	}
@@ -35,13 +44,13 @@ public class ExcelConfiguration {
 	}
 
 	public boolean returnList() {
-		return list ==  EXCELRETURN.LIST;
+		return retourFormat == EXCELRETURN.LIST;
 	}
-	
+
 	public boolean returnMap() {
-		return list ==  EXCELRETURN.MAP;
+		return retourFormat == EXCELRETURN.MAP;
 	}
-	
+
 	@Override
 	public String toString() {
 		return "ExcelConfiguration [resouceUri=" + resouceUri + ", readOnly=" + isReadOnly() + "]";
@@ -49,7 +58,7 @@ public class ExcelConfiguration {
 
 	@PostConstruct
 	public void postConstruc() {
-		LOG.info(this.toString());	
+		LOG.info(this.toString());
 	}
 
 }

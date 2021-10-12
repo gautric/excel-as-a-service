@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.a.g.excel.util.ExcelConfiguration;
-import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 
 @ApplicationScoped
@@ -225,7 +224,7 @@ public class ExcelEngine {
 			case NUMERIC:
 
 				if (DateUtil.isCellDateFormatted(cell)) {
-					SimpleDateFormat sdf = new SimpleDateFormat(ExcelConstants.DATE_FORMAT);
+					SimpleDateFormat sdf = new SimpleDateFormat(conf.getFormatDate());
 					ret = sdf.format(cell.getDateCellValue());
 				} else {
 					ret = cell.getNumericCellValue();
@@ -261,7 +260,7 @@ public class ExcelEngine {
 			case NUMERIC:
 
 				if (DateUtil.isCellDateFormatted(cell)) {
-					SimpleDateFormat sdf = new SimpleDateFormat(ExcelConstants.DATE_FORMAT);
+					SimpleDateFormat sdf = new SimpleDateFormat(conf.getFormatDate());
 					try {
 						cell.setCellValue(sdf.parse(value));
 					} catch (ParseException ex) {

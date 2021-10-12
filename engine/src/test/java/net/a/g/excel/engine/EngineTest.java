@@ -81,38 +81,46 @@ public class EngineTest {
 		List<String> expect = Arrays.asList("ComputeKYC", "COUNTRY", "AMOUNT");
 		assertThat(actual, is(expect));
 	}
-	
-	
+
 	@Test
 	public void testComputeKYCValues() {
-		
-		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").values());
-		assertThat(actual, hasSize(4));
 
-		List<String> expect = Arrays.asList("VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)", "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)", "SUM(C2:C4)", "IF(B2,50,0)");
+		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").values());
+		assertThat(actual, hasSize(5));
+
+		List<String> expect = Arrays.asList("VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)", "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
+				"SUM(C2:C4)", "B9+C9", "IF(B2,50,0)");
 		assertThat(actual, is(expect));
 	}
 
-	
 	@Test
 	public void testComputeKYCKeys() {
-		
-		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").keySet());
-		assertThat(actual, hasSize(4));
 
-		List<String> expect = Arrays.asList("C3", "C4", "C6", "C2");
+		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").keySet());
+		assertThat(actual, hasSize(5));
+
+		List<String> expect = Arrays.asList("C3", "C4", "C6", "C10", "C2");
 		assertThat(actual, is(expect));
 	}
-	
-	
+
 	@Test
 	public void testComputeKYCC6() {
-		
-		Map<String, Object> map = engine.computeCell("KYC", "ComputeKYC", new String[]{"C6"},null);
+
+		Map<String, Object> map = engine.computeCell("KYC", "ComputeKYC", new String[] { "C6" }, null);
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
-		assertThat(map.get("C6"),is(0.0));
+		assertThat(map.get("C6"), is(0.0));
 	}
 	
+	@Test
+	public void testComputeKYCC10() {
+
+		Map<String, Object> map = engine.computeCell("KYC", "ComputeKYC", new String[] { "C10" }, null);
+		List<String> actual = new ArrayList(map.values());
+		assertThat(actual, hasSize(1));
+
+		assertThat(map.get("C10"), is("2021-02-12"));
+	}
+
 }
