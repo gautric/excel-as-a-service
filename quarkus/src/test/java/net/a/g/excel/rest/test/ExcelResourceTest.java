@@ -37,7 +37,7 @@ public class ExcelResourceTest {
 						"results[0].name", is("ComputeKYC"),
 						"results[0]._ref", is("http://localhost:8081/api/KYC/ComputeKYC"),
 						"results[1].name", is("COUNTRY"),
-						"results[2]._ref", is("http://localhost:8081/api/KYC/COUNTRY"));
+						"results[1]._ref", is("http://localhost:8081/api/KYC/COUNTRY"));
 		
 		}
 
