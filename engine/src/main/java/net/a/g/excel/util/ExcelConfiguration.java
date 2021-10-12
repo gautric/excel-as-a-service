@@ -2,15 +2,14 @@ package net.a.g.excel.util;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.smallrye.config.inject.ConfigProducer;
-
 @ApplicationScoped
+@Named
 public class ExcelConfiguration {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelConfiguration.class);
@@ -26,9 +25,6 @@ public class ExcelConfiguration {
 	@ConfigProperty(name = ExcelConstants.EXCEL_LIST_MAP, defaultValue = ExcelConstants.EXCEL_RETURN_DEFAULT)
 	EXCELRETURN list;
 	
-	@Inject 
-	ConfigProducer config;
-
 	
 	public String getResouceUri() {
 		return resouceUri;
@@ -53,11 +49,7 @@ public class ExcelConfiguration {
 
 	@PostConstruct
 	public void postConstruc() {
-		LOG.info(this.toString());
-		LOG.info("{}", config	 );
-		
-	
-		
+		LOG.info(this.toString());	
 	}
 
 }

@@ -28,6 +28,7 @@ import java.util.stream.StreamSupport;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
+import javax.inject.Named;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
@@ -51,6 +52,7 @@ import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 
 @RequestScoped
+@Named
 public class ExcelEngine {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
@@ -149,11 +151,10 @@ public class ExcelEngine {
 		Sheet sheet = workbook.getSheet(sheetName);
 		return sheet != null;
 	}
-	
-	
+
 	public Sheet sheet(String excelName, String sheetName) {
 		Workbook workbook = retrieveWorkbook(excelName);
-		return  workbook.getSheet(sheetName);
+		return workbook.getSheet(sheetName);
 	}
 
 	public Map<String, Object> cellFormular(String excelName, String sheetName) {
@@ -169,8 +170,6 @@ public class ExcelEngine {
 
 		return map;
 	}
-
-	
 
 	public Map<String, Object> computeCell(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names) {
@@ -311,7 +310,7 @@ public class ExcelEngine {
 
 		return cell;
 	}
-	
+
 	private Stream<Cell> streamCell(Workbook workbook) {
 		return StreamSupport.stream(workbook.spliterator(), false).flatMap(sheet -> StreamSupport
 				.stream(sheet.spliterator(), false).flatMap(r -> StreamSupport.stream(r.spliterator(), false)));
@@ -323,25 +322,28 @@ public class ExcelEngine {
 	}
 
 	@PostConstruct
-	public void loadFile() throws Exception {
+	public void loadFile() throws IOException {
+		try {
+			Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
+					&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
 
-		Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
-				&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
+			InputStream inputStream = ExcelEngine.class.getResourceAsStream(conf.getResouceUri());
 
-		InputStream inputStream = ExcelEngine.class.getResourceAsStream(conf.getResouceUri());
-
-		if (inputStream != null) {
-			LOG.info("Load file from classpath://{}", conf.getResouceUri());
-			addFile(FilenameUtils.getBaseName(conf.getResouceUri()), inputStream);
-		} else {
-			Path file = Paths.get(conf.getResouceUri());
-			if (Files.isRegularFile(file)) {
-				addFile(file);
-			} else if (Files.isDirectory(file)) {
-				Files.walk(file, 1).filter(excelFilter).forEach(this::addFile);
+			if (inputStream != null) {
+				LOG.info("Load file from classpath://{}", conf.getResouceUri());
+				addFile(FilenameUtils.getBaseName(conf.getResouceUri()), inputStream);
 			} else {
-				LOG.warn("Cannot read file or directory : {}", conf.getResouceUri());
+				Path file = Paths.get(conf.getResouceUri());
+				if (Files.isRegularFile(file)) {
+					addFile(file);
+				} else if (Files.isDirectory(file)) {
+					Files.walk(file, 1).filter(excelFilter).forEach(this::addFile);
+				} else {
+					LOG.warn("Cannot read file or directory : {}", conf.getResouceUri());
+				}
 			}
+		} catch (IOException ex) {
+			LOG.error("Error while loading file", ex);
 		}
 	}
 
