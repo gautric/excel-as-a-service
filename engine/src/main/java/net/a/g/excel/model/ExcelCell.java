@@ -7,19 +7,70 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(value = Include.NON_NULL)
 public class ExcelCell {
 	@JsonProperty("address")
-	public String address;
+	private String address;
 
 	@JsonProperty("formula")
-	public String formula;
+	private String formula;
 
 	@JsonProperty("value")
-	public Object value;
+	private Object value;
 	
 	@JsonProperty("_metadata")
-	public String metadata;
+	private String metadata;
+	
+	@JsonProperty("type")
+	private String type;
 
 	@JsonProperty("_ref")
-	public String ref;
+	private String ref;
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getFormula() {
+		return formula;
+	}
+
+	public void setFormula(String formula) {
+		this.formula = formula;
+	}
+
+	public Object getValue() {
+		return value;
+	}
+
+	public void setValue(Object value) {
+		this.value = value;
+	}
+
+	public String getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(String metadata) {
+		this.metadata = metadata;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public String getRef() {
+		return ref;
+	}
+
+	public void setRef(String ref) {
+		this.ref = ref;
+	}
 
 	public ExcelCell() {
 	};

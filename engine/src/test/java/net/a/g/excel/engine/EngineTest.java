@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
@@ -85,7 +86,7 @@ public class EngineTest {
 	@Test
 	public void testComputeKYCValues() {
 
-		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").values());
+		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").values().stream().map(cell -> cell.getFormula()).collect(Collectors.toList()));
 		assertThat(actual, hasSize(5));
 
 		List<String> expect = Arrays.asList("VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)", "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
