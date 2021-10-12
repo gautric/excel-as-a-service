@@ -3,6 +3,7 @@ package net.a.g.excel.rest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -204,24 +205,28 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response sheet(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-
+		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery");
+		
 		Response.Status status = Response.Status.NOT_FOUND;
-		Map<String, Object> entity = null;
+		Map<String, ExcelCell> entity = null;
 		ExcelResult ret = null;
 
 		if (!sheetName.contains("!")) {
 			if (engine.ifSheetExists(resource, sheetName)) {
 				status = Response.Status.OK;
 
-				entity = engine.cellFormular(resource, sheetName);
+				entity = engine.retrieveCell(resource, sheetName, cell -> true);
 				ret = new ExcelResult(entity.size(), entity);
-
-				((Map<String, Object>) entity)
-						.replaceAll((k, f) -> createCellFormulaResource(k, (String) f, resource, sheetName));
+				
+				entity.values().stream()
+						.forEach(cell -> cell.setRef(
+								builder.build(resource, sheetName, cell.getAddress()).toString()));
 
 				if (conf.returnList()) {
 					ret.setResults(entity.values());
 				}
+			} else {
+				return Response.status(status).build();
 			}
 		}
 		return returnOK(ret, link);

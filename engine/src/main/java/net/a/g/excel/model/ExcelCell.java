@@ -9,9 +9,6 @@ public class ExcelCell {
 	@JsonProperty("address")
 	private String address;
 
-	@JsonProperty("formula")
-	private String formula;
-
 	@JsonProperty("value")
 	private Object value;
 	
@@ -32,13 +29,6 @@ public class ExcelCell {
 		this.address = address;
 	}
 
-	public String getFormula() {
-		return formula;
-	}
-
-	public void setFormula(String formula) {
-		this.formula = formula;
-	}
 
 	public Object getValue() {
 		return value;
@@ -77,7 +67,6 @@ public class ExcelCell {
 
 	public ExcelCell(String adress, String formula, Object value, String ref, String metadata) {
 		this.address = adress;
-		this.formula = formula;
 		this.value = value;
 		this.ref = ref;
 	};

@@ -86,7 +86,7 @@ public class EngineTest {
 	@Test
 	public void testComputeKYCValues() {
 
-		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").values().stream().map(cell -> cell.getFormula()).collect(Collectors.toList()));
+		List<String> actual = new ArrayList(engine.cellFormular("KYC", "ComputeKYC").values().stream().map(cell -> cell.getValue()).collect(Collectors.toList()));
 		assertThat(actual, hasSize(5));
 
 		List<String> expect = Arrays.asList("VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)", "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",

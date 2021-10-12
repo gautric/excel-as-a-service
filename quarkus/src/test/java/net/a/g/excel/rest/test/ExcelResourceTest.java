@@ -1,11 +1,14 @@
 package net.a.g.excel.rest.test;
 
-import static io.restassured.RestAssured.given;
 import static io.restassured.RestAssured.when;
 import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.hasItems;
 import static org.hamcrest.CoreMatchers.is;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import io.quarkus.test.junit.QuarkusTest;
@@ -51,8 +54,9 @@ public class ExcelResourceTest {
 			.statusCode(200)
 				.body("_count", equalTo(15),
 						"results[2].address", is("C2"),
-						"results[2].formula", is("IF(B2,50,0)"));
+						"results[2].value", is("IF(B2,50,0)"));
 
 	}
+	
 
 }

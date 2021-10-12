@@ -244,8 +244,8 @@ public class ExcelEngine {
 				break;
 			case ERROR:
 				break;
-			// CELL_TYPE_FORMULA will never happen
 			case FORMULA:
+				ret = cell.getCellFormula();
 				break;
 			default:
 				break;
@@ -325,16 +325,10 @@ public class ExcelEngine {
 	}
 
 	private ExcelCell celltoExcelCell(Cell cell) {
-
 		ExcelCell ret = new ExcelCell();
 
 		ret.setAddress(cell.getAddress().formatAsString());
-		if(CellType.FORMULA == cell.getCellType())
-		{
-			ret.setFormula(cell.getCellFormula());
-		}else {
-			ret.setValue(getRawCell(cell));
-		}
+		ret.setValue(getRawCell(cell));
 		ret.setType(cell.getCellType().name());
 		
 		return ret;
