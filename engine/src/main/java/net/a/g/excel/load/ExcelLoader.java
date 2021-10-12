@@ -8,8 +8,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Predicate;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Destroyed;
+import javax.enterprise.context.Initialized;
+import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 
 import org.apache.commons.io.FilenameUtils;
@@ -25,13 +27,27 @@ public class ExcelLoader {
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelLoader.class);
 
 	@Inject
-	ExcelConfiguration conf;
-
-	@Inject
 	ExcelEngine engine;
 
-	@PostConstruct
-	public void loadFile() {
+	@Inject
+	ExcelConfiguration conf;
+
+	public ExcelLoader() {
+	}
+
+	private void addFile(Path file) {
+		try {
+			LOG.info("Load file from {} ({})", file.getFileName(), file.getFileName().toAbsolutePath());
+			engine.addNewResource(FilenameUtils.removeExtension(file.getFileName().toString()),
+					file.toUri().toURL().openStream());
+		} catch (MalformedURLException e) {
+			LOG.error("Error while loading file", e);
+		} catch (IOException e) {
+			LOG.error("Error while loading file", e);
+		}
+	}
+
+	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
 		try {
 			Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
 					&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
@@ -39,7 +55,7 @@ public class ExcelLoader {
 			InputStream inputStream = ExcelEngine.class.getResourceAsStream(conf.getResouceUri());
 
 			if (inputStream != null) {
-				LOG.info("Load file from classpath://{}", conf.getResouceUri());
+				LOG.info("Load file from classpath:/{}", conf.getResouceUri());
 				engine.addNewResource(FilenameUtils.getBaseName(conf.getResouceUri()), inputStream);
 			} else {
 				Path file = Paths.get(conf.getResouceUri());
@@ -48,7 +64,7 @@ public class ExcelLoader {
 				} else if (Files.isDirectory(file)) {
 					Files.walk(file, 1).filter(excelFilter).forEach(this::addFile);
 				} else {
-					LOG.warn("Cannot read file or directory : {}", conf.getResouceUri());
+					LOG.warn("Cannot read file or directory : {}", file.getFileName().toAbsolutePath());
 				}
 			}
 		} catch (Exception ex) {
@@ -56,15 +72,6 @@ public class ExcelLoader {
 		}
 	}
 
-	private void addFile(Path file) {
-		try {
-			LOG.info("Load file from {}", file.getFileName());
-			engine.addNewResource(FilenameUtils.removeExtension(file.getFileName().toString()),
-					file.toUri().toURL().openStream());
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+	public void destroy(@Observes @Destroyed(ApplicationScoped.class) Object init) {
 	}
 }

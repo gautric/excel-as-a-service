@@ -51,9 +51,12 @@ public class ExcelConfiguration {
 		return retourFormat == EXCELRETURN.MAP;
 	}
 
+	
+
 	@Override
 	public String toString() {
-		return "ExcelConfiguration [resouceUri=" + resouceUri + ", readOnly=" + isReadOnly() + "]";
+		return "ExcelConfiguration [resouceUri=" + resouceUri + ", readOnly=" + readOnly + ", retourFormat="
+				+ retourFormat + ", formatDate=" + formatDate + "]";
 	}
 
 	@PostConstruct
