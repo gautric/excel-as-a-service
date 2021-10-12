@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -156,11 +156,19 @@ public class ExcelEngine {
 	}
 
 	public Map<String, Object> cellFormular(String excelName, String sheetName) {
+		return retrieveCell(excelName, sheetName, "FORMULA");
+	}
+	
+	public Map<String, Object> retrieveCell(String excelName, String sheetName, String cellType) {
+		return retrieveCell(excelName, sheetName, cell -> CellType.valueOf(cellType) == cell.getCellType());
+	}
+	
+	public Map<String, Object> retrieveCell(String excelName, String sheetName, Predicate<Cell> predicate) {
 		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
-		
-		return streamCell(sheet).filter(cell -> CellType.FORMULA == cell.getCellType()).collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), cell-> cell.getCellFormula().toString()));
-	
+
+		return streamCell(sheet).filter(predicate).collect(
+				Collectors.toMap(cell -> cell.getAddress().formatAsString(), cell -> cell.toString()));
 	}
 
 	public Map<String, Object> computeCell(String excelName, String sheetName, String[] cellNames,

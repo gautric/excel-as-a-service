@@ -49,10 +49,9 @@ public class ExcelResourceTest {
 			.get("/api/{resource}/{sheet}", "KYC", "ComputeKYC")
 		.then()
 			.statusCode(200)
-				.body("_count", equalTo(4),
-						"results[0].address", is("C3"),
-						"results[0].formula", is("VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)"),
-						"results[2].formula", is("SUM(C2:C4)"));
+				.body("_count", equalTo(15),
+						"results[2].address", is("C2"),
+						"results[2].formula", is("IF(B2,50,0)"));
 
 	}
 
