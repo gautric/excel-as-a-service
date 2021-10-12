@@ -1,4 +1,4 @@
-package net.a.g.excel;
+package net.a.g.excel.rest.test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.is;
