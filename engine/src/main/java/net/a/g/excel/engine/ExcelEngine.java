@@ -63,6 +63,8 @@ public class ExcelEngine {
 	private Map<String, byte[]> map = new HashMap<String, byte[]>();
 
 	public boolean addFile(String s, InputStream is) {
+		
+		assert(is!=null);
 		try {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			int nRead;
@@ -322,7 +324,7 @@ public class ExcelEngine {
 	}
 
 	@PostConstruct
-	public void loadFile() throws IOException {
+	public void loadFile() {
 		try {
 			Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
 					&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
@@ -342,7 +344,7 @@ public class ExcelEngine {
 					LOG.warn("Cannot read file or directory : {}", conf.getResouceUri());
 				}
 			}
-		} catch (IOException ex) {
+		} catch (Exception ex) {
 			LOG.error("Error while loading file", ex);
 		}
 	}
