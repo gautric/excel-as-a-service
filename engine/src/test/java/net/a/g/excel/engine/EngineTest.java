@@ -25,13 +25,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ExtendWith(WeldJunit5Extension.class)
 public class EngineTest {
 
 	@WeldSetup
-	public WeldInitiator weld = WeldInitiator.from(ExcelEngine.class, ExcelConfiguration.class)
+	public WeldInitiator weld = WeldInitiator.from(ExcelEngine.class, ExcelConfiguration.class, ExcelLoader.class)
 			.activate(RequestScoped.class, SessionScoped.class).build();;
 
 	@Inject
