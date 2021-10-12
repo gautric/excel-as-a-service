@@ -1,6 +1,8 @@
 package net.a.g.excel.engine;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.InputStream;
 
@@ -11,6 +13,7 @@ import javax.inject.Inject;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,10 +32,16 @@ public class EngineTest {
 
 	@BeforeEach
 	public void setup() {
-
+		assertNotNull(engine);
 		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
-		engine.addFile("KYC", inputStream);
-
+		assertTrue(engine.addFile("KYC", inputStream));
+	
+	}
+	
+	@AfterEach
+	public void close() {
+		engine.clearAll();
+		assertEquals(0,engine.countListOfResource());
 	}
 
 	@Test
@@ -43,7 +52,7 @@ public class EngineTest {
 	@Test
 	public void testTest() {
 		assertNotNull(engine);
-
+		assertEquals(1,engine.countListOfResource());
 	}
 
 }

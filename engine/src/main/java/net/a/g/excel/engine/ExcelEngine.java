@@ -84,7 +84,10 @@ public class ExcelEngine {
 			LOG.error("", ex);
 		}
 		return true;
-
+	}
+	
+	public void clearAll() {
+		map.clear();
 	}
 
 	public int countListOfResource() {
