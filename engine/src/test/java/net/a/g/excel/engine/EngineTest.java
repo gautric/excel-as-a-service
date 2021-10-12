@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
@@ -100,6 +101,17 @@ public class EngineTest {
 
 		List<String> expect = Arrays.asList("C3", "C4", "C6", "C2");
 		assertThat(actual, is(expect));
+	}
+	
+	
+	@Test
+	public void testComputeKYCC6() {
+		
+		Map<String, Object> map = engine.computeCell("KYC", "ComputeKYC", new String[]{"C6"},null);
+		List<String> actual = new ArrayList(map.values());
+		assertThat(actual, hasSize(1));
+
+		assertThat(map.get("C6"),is(0.0));
 	}
 	
 }

@@ -63,8 +63,8 @@ public class ExcelEngine {
 	private Map<String, byte[]> map = new HashMap<String, byte[]>();
 
 	public boolean addFile(String s, InputStream is) {
-		
-		assert(is!=null);
+
+		assert (is != null);
 		try {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 			int nRead;
@@ -85,7 +85,7 @@ public class ExcelEngine {
 		}
 		return true;
 	}
-	
+
 	public void clearAll() {
 		map.clear();
 	}
@@ -181,9 +181,10 @@ public class ExcelEngine {
 
 		Workbook workbook = retrieveWorkbook(excelName);
 
-		// Inject Value to the workbook
-		names.forEach((address, value) -> injectValue(address, value, workbook, sheetName));
-
+		if (names != null) {
+			// Inject Value to the workbook
+			names.forEach((address, value) -> injectValue(address, value, workbook, sheetName));
+		}
 		FormulaEvaluator exec = formula(workbook);
 
 		exec.setDebugEvaluationOutputForNextEval(true);
