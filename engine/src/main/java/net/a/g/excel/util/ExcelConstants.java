@@ -17,5 +17,6 @@ public class ExcelConstants {
 	public static final String DOT = ".";
 	public static final String EXCEL_LIST_MAP = "excel.return.list.or.map";
 	public static final String EXCEL_RETURN_DEFAULT = "LIST";
+	public static final String SCHEMA_URI = "urn://excel-quarkus/v1.0";
 
 }

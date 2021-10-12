@@ -1,29 +1,36 @@
 package net.a.g.excel.model;
 
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import net.a.g.excel.util.ExcelConstants;
 
 @JsonInclude(value = Include.NON_NULL)
+@Schema(name = "ExcelResult", description = "POJO that represents the result contents.")
 public class ExcelResult {
-	@JsonProperty("_count")
+	@Schema(required = true, description = "Counter of result item")
+	@JsonProperty(value = "_count", namespace = ExcelConstants.SCHEMA_URI)
 	public int count;
 
-	@JsonProperty("_next")
+	@JsonProperty(value = "_next", namespace = ExcelConstants.SCHEMA_URI)
 	public String next;
 
-	@JsonProperty("_previous")
+	@JsonProperty(value = "_previous", namespace = ExcelConstants.SCHEMA_URI)
 	public String previous;
-	
-	@JsonProperty("_self")
+
+	@JsonProperty(value = "_self", namespace = ExcelConstants.SCHEMA_URI)
 	public String self;
 
-	@JsonProperty("results")
+	@JsonProperty(value = "results", namespace = ExcelConstants.SCHEMA_URI)
+	@Schema(oneOf = { ExcelCell[].class, ExcelResource[].class, ExcelSheet[].class })
 	public Object results;
-	
-	@JsonProperty("_error")
+
+	@JsonProperty(required = false, value = "error", namespace = ExcelConstants.SCHEMA_URI)
 	public ExcelError error;
-	
+
 	public ExcelError getError() {
 		return error;
 	}

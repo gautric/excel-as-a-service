@@ -333,7 +333,7 @@ public class ExcelEngine {
 
 		if (inputStream != null) {
 			LOG.info("Load file from classpath://{}", conf.getResouceUri());
-			addFile(FilenameUtils.removeExtension(conf.getResouceUri()), inputStream);
+			addFile(FilenameUtils.getBaseName(conf.getResouceUri()), inputStream);
 		} else {
 			Path file = Paths.get(conf.getResouceUri());
 			if (Files.isRegularFile(file)) {

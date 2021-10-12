@@ -23,6 +23,14 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
+import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.info.Info;
+import org.eclipse.microprofile.openapi.annotations.media.Content;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -34,10 +42,12 @@ import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelResult;
 import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.util.ExcelConfiguration;
+import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 import net.a.g.excel.util.MultipartBody;
 
 @Path("/")
+@OpenAPIDefinition(externalDocs = @ExternalDocumentation(description = "schema", url = ExcelConstants.SCHEMA_URI), info = @Info(version = "1.0", title = "Excel Quarkus"))
 public class ExcelRestResource {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelRestResource.class);
@@ -119,6 +129,9 @@ public class ExcelRestResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelResource[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "List of Excel Resources", description = "Retrieves and returns the list of Excel Resources")
 	public Response getListOfFile() throws Exception {
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
@@ -139,6 +152,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Resource not Found", content = @Content(mediaType = "application/json")),
+			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelSheet[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "List of Excel Sheets", description = "Retrieves and returns the list of Excel Sheets")
 	public Response listOfSheet(@PathParam("resource") String file) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -196,7 +213,7 @@ public class ExcelRestResource {
 		if (!sheetName.contains("!")) {
 			if (engine.ifSheetExists(resource, sheetName)) {
 				status = Response.Status.OK;
-				
+
 				entity = engine.cellFormular(resource, sheetName);
 				ret = new ExcelResult(entity.size(), entity);
 
@@ -231,10 +248,13 @@ public class ExcelRestResource {
 		if (ExcelUtils.checkFullAdress(adress)) {
 			return new ExcelCell(adress, null, value,
 					UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery")
-							.build(file, adress.replaceAll("!.*", ""), adress.replaceAll(".*!", "")).toString(), null);
+							.build(file, adress.replaceAll("!.*", ""), adress.replaceAll(".*!", "")).toString(),
+					null);
 		} else {
-			return new ExcelCell(adress, null, value, UriBuilder.fromUri(uriInfo.getBaseUri())
-					.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString(), null);
+			return new ExcelCell(
+					adress, null, value, UriBuilder.fromUri(uriInfo.getBaseUri())
+							.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString(),
+					null);
 		}
 	}
 
