@@ -3,7 +3,6 @@ package net.a.g.excel.rest;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -181,25 +180,27 @@ public class ExcelRestResource {
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
-			@APIResponse(responseCode = "405", description = "Resource is readonly mode", content = @Content(mediaType = "application/json")),
-			@APIResponse(responseCode = "400", description = "Nominal result, return ExcelResult + ExcelSheet[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+			@APIResponse(responseCode = "405", description = "Resource is readonly mode", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "List of Excel Sheets", description = "Retrieves and returns the list of Excel Sheets")
 	public Response sendMultipartData(@PathParam("resource") String resource, @MultipartForm MultipartBody data) {
 
-		JSONObject ret = new JSONObject();
-
 		if (conf.isReadOnly()) {
-			return ExcelRestTool.returnKO(Response.Status.METHOD_NOT_ALLOWED,"Service is on readonly mode, you cannot upload file");
+			return ExcelRestTool.returnKO(Response.Status.METHOD_NOT_ALLOWED,
+					"Service is on readonly mode, you cannot upload file");
 		}
 
 		if (!engine.addNewResource(resource, data.is)) {
-			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,"Server cannot accept/recognize format file provided");
+			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,
+					"Server cannot accept/recognize format file provided");
 		}
 
-		ret.accumulate(data.name, UriBuilder.fromUri(uriInfo.getRequestUri())
-				.path(ExcelRestResource.class, "listOfSheet").build(data.name).toString());
+		ExcelResult ret = new ExcelResult();
+		ret.setSelf(UriBuilder.fromUri(uriInfo.getRequestUri()).path(ExcelRestResource.class, "listOfSheet")
+				.build(data.name).toString());
 
-		return Response.accepted(ret.toString()).build();
+		return Response.accepted(ret).build();
 	}
 
 	@GET
