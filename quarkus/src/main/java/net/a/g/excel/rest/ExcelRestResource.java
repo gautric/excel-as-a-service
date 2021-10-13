@@ -59,6 +59,7 @@ public class ExcelRestResource {
 	@Context
 	UriInfo uriInfo;
 
+	
 	@POST
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -67,7 +68,7 @@ public class ExcelRestResource {
 			@PathParam("cells") String cell, @QueryParam("raw") @DefaultValue("false") boolean format,
 			final String jsonBody) {
 
-		if (!engine.ifSheetExists(title, sheet)) {
+		if (!getEngine().ifSheetExists(title, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
@@ -76,7 +77,7 @@ public class ExcelRestResource {
 		Map<String, List<String>> query = body.toMap().entrySet().stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue().toString())));
 
-		Map<String, Object> ret = engine.computeCell(title, sheet, cell.split(","), query);
+		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query);
 
 		return Response.status(Response.Status.OK).entity(ret).build();
 	}
@@ -89,13 +90,13 @@ public class ExcelRestResource {
 			@PathParam("cells") String cell, @QueryParam("raw") @DefaultValue("false") boolean format,
 			final MultivaluedMap<String, String> queryurlencoded) {
 
-		if (!engine.ifSheetExists(title, sheet)) {
+		if (!getEngine().ifSheetExists(title, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
 		Map<String, List<String>> query = queryurlencoded;
 
-		Map<String, Object> ret = engine.computeCell(title, sheet, cell.split(","), query);
+		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query);
 
 		return Response.status(Response.Status.OK).entity(ret).build();
 	}
@@ -107,18 +108,18 @@ public class ExcelRestResource {
 			@PathParam("cells") String cellNames) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		if (!engine.ifSheetExists(resource, sheetName)) {
+		if (!getEngine().ifSheetExists(resource, sheetName)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		Map<String, List<String>> query = uriInfo.getQueryParameters();
 
-		Map<String, Object> entity = engine.computeCell(resource, sheetName, cellNames.split(","), query);
+		Map<String, Object> entity = getEngine().computeCell(resource, sheetName, cellNames.split(","), query);
 
 		((Map<String, Object>) entity).replaceAll((k, v) -> createCellValueResource(k, v, resource, sheetName));
 
 		ExcelResult ret = new ExcelResult(entity.size(), entity);
 
-		if (conf.returnList()) {
+		if (getConf().returnList()) {
 			ret.setResults(entity.values());
 		}
 
@@ -135,14 +136,14 @@ public class ExcelRestResource {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		Object entity = null;
-		if (conf.returnMap()) {
-			entity = engine.listOfFile().stream()
+		if (getConf().returnMap()) {
+			entity = getEngine().listOfFile().stream()
 					.collect(Collectors.toMap(k -> k, resource -> createExcelResource(resource)));
 		} else {
-			entity = engine.listOfFile().stream().map(resource -> createExcelResource(resource));
+			entity = getEngine().listOfFile().stream().map(resource -> createExcelResource(resource));
 		}
 
-		ExcelResult ret = new ExcelResult(engine.countListOfResource(), entity);
+		ExcelResult ret = new ExcelResult(getEngine().countListOfResource(), entity);
 
 		return ExcelRestTool.returnOK(ret, link);
 	}
@@ -157,15 +158,15 @@ public class ExcelRestResource {
 	public Response listOfSheet(@PathParam("resource") String file) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		if (!engine.title(file)) {
+		if (!getEngine().title(file)) {
 			return Response.status(Response.Status.NOT_FOUND).links(link).build();
 		}
 
-		List<String> listOfSheet = engine.listOfSheet(file);
+		List<String> listOfSheet = getEngine().listOfSheet(file);
 
 		Object entity = null;
 
-		if (conf.returnMap()) {
+		if (getConf().returnMap()) {
 			entity = listOfSheet.stream().collect(Collectors.toMap(k -> k, sheet -> createSheetResource(file, sheet)));
 		} else {
 			entity = listOfSheet.stream().map(sheet -> createSheetResource(file, sheet));
@@ -186,12 +187,12 @@ public class ExcelRestResource {
 	@Operation(summary = "List of Excel Sheets", description = "Retrieves and returns the list of Excel Sheets")
 	public Response sendMultipartData(@PathParam("resource") String resource, @MultipartForm MultipartBody data) {
 
-		if (conf.isReadOnly()) {
+		if (getConf().isReadOnly()) {
 			return ExcelRestTool.returnKO(Response.Status.METHOD_NOT_ALLOWED,
 					"Service is on readonly mode, you cannot upload file");
 		}
 
-		if (!engine.addNewResource(resource, data.is)) {
+		if (!getEngine().addNewResource(resource, data.is)) {
 			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,
 					"Server cannot accept/recognize format file provided");
 		}
@@ -215,16 +216,16 @@ public class ExcelRestResource {
 		ExcelResult ret = null;
 
 		if (!sheetName.contains("!")) {
-			if (engine.ifSheetExists(resource, sheetName)) {
+			if (getEngine().ifSheetExists(resource, sheetName)) {
 				status = Response.Status.OK;
 
-				entity = engine.retrieveCell(resource, sheetName, cell -> true);
+				entity = getEngine().retrieveCell(resource, sheetName, cell -> true);
 				ret = new ExcelResult(entity.size(), entity);
 
 				entity.values().stream()
 						.forEach(cell -> cell.setRef(builder.build(resource, sheetName, cell.getAddress()).toString()));
 
-				if (conf.returnList()) {
+				if (getConf().returnList()) {
 					ret.setResults(entity.values());
 				}
 			} else {
@@ -263,4 +264,17 @@ public class ExcelRestResource {
 					null);
 		}
 	}
+
+	public ExcelConfiguration getConf() {
+		return conf;
+	}
+
+	public ExcelEngine getEngine() {
+		return engine;
+	}
+
+	public UriInfo getUriInfo() {
+		return uriInfo;
+	}	
+	
 }
