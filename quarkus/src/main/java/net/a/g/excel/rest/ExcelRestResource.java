@@ -184,7 +184,7 @@ public class ExcelRestResource {
 			@APIResponse(responseCode = "405", description = "Resource is readonly mode", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "List of Excel Sheets", description = "Retrieves and returns the list of Excel Sheets")
+	@Operation(summary = "Create a new Excel Resource", description = "Create a new Excel Resource")
 	public Response sendMultipartData(@PathParam("resource") String resource, @MultipartForm MultipartBody data) {
 
 		if (getConf().isReadOnly()) {
@@ -198,6 +198,7 @@ public class ExcelRestResource {
 		}
 
 		ExcelResult ret = new ExcelResult();
+		
 		ret.setSelf(UriBuilder.fromUri(uriInfo.getRequestUri()).path(ExcelRestResource.class, "listOfSheet")
 				.build(data.name).toString());
 
