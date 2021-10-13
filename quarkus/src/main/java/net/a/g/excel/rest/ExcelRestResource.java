@@ -20,7 +20,6 @@ import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -124,7 +123,7 @@ public class ExcelRestResource {
 			ret.setResults(entity.values());
 		}
 
-		return returnOK(ret, link);
+		return ExcelRestTool.returnOK(ret, link);
 	}
 
 	@GET
@@ -146,7 +145,7 @@ public class ExcelRestResource {
 
 		ExcelResult ret = new ExcelResult(engine.countListOfResource(), entity);
 
-		return returnOK(ret, link);
+		return ExcelRestTool.returnOK(ret, link);
 	}
 
 	@GET
@@ -174,24 +173,27 @@ public class ExcelRestResource {
 		}
 		ExcelResult ret = new ExcelResult(listOfSheet.size(), entity);
 
-		return returnOK(ret, link);
+		return ExcelRestTool.returnOK(ret, link);
 	}
 
 	@POST
+	@Path("{resource}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response sendMultipartData(@MultipartForm MultipartBody data) {
+	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "405", description = "Resource is readonly mode", content = @Content(mediaType = "application/json")),
+			@APIResponse(responseCode = "400", description = "Nominal result, return ExcelResult + ExcelSheet[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "List of Excel Sheets", description = "Retrieves and returns the list of Excel Sheets")
+	public Response sendMultipartData(@PathParam("resource") String resource, @MultipartForm MultipartBody data) {
 
 		JSONObject ret = new JSONObject();
 
 		if (conf.isReadOnly()) {
-			ret.accumulate("_error", "Service is on readonly mode, you cannot upload file");
-			return Response.status(Response.Status.METHOD_NOT_ALLOWED).entity(ret.toString()).build();
+			return ExcelRestTool.returnKO(Response.Status.METHOD_NOT_ALLOWED,"Service is on readonly mode, you cannot upload file");
 		}
 
-		if (!engine.addNewResource(data.name, data.is)) {
-			ret.accumulate("_error", "Server cannot accept/recognize format file provided");
-			return Response.status(Status.BAD_REQUEST).entity(ret.toString()).build();
+		if (!engine.addNewResource(resource, data.is)) {
+			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,"Server cannot accept/recognize format file provided");
 		}
 
 		ret.accumulate(data.name, UriBuilder.fromUri(uriInfo.getRequestUri())
@@ -206,7 +208,7 @@ public class ExcelRestResource {
 	public Response sheet(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery");
-		
+
 		Response.Status status = Response.Status.NOT_FOUND;
 		Map<String, ExcelCell> entity = null;
 		ExcelResult ret = null;
@@ -217,10 +219,9 @@ public class ExcelRestResource {
 
 				entity = engine.retrieveCell(resource, sheetName, cell -> true);
 				ret = new ExcelResult(entity.size(), entity);
-				
+
 				entity.values().stream()
-						.forEach(cell -> cell.setRef(
-								builder.build(resource, sheetName, cell.getAddress()).toString()));
+						.forEach(cell -> cell.setRef(builder.build(resource, sheetName, cell.getAddress()).toString()));
 
 				if (conf.returnList()) {
 					ret.setResults(entity.values());
@@ -229,7 +230,7 @@ public class ExcelRestResource {
 				return Response.status(status).build();
 			}
 		}
-		return returnOK(ret, link);
+		return ExcelRestTool.returnOK(ret, link);
 	}
 
 	private ExcelResource createExcelResource(String resource) {
@@ -260,10 +261,5 @@ public class ExcelRestResource {
 							.path(ExcelRestResource.class, "cellQuery").build(file, sheetName, adress).toString(),
 					null);
 		}
-	}
-
-	private Response returnOK(ExcelResult ret, Link link) {
-		ret.setSelf(link.getUri().toString());
-		return Response.status(Response.Status.OK).entity(ret).links(link).build();
 	}
 }
