@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.a.g.excel.engine;
 
 import java.io.ByteArrayInputStream;
@@ -330,7 +326,9 @@ public class ExcelEngine {
 		ret.setAddress(cell.getAddress().formatAsString());
 		ret.setValue(getRawCell(cell));
 		ret.setType(cell.getCellType().name());
-		
+		if (cell.getCellComment() != null) {
+			ret.setMetadata(cell.getCellComment().getString().toString());
+		}
 		return ret;
 	}
 }
