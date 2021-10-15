@@ -93,18 +93,14 @@ public class ExcelEngine {
 
 	private Workbook extractedWorkbook(String name, byte[] byteArray) {
 		Workbook workbook = null;
-		ByteArrayInputStream is = new ByteArrayInputStream(byteArray);
+
 		try {
-			workbook = new XSSFWorkbook(is);
+			workbook = WorkbookFactory.create(new ByteArrayInputStream(byteArray));
 			return workbook;
 		} catch (Exception ex) {
-			LOG.error("Workbook '{}' is not a XSSF file", name, ex);
+			LOG.error("Workbook '" + name + "' is not a XSSF file", ex);
 		}
-		try {
-			workbook = new HSSFWorkbook(is);
-		} catch (Exception ex) {
-			LOG.error("Workbook '{}' is not a HSSF file", name, ex);
-		}
+
 		return workbook;
 	}
 
@@ -219,7 +215,7 @@ public class ExcelEngine {
 		return cell;
 	}
 
-	public Object getRawCell(Cell cell) {
+	private Object getRawCell(Cell cell) {
 
 		Object ret = "";
 		if (cell != null) {
@@ -256,7 +252,7 @@ public class ExcelEngine {
 		return ret;
 	}
 
-	public void updateCell(Cell cell, String value) {
+	private void updateCell(Cell cell, String value) {
 
 		if (cell != null) {
 
