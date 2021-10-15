@@ -1,7 +1,5 @@
 package net.a.g.excel.rest;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -22,7 +20,6 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
@@ -36,7 +33,6 @@ import org.eclipse.microprofile.openapi.annotations.media.Content;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
-import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONObject;
@@ -52,7 +48,7 @@ import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 
-@Path("/generic")
+@Path("/")
 @OpenAPIDefinition(externalDocs = @ExternalDocumentation(description = "schema", url = ExcelConstants.SCHEMA_URI), info = @Info(version = "1.0", title = "Excel Quarkus"))
 public class ExcelRestResource {
 
@@ -191,7 +187,8 @@ public class ExcelRestResource {
 			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "Create a new Excel Resource", description = "Create a new Excel Resource")
-	public Response uploadFile(@PathParam("resource") String resource, MultipartFormDataInput input) throws IOException {
+	public Response uploadFile(@PathParam("resource") String resource, MultipartFormDataInput input)
+			throws IOException {
 
 		String fileName = "";
 		byte[] bytes = null;
@@ -209,7 +206,6 @@ public class ExcelRestResource {
 			bytes = IOUtils.toByteArray(inputStream);
 		}
 
-		
 		ExcelResource excelResource = new ExcelResource();
 		excelResource.setName(resource);
 		excelResource.setFile(fileName);
@@ -283,12 +279,12 @@ public class ExcelRestResource {
 	}
 
 	private ExcelResource createExcelResource(String resource) {
-		return new ExcelResource(resource, UriBuilder.fromUri(uriInfo.getRequestUri())
+		return new ExcelResource(resource, UriBuilder.fromUri(uriInfo.getBaseUri())
 				.path(ExcelRestResource.class, "listOfSheet").build(resource).toString());
 	}
 
 	private ExcelSheet createSheetResource(String resource, String sheet) {
-		return new ExcelSheet(sheet, UriBuilder.fromUri(uriInfo.getPath()).path(ExcelRestResource.class, "sheet")
+		return new ExcelSheet(sheet, UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "sheet")
 				.build(resource, sheet).toString());
 	}
 
