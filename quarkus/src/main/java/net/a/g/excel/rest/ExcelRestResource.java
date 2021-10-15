@@ -68,7 +68,7 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response cellBody(@PathParam("resource") String title, @PathParam("sheet") String sheet,
-			@PathParam("cells") String cell, @QueryParam("raw") @DefaultValue("false") boolean format,
+			@PathParam("cells") String cell, @QueryParam("_global") @DefaultValue("false") boolean global,
 			final String jsonBody) {
 
 		if (!getEngine().ifSheetExists(title, sheet)) {
@@ -80,7 +80,7 @@ public class ExcelRestResource {
 		Map<String, List<String>> query = body.toMap().entrySet().stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue().toString())));
 
-		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query);
+		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query, global);
 
 		return Response.status(Response.Status.OK).entity(ret).build();
 	}
@@ -90,7 +90,7 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes("application/x-www-form-urlencoded")
 	public Response cellForm(@PathParam("resource") String title, @PathParam("sheet") String sheet,
-			@PathParam("cells") String cell, @QueryParam("raw") @DefaultValue("false") boolean format,
+			@PathParam("cells") String cell,  @QueryParam("_global") @DefaultValue("false") boolean global,
 			final MultivaluedMap<String, String> queryurlencoded) {
 
 		if (!getEngine().ifSheetExists(title, sheet)) {
@@ -99,7 +99,7 @@ public class ExcelRestResource {
 
 		Map<String, List<String>> query = queryurlencoded;
 
-		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query);
+		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query, global);
 
 		return Response.status(Response.Status.OK).entity(ret).build();
 	}
@@ -108,7 +108,7 @@ public class ExcelRestResource {
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response cellQuery(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
-			@PathParam("cells") String cellNames) {
+			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		if (!getEngine().ifSheetExists(resource, sheetName)) {
@@ -116,7 +116,7 @@ public class ExcelRestResource {
 		}
 		Map<String, List<String>> query = uriInfo.getQueryParameters();
 
-		Map<String, Object> entity = getEngine().computeCell(resource, sheetName, cellNames.split(","), query);
+		Map<String, Object> entity = getEngine().computeCell(resource, sheetName, cellNames.split(","), query, global);
 
 		((Map<String, Object>) entity).replaceAll((k, v) -> createCellValueResource(k, v, resource, sheetName));
 

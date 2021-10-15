@@ -28,6 +28,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Row.MissingCellPolicy;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -53,15 +54,15 @@ public class ExcelEngine {
 	public boolean addNewResource(ExcelResource resource) {
 
 		assert (resource != null);
-		
+
 		if (extractedWorkbook(resource.getName(), resource.getDoc()) == null) {
 			LOG.error("Workbook {} is not readable", resource.getName());
 			return false;
 		}
 		listOfResources.put(resource.getName(), resource);
-		
+
 		LOG.info("Add {} OK", resource);
-		
+
 		return true;
 	}
 
@@ -82,10 +83,11 @@ public class ExcelEngine {
 	}
 
 	public Workbook retrieveWorkbook(String name) {
-		byte[] byteArray = listOfResources.get(name).getDoc();
-
-		Workbook workbook = extractedWorkbook(name, byteArray);
-
+		Workbook workbook = null;
+		if (listOfResources.containsKey(name)) {
+			byte[] byteArray = listOfResources.get(name).getDoc();
+			workbook = extractedWorkbook(name, byteArray);
+		}
 		return workbook;
 	}
 
@@ -116,17 +118,20 @@ public class ExcelEngine {
 	}
 
 	public List<String> listOfSheet(String name) {
+		List<String> list = null;
 
-		Workbook workbook = retrieveWorkbook(name);
+		if (listOfResources.containsKey(name)) {
 
-		int numberOfSheet = workbook.getNumberOfSheets();
+			Workbook workbook = retrieveWorkbook(name);
 
-		List<String> list = new ArrayList<String>(numberOfSheet);
+			int numberOfSheet = workbook.getNumberOfSheets();
 
-		for (int i = 0; i < numberOfSheet; i++) {
-			list.add(workbook.getSheetAt(i).getSheetName());
+			list = new ArrayList<String>(numberOfSheet);
+
+			for (int i = 0; i < numberOfSheet; i++) {
+				list.add(workbook.getSheetAt(i).getSheetName());
+			}
 		}
-
 		return list;
 	}
 
@@ -158,7 +163,7 @@ public class ExcelEngine {
 	}
 
 	public Map<String, Object> computeCell(String excelName, String sheetName, String[] cellNames,
-			Map<String, List<String>> names) {
+			Map<String, List<String>> names, boolean global) {
 
 		Workbook workbook = retrieveWorkbook(excelName);
 
@@ -166,10 +171,23 @@ public class ExcelEngine {
 			// Inject Value to the workbook
 			names.forEach((address, value) -> injectValue(address, value, workbook, sheetName));
 		}
-		FormulaEvaluator exec = formula(workbook);
 
-		exec.setDebugEvaluationOutputForNextEval(true);
+		FormulaEvaluator exec = workbook.getCreationHelper().createFormulaEvaluator();
 
+		if (global) {
+			Map<String, FormulaEvaluator> workbooks = new HashMap<String, FormulaEvaluator>();
+
+			workbooks.put("primary", exec);
+
+			listOfResources.forEach((k, v) -> {
+				if (excelName.compareTo(k) != 0) {
+					workbooks.put(listOfResources.get(k).getFile(),
+							this.retrieveWorkbook(k).getCreationHelper().createFormulaEvaluator());
+				}
+			});
+
+			exec.setupReferencedWorkbooks(workbooks);
+		}
 		// Compute All cellNames
 		Map<String, Object> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
 				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
