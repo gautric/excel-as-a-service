@@ -105,12 +105,7 @@ public class ExcelEngine {
 	}
 
 	private FormulaEvaluator formula(Workbook wb) {
-
-		if (wb instanceof HSSFWorkbook) {
-			return new HSSFFormulaEvaluator((HSSFWorkbook) wb);
-		}
-
-		return new XSSFFormulaEvaluator((XSSFWorkbook) wb);
+		return wb.getCreationHelper().createFormulaEvaluator();
 	}
 
 	public List<String> listOfSheet(String name) {
@@ -142,7 +137,7 @@ public class ExcelEngine {
 		return workbook.getSheet(sheetName);
 	}
 
-	private Map<String, ExcelCell> cellFormular(String excelName, String sheetName) {
+	public Map<String, ExcelCell> cellFormular(String excelName, String sheetName) {
 		return retrieveCell(excelName, sheetName, "FORMULA");
 	}
 
