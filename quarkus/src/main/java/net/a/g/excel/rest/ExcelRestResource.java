@@ -1,5 +1,9 @@
 package net.a.g.excel.rest;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -18,10 +22,12 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
 import org.eclipse.microprofile.openapi.annotations.OpenAPIDefinition;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -31,6 +37,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
+import org.jboss.resteasy.plugins.providers.multipart.InputPart;
+import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +52,7 @@ import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelConstants;
 import net.a.g.excel.util.ExcelUtils;
 
-@Path("/")
+@Path("/generic")
 @OpenAPIDefinition(externalDocs = @ExternalDocumentation(description = "schema", url = ExcelConstants.SCHEMA_URI), info = @Info(version = "1.0", title = "Excel Quarkus"))
 public class ExcelRestResource {
 
@@ -59,7 +67,6 @@ public class ExcelRestResource {
 	@Context
 	UriInfo uriInfo;
 
-	
 	@POST
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -177,32 +184,71 @@ public class ExcelRestResource {
 	}
 
 	@POST
-	@Path("{resource}")
+	@Path("/{resource}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
-			@APIResponse(responseCode = "405", description = "Resource is readonly mode", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "Create a new Excel Resource", description = "Create a new Excel Resource")
-	public Response sendMultipartData(@PathParam("resource") String resource, @MultipartForm MultipartBody data) {
+	public Response uploadFile(@PathParam("resource") String resource, MultipartFormDataInput input) throws IOException {
 
-		if (getConf().isReadOnly()) {
-			return ExcelRestTool.returnKO(Response.Status.METHOD_NOT_ALLOWED,
-					"Service is on readonly mode, you cannot upload file");
+		String fileName = "";
+		byte[] bytes = null;
+
+		Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
+		List<InputPart> inputParts = uploadForm.get("file");
+
+		for (InputPart inputPart : inputParts) {
+
+			MultivaluedMap<String, String> header = inputPart.getHeaders();
+			fileName = getFileName(header);
+
+			InputStream inputStream = inputPart.getBody(InputStream.class, null);
+
+			bytes = IOUtils.toByteArray(inputStream);
 		}
 
-		if (!getEngine().addNewResource(resource, data.is)) {
+		
+		ExcelResource excelResource = new ExcelResource();
+		excelResource.setName(resource);
+		excelResource.setFile(fileName);
+		excelResource.setDoc(bytes);
+
+		if (!getEngine().addNewResource(excelResource)) {
 			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,
 					"Server cannot accept/recognize format file provided");
 		}
 
+		String url = uriInfo.getRequestUri().toString();
+
 		ExcelResult ret = new ExcelResult();
-		
-		ret.setSelf(UriBuilder.fromUri(uriInfo.getRequestUri()).path(ExcelRestResource.class, "listOfSheet")
-				.build(data.name).toString());
+		excelResource.setRef(url);
+		ret.setSelf(url);
+		ret.setResults(excelResource);
 
 		return Response.accepted(ret).build();
+	}
+
+	/**
+	 * header sample { Content-Type=[image/png], Content-Disposition=[form-data;
+	 * name="file"; filename="filename.extension"] }
+	 **/
+	// get uploaded filename, is there a easy way in RESTEasy?
+	private String getFileName(MultivaluedMap<String, String> header) {
+
+		String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+
+		for (String filename : contentDisposition) {
+			if ((filename.trim().startsWith("filename"))) {
+
+				String[] name = filename.split("=");
+
+				String finalFileName = name[1].trim().replaceAll("\"", "");
+				return finalFileName;
+			}
+		}
+		return "unknown";
 	}
 
 	@GET
@@ -242,7 +288,7 @@ public class ExcelRestResource {
 	}
 
 	private ExcelSheet createSheetResource(String resource, String sheet) {
-		return new ExcelSheet(sheet, UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "sheet")
+		return new ExcelSheet(sheet, UriBuilder.fromUri(uriInfo.getPath()).path(ExcelRestResource.class, "sheet")
 				.build(resource, sheet).toString());
 	}
 
@@ -276,6 +322,6 @@ public class ExcelRestResource {
 
 	public UriInfo getUriInfo() {
 		return uriInfo;
-	}	
-	
+	}
+
 }

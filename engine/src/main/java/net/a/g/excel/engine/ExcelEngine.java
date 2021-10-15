@@ -1,7 +1,6 @@
 package net.a.g.excel.engine;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
@@ -12,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,6 +20,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -39,6 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.a.g.excel.model.ExcelCell;
+import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelUtils;
 
@@ -51,50 +51,64 @@ public class ExcelEngine {
 	@Inject
 	ExcelConfiguration conf;
 
-	private Map<String, byte[]> map = new HashMap<String, byte[]>();
+	private Map<String, ExcelResource> listOfResources = new HashMap<String, ExcelResource>();
+
+	public boolean addNewResource(ExcelResource resource) {
+
+		assert (resource != null);
+		
+		if (extractedWorkbook(resource.getName(), resource.getDoc()) == null) {
+			LOG.error("Workbook {} is not readable", resource.getName());
+			return false;
+		}
+		listOfResources.put(resource.getName(), resource);
+
+		return true;
+	}
 
 	public boolean addNewResource(String s, InputStream is) {
 
 		assert (is != null);
+		byte[] targetArray;
 		try {
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-			int nRead;
-			byte[] data = new byte[16384];
-			while ((nRead = is.read(data, 0, data.length)) != -1) {
-				buffer.write(data, 0, nRead);
-			}
-			buffer.flush();
-
-			data = buffer.toByteArray();
-
-			if (extractedWorkbook("", data) == null) {
-				return false;
-			}
-			map.put(s, data);
-		} catch (IOException ex) {
-			LOG.error("", ex);
+			targetArray = IOUtils.toByteArray(is);
+		} catch (IOException e) {
+			LOG.error("Workbook " + s + " is not readable", e);
+			return false;
 		}
+
+		if (extractedWorkbook("", targetArray) == null) {
+			return false;
+		}
+		
+		ExcelResource excelResource = new ExcelResource();
+		excelResource.setName(s);
+		excelResource.setFile(s);
+		excelResource.setDoc(targetArray);
+		
+		addNewResource(excelResource);
+
 		return true;
 	}
 
 	public void clearAll() {
-		map.clear();
+		listOfResources.clear();
 	}
 
 	public int countListOfResource() {
-		return map.keySet().size();
+		return listOfResources.keySet().size();
 	}
 
 	public Set<String> listOfFile() {
-		return map.keySet();
+		return listOfResources.keySet();
 	}
 
 	public boolean title(String name) {
-		return map.containsKey(name);
+		return listOfResources.containsKey(name);
 	}
 
 	public Workbook retrieveWorkbook(String name) {
-		byte[] byteArray = map.get(name);
+		byte[] byteArray = listOfResources.get(name).getDoc();
 
 		Workbook workbook = extractedWorkbook(name, byteArray);
 
