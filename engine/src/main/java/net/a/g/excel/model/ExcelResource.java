@@ -8,19 +8,54 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(value = Include.NON_NULL)
 public class ExcelResource {
 	@JsonProperty("name")
-	public String name;
+	private String name;
 
 	@JsonProperty("file")
-	public String file;
+	private String file;
 
 	@JsonIgnore(value = true)
-	public byte[] doc;
-	
+	private byte[] doc;
+
 	@JsonProperty("_ref")
-	public String ref;
+	private String ref;
+
+	public ExcelResource() {
+	}
 
 	public ExcelResource(String name, String ref) {
 		this.name = name;
+		this.ref = ref;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getFile() {
+		return file;
+	}
+
+	public void setFile(String file) {
+		this.file = file;
+	}
+
+	public byte[] getDoc() {
+		return doc;
+	}
+
+	public void setDoc(byte[] doc) {
+		this.doc = doc;
+	}
+
+	public String getRef() {
+		return ref;
+	}
+
+	public void setRef(String ref) {
 		this.ref = ref;
 	}
 }
