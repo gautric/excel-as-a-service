@@ -211,7 +211,7 @@ public class ExcelRestResource {
 		excelResource.setFile(fileName);
 		excelResource.setDoc(bytes);
 
-		if (!getEngine().addNewResource(excelResource)) {
+		if (!getEngine().addResource(excelResource)) {
 			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,
 					"Server cannot accept/recognize format file provided");
 		}

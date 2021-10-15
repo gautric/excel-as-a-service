@@ -93,7 +93,7 @@ public class ExcelLoader {
 		excelResource.setFile(resourceFileName);
 		excelResource.setDoc(targetArray);
 
-		engine.addNewResource(excelResource);
+		engine.addResource(excelResource);
 
 		return true;
 	}

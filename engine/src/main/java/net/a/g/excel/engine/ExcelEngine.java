@@ -51,7 +51,7 @@ public class ExcelEngine {
 
 	private Map<String, ExcelResource> listOfResources = new HashMap<String, ExcelResource>();
 
-	public boolean addNewResource(ExcelResource resource) {
+	public boolean addResource(ExcelResource resource) {
 
 		assert (resource != null);
 
