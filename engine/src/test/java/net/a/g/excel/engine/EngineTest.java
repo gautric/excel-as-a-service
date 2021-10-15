@@ -38,12 +38,15 @@ public class EngineTest {
 
 	@Inject
 	ExcelEngine engine;
+	
+	@Inject
+	ExcelLoader loader;
 
 	@BeforeEach
 	public void setup() {
 		assertNotNull(engine);
 		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
-		assertTrue(engine.addNewResource("KYC", inputStream));
+		assertTrue(loader.injectResource("KYC", inputStream));
 
 	}
 

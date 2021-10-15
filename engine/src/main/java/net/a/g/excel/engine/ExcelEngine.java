@@ -1,8 +1,6 @@
 package net.a.g.excel.engine;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,7 +18,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -62,31 +59,6 @@ public class ExcelEngine {
 			return false;
 		}
 		listOfResources.put(resource.getName(), resource);
-
-		return true;
-	}
-
-	public boolean addNewResource(String s, InputStream is) {
-
-		assert (is != null);
-		byte[] targetArray;
-		try {
-			targetArray = IOUtils.toByteArray(is);
-		} catch (IOException e) {
-			LOG.error("Workbook " + s + " is not readable", e);
-			return false;
-		}
-
-		if (extractedWorkbook("", targetArray) == null) {
-			return false;
-		}
-		
-		ExcelResource excelResource = new ExcelResource();
-		excelResource.setName(s);
-		excelResource.setFile(s);
-		excelResource.setDoc(targetArray);
-		
-		addNewResource(excelResource);
 
 		return true;
 	}
