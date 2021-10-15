@@ -53,7 +53,7 @@ public class EngineTest {
 
 	@AfterEach
 	public void close() {
-		engine.clearAll();
+		engine.clearAllResource();
 		assertEquals(0, engine.countListOfResource());
 	}
 

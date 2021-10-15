@@ -66,7 +66,7 @@ public class ExcelEngine {
 		return true;
 	}
 
-	public void clearAll() {
+	public void clearAllResource() {
 		listOfResources.clear();
 	}
 
