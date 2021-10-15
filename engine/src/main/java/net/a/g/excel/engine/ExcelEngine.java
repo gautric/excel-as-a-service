@@ -82,7 +82,7 @@ public class ExcelEngine {
 		return listOfResources.containsKey(name);
 	}
 
-	public Workbook retrieveWorkbook(String name) {
+	private Workbook retrieveWorkbook(String name) {
 		Workbook workbook = null;
 		if (listOfResources.containsKey(name)) {
 			byte[] byteArray = listOfResources.get(name).getDoc();
@@ -104,7 +104,7 @@ public class ExcelEngine {
 		return workbook;
 	}
 
-	public FormulaEvaluator formula(Workbook wb) {
+	private FormulaEvaluator formula(Workbook wb) {
 
 		if (wb instanceof HSSFWorkbook) {
 			return new HSSFFormulaEvaluator((HSSFWorkbook) wb);
@@ -137,16 +137,16 @@ public class ExcelEngine {
 		return sheet != null;
 	}
 
-	public Sheet sheet(String excelName, String sheetName) {
+	private Sheet sheet(String excelName, String sheetName) {
 		Workbook workbook = retrieveWorkbook(excelName);
 		return workbook.getSheet(sheetName);
 	}
 
-	public Map<String, ExcelCell> cellFormular(String excelName, String sheetName) {
+	private Map<String, ExcelCell> cellFormular(String excelName, String sheetName) {
 		return retrieveCell(excelName, sheetName, "FORMULA");
 	}
 
-	public Map<String, ExcelCell> retrieveCell(String excelName, String sheetName, String cellType) {
+	private Map<String, ExcelCell> retrieveCell(String excelName, String sheetName, String cellType) {
 		return retrieveCell(excelName, sheetName, cell -> CellType.valueOf(cellType) == cell.getCellType());
 	}
 
@@ -299,7 +299,7 @@ public class ExcelEngine {
 	 * @param a
 	 * @return
 	 */
-	public Cell getCell(Sheet sheet, String excelPosition) {
+	private Cell getCell(Sheet sheet, String excelPosition) {
 
 		Cell cell = null;
 
