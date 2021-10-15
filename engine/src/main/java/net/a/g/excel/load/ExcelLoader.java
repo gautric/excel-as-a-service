@@ -41,7 +41,7 @@ public class ExcelLoader {
 		try {
 			LOG.info("Load file from {} ({})", file.getFileName(), file.getFileName().toAbsolutePath());
 			injectResource(FilenameUtils.removeExtension(file.getFileName().toString()),
-					file.toUri().toURL().openStream());
+					FilenameUtils.getName(file.getFileName().toString()), file.toUri().toURL().openStream());
 		} catch (MalformedURLException e) {
 			LOG.error("Error while loading file", e);
 		} catch (IOException e) {
@@ -58,7 +58,8 @@ public class ExcelLoader {
 
 			if (inputStream != null) {
 				LOG.info("Load file from classpath:/{}", conf.getResouceUri());
-				injectResource(FilenameUtils.getBaseName(conf.getResouceUri()), inputStream);
+				injectResource(FilenameUtils.getBaseName(conf.getResouceUri()),
+						FilenameUtils.getName(conf.getResouceUri()), inputStream);
 			} else {
 				Path file = Paths.get(conf.getResouceUri());
 				if (Files.isRegularFile(file)) {
@@ -77,19 +78,19 @@ public class ExcelLoader {
 	public void destroy(@Observes @Destroyed(ApplicationScoped.class) Object init) {
 	}
 
-	public boolean injectResource(String s, InputStream is) {
+	public boolean injectResource(String resourceName, String resourceFileName, InputStream resourceStream) {
 
 		byte[] targetArray;
 		try {
-			targetArray = IOUtils.toByteArray(is);
+			targetArray = IOUtils.toByteArray(resourceStream);
 		} catch (IOException e) {
-			LOG.error("Workbook " + s + " is not readable", e);
+			LOG.error("Workbook " + resourceName + " is not readable", e);
 			return false;
 		}
 
 		ExcelResource excelResource = new ExcelResource();
-		excelResource.setName(s);
-		excelResource.setFile(s);
+		excelResource.setName(resourceName);
+		excelResource.setFile(resourceFileName);
 		excelResource.setDoc(targetArray);
 
 		engine.addNewResource(excelResource);

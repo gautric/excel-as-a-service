@@ -46,7 +46,8 @@ public class EngineTest {
 	public void setup() {
 		assertNotNull(engine);
 		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
-		assertTrue(loader.injectResource("KYC", inputStream));
+		assertTrue(loader.injectResource("KYC", null, inputStream));
+		assertEquals(1, engine.countListOfResource());
 
 	}
 
@@ -127,4 +128,12 @@ public class EngineTest {
 		assertThat(map.get("C10"), is("2021-02-12"));
 	}
 
+	
+	@Test
+	public void testLoading() {
+		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
+		assertTrue(loader.injectResource("newtest", null, inputStream));
+		assertEquals(2, engine.countListOfResource());
+	}
+	
 }

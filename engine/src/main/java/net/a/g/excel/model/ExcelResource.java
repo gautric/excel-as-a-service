@@ -1,5 +1,7 @@
 package net.a.g.excel.model;
 
+import java.util.Arrays;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -57,5 +59,10 @@ public class ExcelResource {
 
 	public void setRef(String ref) {
 		this.ref = ref;
+	}
+
+	public String toString() {
+		return "ExcelResource [name=" + name + ", file=" + file + ", doc=" + Arrays.toString(doc).substring(0, 10) + ".... , ref=" + ref
+				+ "]";
 	}
 }

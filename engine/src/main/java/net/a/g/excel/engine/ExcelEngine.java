@@ -59,7 +59,9 @@ public class ExcelEngine {
 			return false;
 		}
 		listOfResources.put(resource.getName(), resource);
-
+		
+		LOG.info("Add {} OK", resource);
+		
 		return true;
 	}
 
