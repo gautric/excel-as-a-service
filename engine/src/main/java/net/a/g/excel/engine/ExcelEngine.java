@@ -137,7 +137,7 @@ public class ExcelEngine {
 		return workbook.getSheet(sheetName);
 	}
 
-	public Map<String, ExcelCell> cellFormular(String excelName, String sheetName) {
+	public Map<String, ExcelCell> mapOfFormularCell(String excelName, String sheetName) {
 		return retrieveCell(excelName, sheetName, "FORMULA");
 	}
 

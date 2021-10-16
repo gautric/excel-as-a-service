@@ -91,7 +91,7 @@ public class CrossRefTest {
 	@Test
 	public void testSheetPrimaryV() {
 
-		List<String> actual = new ArrayList(engine.cellFormular("Primary", "Feuil1").values().stream()
+		List<String> actual = new ArrayList(engine.mapOfFormularCell("Primary", "Feuil1").values().stream()
 				.map(cell -> cell.getValue()).collect(Collectors.toList()));
 		assertNotNull(actual);
 		assertThat(actual, hasSize(2));
@@ -103,7 +103,7 @@ public class CrossRefTest {
 	@Test
 	public void testSheetPrimaryK() {
 
-		List<String> actual = new ArrayList(engine.cellFormular("Primary", "Feuil1").keySet());
+		List<String> actual = new ArrayList(engine.mapOfFormularCell("Primary", "Feuil1").keySet());
 		assertNotNull(actual);
 		assertThat(actual, hasSize(2));
 
@@ -114,7 +114,7 @@ public class CrossRefTest {
 	@Test
 	public void testSheetPrimaryCall() {
 
-		List<String> actual = new ArrayList(engine.cellFormular("Primary", "Feuil1").keySet());
+		List<String> actual = new ArrayList(engine.mapOfFormularCell("Primary", "Feuil1").keySet());
 		assertNotNull(actual);
 		assertThat(actual, hasSize(2));
 
