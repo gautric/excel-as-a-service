@@ -30,7 +30,10 @@ public class ExcelResult {
 
 	@JsonProperty(required = false, value = "error", namespace = ExcelConstants.SCHEMA_URI)
 	public ExcelError error;
-
+	
+	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
+	public ExcelLink[] links;
+	
 	public ExcelError getError() {
 		return error;
 	}

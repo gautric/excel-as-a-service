@@ -5,6 +5,9 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+
+import net.a.g.excel.util.ExcelConstants;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(value = Include.NON_NULL)
@@ -20,6 +23,9 @@ public class ExcelResource {
 
 	@JsonProperty("_ref")
 	private String ref;
+
+	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
+	public ExcelLink[] links;
 
 	public ExcelResource() {
 	}
@@ -62,7 +68,7 @@ public class ExcelResource {
 	}
 
 	public String toString() {
-		return "ExcelResource [name=" + name + ", file=" + file + ", doc=" + Arrays.toString(doc).substring(0, 10) + ".... , ref=" + ref
-				+ "]";
+		return "ExcelResource [name=" + name + ", file=" + file + ", doc=" + Arrays.toString(doc).substring(0, 10)
+				+ ".... , ref=" + ref + "]";
 	}
 }
