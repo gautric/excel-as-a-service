@@ -71,7 +71,7 @@ public class ExcelRestResource {
 			@PathParam("cells") String cell, @QueryParam("_global") @DefaultValue("false") boolean global,
 			final String jsonBody) {
 
-		if (!getEngine().ifSheetExists(title, sheet)) {
+		if (!getEngine().isSheetExists(title, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
@@ -93,7 +93,7 @@ public class ExcelRestResource {
 			@PathParam("cells") String cell,  @QueryParam("_global") @DefaultValue("false") boolean global,
 			final MultivaluedMap<String, String> queryurlencoded) {
 
-		if (!getEngine().ifSheetExists(title, sheet)) {
+		if (!getEngine().isSheetExists(title, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
@@ -111,7 +111,7 @@ public class ExcelRestResource {
 			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		if (!getEngine().ifSheetExists(resource, sheetName)) {
+		if (!getEngine().isSheetExists(resource, sheetName)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 		Map<String, List<String>> query = uriInfo.getQueryParameters();
@@ -259,7 +259,7 @@ public class ExcelRestResource {
 		ExcelResult ret = null;
 
 		if (!sheetName.contains("!")) {
-			if (getEngine().ifSheetExists(resource, sheetName)) {
+			if (getEngine().isSheetExists(resource, sheetName)) {
 				status = Response.Status.OK;
 
 				entity = getEngine().retrieveCell(resource, sheetName, cell -> true);

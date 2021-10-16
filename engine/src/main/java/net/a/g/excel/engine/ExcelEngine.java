@@ -126,7 +126,7 @@ public class ExcelEngine {
 		return list;
 	}
 
-	public boolean ifSheetExists(String excelName, String sheetName) {
+	public boolean isSheetExists(String excelName, String sheetName) {
 		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
 		return sheet != null;
