@@ -142,10 +142,10 @@ public class ExcelEngine {
 	}
 
 	private Map<String, ExcelCell> retrieveCell(String excelName, String sheetName, String cellType) {
-		return retrieveCell(excelName, sheetName, cell -> CellType.valueOf(cellType) == cell.getCellType());
+		return mapOfCell(excelName, sheetName, cell -> CellType.valueOf(cellType) == cell.getCellType());
 	}
 
-	public Map<String, ExcelCell> retrieveCell(String excelName, String sheetName, Predicate<Cell> predicate) {
+	public Map<String, ExcelCell> mapOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
 		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
 

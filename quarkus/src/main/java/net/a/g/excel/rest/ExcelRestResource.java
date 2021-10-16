@@ -262,7 +262,7 @@ public class ExcelRestResource {
 			if (getEngine().isSheetExists(resource, sheetName)) {
 				status = Response.Status.OK;
 
-				entity = getEngine().retrieveCell(resource, sheetName, cell -> true);
+				entity = getEngine().mapOfCell(resource, sheetName, cell -> true);
 				ret = new ExcelResult(entity.size(), entity);
 
 				entity.values().stream()
