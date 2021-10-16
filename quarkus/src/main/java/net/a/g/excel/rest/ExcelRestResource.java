@@ -161,7 +161,7 @@ public class ExcelRestResource {
 	public Response listOfSheet(@PathParam("resource") String file) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		if (!getEngine().title(file)) {
+		if (!getEngine().isResourceExists(file)) {
 			return Response.status(Response.Status.NOT_FOUND).links(link).build();
 		}
 

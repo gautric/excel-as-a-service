@@ -78,7 +78,7 @@ public class ExcelEngine {
 		return listOfResources.keySet();
 	}
 
-	public boolean title(String name) {
+	public boolean isResourceExists(String name) {
 		return listOfResources.containsKey(name);
 	}
 
