@@ -69,7 +69,7 @@ public class EngineTest {
 
 	@Test
 	public void testResourceKYC() {
-		List<String> actual = new ArrayList(engine.listOfFile());
+		List<String> actual = new ArrayList(engine.lisfOfResourceName());
 
 		assertThat(actual, hasSize(1));
 		List<String> expect = Arrays.asList("KYC");

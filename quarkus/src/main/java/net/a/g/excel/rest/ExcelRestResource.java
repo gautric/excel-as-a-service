@@ -140,10 +140,10 @@ public class ExcelRestResource {
 
 		Object entity = null;
 		if (getConf().returnMap()) {
-			entity = getEngine().listOfFile().stream()
+			entity = getEngine().lisfOfResourceName().stream()
 					.collect(Collectors.toMap(k -> k, resource -> createExcelResource(resource)));
 		} else {
-			entity = getEngine().listOfFile().stream().map(resource -> createExcelResource(resource));
+			entity = getEngine().lisfOfResourceName().stream().map(resource -> createExcelResource(resource));
 		}
 
 		ExcelResult ret = new ExcelResult(getEngine().countListOfResource(), entity);

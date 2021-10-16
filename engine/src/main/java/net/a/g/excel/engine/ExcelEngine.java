@@ -74,7 +74,7 @@ public class ExcelEngine {
 		return listOfResources.keySet().size();
 	}
 
-	public Set<String> listOfFile() {
+	public Set<String> lisfOfResourceName() {
 		return listOfResources.keySet();
 	}
 
