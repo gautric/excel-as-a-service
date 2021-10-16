@@ -121,9 +121,9 @@ public class CrossRefTest {
 		List<String> expect = Arrays.asList("A1", "B1");
 		assertThat(actual, is(expect));
 
-		Map<String, Object> toto = engine.mapOfCellCalculated("Primary", "Feuil1", new String[] { "B1" }, null, true);
+		Map<String, ExcelCell> toto = engine.mapOfCellCalculated("Primary", "Feuil1", new String[] { "B1" }, null, true);
 
-		assertEquals(44.0, toto.get("B1"));
+		assertEquals(44.0, toto.get("B1").getValue());
 
 	}
 

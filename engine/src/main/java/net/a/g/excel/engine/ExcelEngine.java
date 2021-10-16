@@ -153,7 +153,7 @@ public class ExcelEngine {
 				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
 	}
 
-	public Map<String, Object> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
+	public Map<String, ExcelCell> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names, boolean global) {
 
 		Workbook workbook = retrieveWorkbook(excelName);
@@ -180,15 +180,23 @@ public class ExcelEngine {
 			exec.setupReferencedWorkbooks(workbooks);
 		}
 		// Compute All cellNames
-		Map<String, Object> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
+		Map<String, ExcelCell> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
 				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
 						cell -> computeCell(cell, exec)));
 
 		return map;
 	}
 
-	private Object computeCell(Cell cell, FormulaEvaluator exec) {
-		return getRawCell(exec.evaluateInCell(cell));
+	private ExcelCell computeCell(Cell cell, FormulaEvaluator exec) {
+
+		ExcelCell ret = new ExcelCell();
+		
+		ret.setAddress(cell.getAddress().formatAsString());
+		ret.setValue(getRawCell(exec.evaluateInCell(cell)));
+		ret.setType(getCellType(cell));
+		ret.setMetadata(getCellComment(cell));
+		
+		return ret;
 	}
 
 	private String retrieveFullCellName(Cell cell, String defaultSheetName) {
@@ -240,6 +248,44 @@ public class ExcelEngine {
 			case FORMULA:
 				ret = cell.getCellFormula();
 				break;
+			default:
+				break;
+			}
+		}
+		return ret;
+	}
+
+	private String getCellComment(Cell cell) {
+
+		String ret = null;
+		if (cell.getCellComment() != null) {
+			ret = cell.getCellComment().getString().toString();
+		}
+		return ret;
+	}
+
+	private String getCellType(Cell cell) {
+
+		String ret = "";
+		if (cell != null) {
+
+			CellType type = cell.getCellType();
+			switch (cell.getCellType()) {
+
+			case NUMERIC:
+
+				if (DateUtil.isCellDateFormatted(cell)) {
+					return "DATE";
+				} else {
+					return type.name();
+				}
+
+			case BOOLEAN:
+			case STRING:
+			case BLANK:
+			case ERROR:
+			case FORMULA:
+				return type.name();
 			default:
 				break;
 			}
@@ -322,10 +368,8 @@ public class ExcelEngine {
 
 		ret.setAddress(cell.getAddress().formatAsString());
 		ret.setValue(getRawCell(cell));
-		ret.setType(cell.getCellType().name());
-		if (cell.getCellComment() != null) {
-			ret.setMetadata(cell.getCellComment().getString().toString());
-		}
+		ret.setType(getCellType(cell));
+		ret.setMetadata(getCellComment(cell));
 		return ret;
 	}
 }

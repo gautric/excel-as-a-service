@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.a.g.excel.load.ExcelLoader;
+import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ExtendWith(WeldJunit5Extension.class)
@@ -111,21 +112,21 @@ public class EngineTest {
 	@Test
 	public void testComputeKYCC6() {
 
-		Map<String, Object> map = engine.mapOfCellCalculated("KYC", "ComputeKYC", new String[] { "C6" }, null, false);
+		Map<String, ExcelCell> map = engine.mapOfCellCalculated("KYC", "ComputeKYC", new String[] { "C6" }, null, false);
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
-		assertThat(map.get("C6"), is(0.0));
+		assertThat(map.get("C6").getValue(), is(0.0));
 	}
 	
 	@Test
 	public void testComputeKYCC10() {
 
-		Map<String, Object> map = engine.mapOfCellCalculated("KYC", "ComputeKYC", new String[] { "C10" }, null, false);
+		Map<String, ExcelCell> map = engine.mapOfCellCalculated("KYC", "ComputeKYC", new String[] { "C10" }, null, false);
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
-		assertThat(map.get("C10"), is("2021-02-12"));
+		assertThat(map.get("C10").getValue(), is("2021-02-12"));
 	}
 
 	
