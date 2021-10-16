@@ -80,7 +80,7 @@ public class ExcelRestResource {
 		Map<String, List<String>> query = body.toMap().entrySet().stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue().toString())));
 
-		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query, global);
+		Map<String, Object> ret = getEngine().mapOfCellCalculated(title, sheet, cell.split(","), query, global);
 
 		return Response.status(Response.Status.OK).entity(ret).build();
 	}
@@ -99,7 +99,7 @@ public class ExcelRestResource {
 
 		Map<String, List<String>> query = queryurlencoded;
 
-		Map<String, Object> ret = getEngine().computeCell(title, sheet, cell.split(","), query, global);
+		Map<String, Object> ret = getEngine().mapOfCellCalculated(title, sheet, cell.split(","), query, global);
 
 		return Response.status(Response.Status.OK).entity(ret).build();
 	}
@@ -116,7 +116,7 @@ public class ExcelRestResource {
 		}
 		Map<String, List<String>> query = uriInfo.getQueryParameters();
 
-		Map<String, Object> entity = getEngine().computeCell(resource, sheetName, cellNames.split(","), query, global);
+		Map<String, Object> entity = getEngine().mapOfCellCalculated(resource, sheetName, cellNames.split(","), query, global);
 
 		((Map<String, Object>) entity).replaceAll((k, v) -> createCellValueResource(k, v, resource, sheetName));
 

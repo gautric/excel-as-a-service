@@ -153,7 +153,7 @@ public class ExcelEngine {
 				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
 	}
 
-	public Map<String, Object> computeCell(String excelName, String sheetName, String[] cellNames,
+	public Map<String, Object> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names, boolean global) {
 
 		Workbook workbook = retrieveWorkbook(excelName);

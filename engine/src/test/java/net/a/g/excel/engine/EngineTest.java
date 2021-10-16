@@ -111,7 +111,7 @@ public class EngineTest {
 	@Test
 	public void testComputeKYCC6() {
 
-		Map<String, Object> map = engine.computeCell("KYC", "ComputeKYC", new String[] { "C6" }, null, false);
+		Map<String, Object> map = engine.mapOfCellCalculated("KYC", "ComputeKYC", new String[] { "C6" }, null, false);
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
@@ -121,7 +121,7 @@ public class EngineTest {
 	@Test
 	public void testComputeKYCC10() {
 
-		Map<String, Object> map = engine.computeCell("KYC", "ComputeKYC", new String[] { "C10" }, null, false);
+		Map<String, Object> map = engine.mapOfCellCalculated("KYC", "ComputeKYC", new String[] { "C10" }, null, false);
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
