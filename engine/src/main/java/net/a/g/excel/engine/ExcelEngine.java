@@ -259,7 +259,7 @@ public class ExcelEngine {
 
 		String ret = null;
 		if (cell.getCellComment() != null) {
-			ret = cell.getCellComment().getString().toString();
+			ret = cell.getCellComment().getString().toString().replaceAll("\\n", "");
 		}
 		return ret;
 	}

@@ -58,5 +58,19 @@ public class ExcelResourceTest {
 
 	}
 	
+	
+	@Test
+	public void testKYCComputeKYCC6() {
+
+		when()
+			.get("/api/{resource}/{sheet}/{cell}", "KYC", "ComputeKYC", "C6")
+		.then()
+			.statusCode(200)
+				.body("_count", equalTo(1),
+						"results[0].address", is("C6"),
+						"results[0].value", is(0.0F),
+						"results[0].type", is("NUMERIC"));
+
+	}
 
 }
