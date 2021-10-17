@@ -1,6 +1,7 @@
 package net.a.g.excel.engine;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,8 +19,7 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import org.apache.poi.hssf.usermodel.HSSFFormulaEvaluator;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -30,8 +30,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFFormulaEvaluator;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,9 +84,20 @@ public class ExcelEngine {
 		Workbook workbook = null;
 		if (listOfResources.containsKey(name)) {
 			byte[] byteArray = listOfResources.get(name).getDoc();
-			workbook = extractedWorkbook(name, byteArray);
+			workbook = convertByteToWorkbook(byteArray);
 		}
 		return workbook;
+	}
+
+	private Workbook convertByteToWorkbook(byte[] byteArray) {
+		try {
+			return WorkbookFactory.create(new ByteArrayInputStream(byteArray));
+		} catch (EncryptedDocumentException ex) {
+			LOG.error("Workbook  is not a XSSF file", ex);
+		} catch (IOException ex) {
+			LOG.error("Workbook  is not a XSSF file", ex);
+		}
+		return null;
 	}
 
 	private Workbook extractedWorkbook(String name, byte[] byteArray) {
@@ -158,32 +167,29 @@ public class ExcelEngine {
 
 		Workbook workbook = retrieveWorkbook(excelName);
 
+		FormulaEvaluator exec = formula(workbook);
+
+		if (global) {
+
+			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream()
+					.filter(v -> excelName.compareTo(v.getName()) != 0).collect(Collectors.toMap(ExcelResource::getFile,
+							r -> formula(convertByteToWorkbook(r.getDoc()))));
+
+			workbooks.put("primary", exec);
+
+			exec.setupReferencedWorkbooks(workbooks);
+		}
+
 		if (names != null) {
 			// Inject Value to the workbook
 			names.forEach((address, value) -> injectValue(address, value, workbook, sheetName));
 		}
 
-		FormulaEvaluator exec = workbook.getCreationHelper().createFormulaEvaluator();
-
-		if (global) {
-			Map<String, FormulaEvaluator> workbooks = new HashMap<String, FormulaEvaluator>();
-
-			workbooks.put("primary", exec);
-
-			listOfResources.forEach((k, v) -> {
-				if (excelName.compareTo(k) != 0) {
-					workbooks.put(listOfResources.get(k).getFile(),
-							this.retrieveWorkbook(k).getCreationHelper().createFormulaEvaluator());
-				}
-			});
-
-			exec.setupReferencedWorkbooks(workbooks);
-		}
 		// Compute All cellNames
 		Map<String, ExcelCell> map = Arrays.stream(cellNames)
-				.map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
-				.flatMap(Stream::ofNullable)
-				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName), cell -> computeCell(cell, exec)));
+				.map(addr -> retrieveCellByAdress(addr, workbook, sheetName)).flatMap(Stream::ofNullable)
+				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
+						cell -> computeCell(cell, exec)));
 
 		return map;
 	}
@@ -211,7 +217,7 @@ public class ExcelEngine {
 	}
 
 	private Cell retrieveCellByAdress(String cellAddress, Workbook workbook, String defaultSheetName) {
-		Cell ret = null;		
+		Cell ret = null;
 		CellReference cr = new CellReference(cellAddress);
 		String sheetOfCell = (cr.getSheetName() == null) ? defaultSheetName : cr.getSheetName();
 		Sheet sheet = workbook.getSheet(sheetOfCell);
