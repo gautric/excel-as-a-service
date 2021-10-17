@@ -1,8 +1,13 @@
 package net.a.g.excel.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import net.a.g.excel.util.ExcelConstants;
 
 @JsonInclude(value = Include.NON_NULL)
 public class ExcelCell {
@@ -11,15 +16,23 @@ public class ExcelCell {
 
 	@JsonProperty("value")
 	private Object value;
-	
-	@JsonProperty("_metadata")
+
+	@JsonProperty("metadata")
 	private String metadata;
-	
+
 	@JsonProperty("type")
 	private String type;
 
-	@JsonProperty("_ref")
-	private String ref;
+	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
+	private List<ExcelLink> links = new ArrayList<ExcelLink>();
+
+	public List<ExcelLink> getLinks() {
+		return this.links;
+	}
+
+	public void setLinks(List<ExcelLink> links) {
+		this.links = links;
+	}
 
 	public String getAddress() {
 		return address;
@@ -28,7 +41,6 @@ public class ExcelCell {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
 
 	public Object getValue() {
 		return value;
@@ -54,21 +66,12 @@ public class ExcelCell {
 		this.type = type;
 	}
 
-	public String getRef() {
-		return ref;
-	}
-
-	public void setRef(String ref) {
-		this.ref = ref;
-	}
-
 	public ExcelCell() {
 	};
 
 	public ExcelCell(String adress, String formula, Object value, String ref, String metadata) {
 		this.address = adress;
 		this.value = value;
-		this.ref = ref;
 	};
 
 }

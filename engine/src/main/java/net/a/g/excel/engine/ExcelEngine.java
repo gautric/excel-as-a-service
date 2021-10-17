@@ -180,9 +180,10 @@ public class ExcelEngine {
 			exec.setupReferencedWorkbooks(workbooks);
 		}
 		// Compute All cellNames
-		Map<String, ExcelCell> map = Arrays.stream(cellNames).map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
-				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
-						cell -> computeCell(cell, exec)));
+		Map<String, ExcelCell> map = Arrays.stream(cellNames)
+				.map(addr -> retrieveCellByAdress(addr, workbook, sheetName))
+				.flatMap(Stream::ofNullable)
+				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName), cell -> computeCell(cell, exec)));
 
 		return map;
 	}
@@ -190,12 +191,12 @@ public class ExcelEngine {
 	private ExcelCell computeCell(Cell cell, FormulaEvaluator exec) {
 
 		ExcelCell ret = new ExcelCell();
-		
+
 		ret.setAddress(cell.getAddress().formatAsString());
 		ret.setValue(getRawCell(exec.evaluateInCell(cell)));
 		ret.setType(getCellType(cell));
 		ret.setMetadata(getCellComment(cell));
-		
+
 		return ret;
 	}
 
@@ -210,12 +211,15 @@ public class ExcelEngine {
 	}
 
 	private Cell retrieveCellByAdress(String cellAddress, Workbook workbook, String defaultSheetName) {
+		Cell ret = null;		
 		CellReference cr = new CellReference(cellAddress);
 		String sheetOfCell = (cr.getSheetName() == null) ? defaultSheetName : cr.getSheetName();
-		Sheet mySheet = workbook.getSheet(sheetOfCell);
-		Row row = mySheet.getRow(cr.getRow());
-		Cell cell = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
-		return cell;
+		Sheet sheet = workbook.getSheet(sheetOfCell);
+		Row row = sheet.getRow(cr.getRow());
+		if (row != null) {
+			ret = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
+		}
+		return ret;
 	}
 
 	private Object getRawCell(Cell cell) {

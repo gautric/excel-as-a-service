@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import net.a.g.excel.engine.ExcelEngine;
 import net.a.g.excel.model.ExcelCell;
+import net.a.g.excel.model.ExcelLink;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelResult;
 import net.a.g.excel.model.ExcelSheet;
@@ -67,41 +69,28 @@ public class ExcelRestResource {
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response cellBody(@PathParam("resource") String title, @PathParam("sheet") String sheet,
-			@PathParam("cells") String cell, @QueryParam("_global") @DefaultValue("false") boolean global,
+	public Response cellBody(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
+			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global,
 			final String jsonBody) {
-
-		if (!getEngine().isSheetExists(title, sheet)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
-
 		JSONObject body = new JSONObject(jsonBody);
 
 		Map<String, List<String>> query = body.toMap().entrySet().stream()
 				.collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue().toString())));
 
-		Map<String, ExcelCell> ret = getEngine().mapOfCellCalculated(title, sheet, cell.split(","), query, global);
-
-		return Response.status(Response.Status.OK).entity(ret).build();
+		return computeCells(resource, sheetName, cellNames, global, query);
 	}
 
 	@POST
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes("application/x-www-form-urlencoded")
-	public Response cellForm(@PathParam("resource") String title, @PathParam("sheet") String sheet,
-			@PathParam("cells") String cell,  @QueryParam("_global") @DefaultValue("false") boolean global,
+	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	public Response cellForm(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
+			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global,
 			final MultivaluedMap<String, String> queryurlencoded) {
-
-		if (!getEngine().isSheetExists(title, sheet)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
 
 		Map<String, List<String>> query = queryurlencoded;
 
-		Map<String, ExcelCell> ret = getEngine().mapOfCellCalculated(title, sheet, cell.split(","), query, global);
-
-		return Response.status(Response.Status.OK).entity(ret).build();
+		return computeCells(resource, sheetName, cellNames, global, query);
 	}
 
 	@GET
@@ -109,16 +98,31 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response cellQuery(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
 			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global) {
+
+		Map<String, List<String>> query = uriInfo.getQueryParameters();
+
+		return computeCells(resource, sheetName, cellNames, global, query);
+	}
+
+	private Response computeCells(String resource, String sheetName, String cellNames, boolean global,
+			Map<String, List<String>> query) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery");
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
-		Map<String, List<String>> query = uriInfo.getQueryParameters();
 
-		Map<String, ExcelCell> entity = getEngine().mapOfCellCalculated(resource, sheetName, cellNames.split(","), query, global);
+		Map<String, ExcelCell> entity = getEngine().mapOfCellCalculated(resource, sheetName, cellNames.split(","),
+				query, global);
 
-		//((Map<String, Object>) entity).replaceAll((k, v) -> createCellValueResource(k, v, resource, sheetName));
+		Consumer<? super ExcelCell> consume = parseExcelCell(resource, sheetName, builder);
+
+		entity.values().stream().forEach(consume);
 
 		ExcelResult ret = new ExcelResult(entity.size(), entity);
 
@@ -127,6 +131,16 @@ public class ExcelRestResource {
 		}
 
 		return ExcelRestTool.returnOK(ret, link);
+	}
+
+	private Consumer<? super ExcelCell> parseExcelCell(String resource, String sheetName, UriBuilder builder) {
+		return cell -> {
+			ExcelLink el = new ExcelLink();
+			el.setHref(builder.build(resource, sheetName, cell.getAddress()).toString());
+			el.setRel("self");
+			el.setType(MediaType.APPLICATION_JSON);
+			cell.getLinks().add(el);
+		};
 	}
 
 	@GET
@@ -265,8 +279,9 @@ public class ExcelRestResource {
 				entity = getEngine().mapOfCell(resource, sheetName, cell -> true);
 				ret = new ExcelResult(entity.size(), entity);
 
-				entity.values().stream()
-						.forEach(cell -> cell.setRef(builder.build(resource, sheetName, cell.getAddress()).toString()));
+				Consumer<? super ExcelCell> consume = parseExcelCell(resource, sheetName, builder);
+
+				entity.values().stream().forEach(consume);
 
 				if (getConf().returnList()) {
 					ret.setResults(entity.values());
