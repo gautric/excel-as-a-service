@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -172,8 +173,8 @@ public class ExcelEngine {
 		if (global) {
 
 			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream()
-					.filter(v -> excelName.compareTo(v.getName()) != 0).collect(Collectors.toMap(ExcelResource::getFile,
-							r -> formula(convertByteToWorkbook(r.getDoc()))));
+					.filter(r -> excelName.compareTo(r.getName()) != 0)
+					.collect(Collectors.toMap(ExcelResource::getFile, r -> formula(convertByteToWorkbook(r.getDoc()))));
 
 			workbooks.put("primary", exec);
 
@@ -192,18 +193,6 @@ public class ExcelEngine {
 						cell -> computeCell(cell, exec)));
 
 		return map;
-	}
-
-	private ExcelCell computeCell(Cell cell, FormulaEvaluator exec) {
-
-		ExcelCell ret = new ExcelCell();
-
-		ret.setAddress(cell.getAddress().formatAsString());
-		ret.setValue(getRawCell(exec.evaluateInCell(cell)));
-		ret.setType(getCellType(cell));
-		ret.setMetadata(getCellComment(cell));
-
-		return ret;
 	}
 
 	private String retrieveFullCellName(Cell cell, String defaultSheetName) {
@@ -261,15 +250,6 @@ public class ExcelEngine {
 			default:
 				break;
 			}
-		}
-		return ret;
-	}
-
-	private String getCellComment(Cell cell) {
-
-		String ret = null;
-		if (cell.getCellComment() != null) {
-			ret = cell.getCellComment().getString().toString().replaceAll("\\n", "");
 		}
 		return ret;
 	}
@@ -373,11 +353,28 @@ public class ExcelEngine {
 				.flatMap(r -> StreamSupport.stream(r.spliterator(), false));
 	}
 
+	private String getCellComment(Cell cell) {
+
+		String ret = null;
+		if (cell.getCellComment() != null) {
+			ret = cell.getCellComment().getString().toString().replaceAll("\\n", "");
+		}
+		return ret;
+	}
+
+	private ExcelCell computeCell(Cell cell, FormulaEvaluator exec) {
+		return celltoExcelCell(cell, c -> exec.evaluateInCell(c));
+	}
+
 	private ExcelCell celltoExcelCell(Cell cell) {
+		return celltoExcelCell(cell, Function.identity());
+	}
+
+	private ExcelCell celltoExcelCell(Cell cell, Function<Cell, Cell> valueFunction) {
 		ExcelCell ret = new ExcelCell();
 
 		ret.setAddress(cell.getAddress().formatAsString());
-		ret.setValue(getRawCell(cell));
+		ret.setValue(getRawCell(valueFunction.apply(cell)));
 		ret.setType(getCellType(cell));
 		ret.setMetadata(getCellComment(cell));
 		return ret;
