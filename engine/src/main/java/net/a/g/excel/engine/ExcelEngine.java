@@ -1,5 +1,7 @@
 package net.a.g.excel.engine;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
@@ -162,64 +164,71 @@ public class ExcelEngine {
 		return streamCell(sheet).filter(predicate)
 				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
 	}
-	
-	
+
 	public List<ExcelCell> listOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
 		Workbook workbook = retrieveWorkbook(excelName);
 		Sheet sheet = workbook.getSheet(sheetName);
 
-		return streamCell(sheet).filter(predicate).map(this::celltoExcelCell)
-				.collect(Collectors.toList());
+		return streamCell(sheet).filter(predicate).map(this::celltoExcelCell).collect(Collectors.toList());
 	}
 
 	public Map<String, ExcelCell> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names, boolean global) {
 
 		// Compute All cellNames
-		return cellCalculation(excelName, sheetName, cellNames, names, global).stream()
+		return cellCalculationOld(excelName, sheetName, Arrays.asList(cellNames), names, global).stream()
 				.collect(Collectors.toMap(ExcelCell::getAddress, Function.identity()));
 
 	}
 
-	public List<ExcelCell> cellCalculation(String excelName, String sheetName, String[] cellNames,
+	public List<ExcelCell> cellCalculationOld(String excelName, String sheetName, List<String> cellNames,
 			Map<String, List<String>> names, boolean global) {
+
+		names = (names == null) ? Map.of() : names;
+
+		return cellCalculation(excelName, sheetName, cellNames,
+				names.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0))),
+				global);
+
+	}
+
+	public List<ExcelCell> cellCalculation(String excelName, String sheetName, List<String> outputCell,
+			Map<String, String> inputCell, boolean global) {
+
+		Function<String, String> renameFunction = cn -> cn.contains("!") ? cn : sheetName + "!" + cn;
+
+		return cellCalculation(excelName, outputCell.stream().map(renameFunction).collect(toList()),
+				inputCell.entrySet().stream()
+						.collect(Collectors.toMap(e -> renameFunction.apply(e.getKey()), Map.Entry::getValue)),
+				global);
+	}
+
+	public List<ExcelCell> cellCalculation(String excelName, List<String> cellNames, boolean global) {
+		return cellCalculation(excelName, cellNames, Map.<String, String>of(), global);
+	}
+
+	public List<ExcelCell> cellCalculation(String excelName, List<String> inputCell, Map<String, String> inputs,
+			boolean global) {
 
 		Workbook workbook = retrieveWorkbook(excelName);
 
-		FormulaEvaluator exec = formula(workbook);
+		Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream()
+				.filter(r -> global || excelName.compareTo(r.getName()) == 0)
+				.collect(Collectors.toMap(ExcelResource::getFile, r -> formula(
+						(excelName.compareTo(r.getName()) == 0) ? workbook : convertByteToWorkbook(r.getDoc()))));
 
-		if (global) {
+		FormulaEvaluator exec = workbooks.get(listOfResources.get(excelName).getFile());
 
-			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream()
-					.filter(r -> excelName.compareTo(r.getName()) != 0)
-					.collect(Collectors.toMap(ExcelResource::getFile, r -> formula(convertByteToWorkbook(r.getDoc()))));
+		exec.setupReferencedWorkbooks(workbooks);
 
-			workbooks.put("primary", exec);
-
-			exec.setupReferencedWorkbooks(workbooks);
-		}
-
-		if (names != null) {
-			// Inject Value to the workbook
-			names.forEach((address, value) -> injectValue(address, value, workbook, sheetName));
-		}
+		inputs.entrySet().stream()
+				.map(kv -> Map.entry(retrieveCellByAdress(new CellReference(kv.getKey()), workbook), kv.getValue()))
+				.forEach(kv -> updateCell(kv.getKey(), kv.getValue()));
 
 		// Compute All cellNames
-		return Arrays.stream(cellNames).map(cn -> cn.contains("!") ? cn : sheetName + "!" + cn).map(CellReference::new)
-				.map(cr -> retrieveCellByAdress(cr, workbook)).flatMap(Stream::ofNullable)
-				.map(cell -> computeCell(cell, exec)).collect(Collectors.toList());
+		return inputCell.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
+				.flatMap(Stream::ofNullable).map(cell -> computeCell(cell, exec)).collect(toList());
 
-	}
-
-	private String retrieveFullCellName(Cell cell, String defaultSheetName) {
-
-		return (defaultSheetName.compareTo(cell.getSheet().getSheetName()) != 0)
-				? cell.getSheet().getSheetName() + "!" + cell.getAddress().formatAsString()
-				: cell.getAddress().formatAsString();
-	}
-
-	private void injectValue(String cellAdress, List<String> value, Workbook workbook, String defaultSheetName) {
-		updateCell(retrieveCellByAdress(cellAdress, workbook, defaultSheetName), value.get(0));
 	}
 
 	private Cell retrieveCellByAdress(CellReference cr, Workbook workbook) {

@@ -119,7 +119,7 @@ public class ExcelRestResource {
 
 		Consumer<? super ExcelCell> consume = parseExcelCell(resource, sheetName, builder);
 
-		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, cellNames.split(","), query, global);
+		List<ExcelCell> entity = getEngine().cellCalculationOld(resource, sheetName, Arrays.asList(cellNames.split(",")), query, global);
 
 		entity.forEach(consume);
 
