@@ -187,15 +187,17 @@ public class ExcelEngine {
 		}
 
 		// Compute All cellNames
-		Map<String, ExcelCell> map = Arrays.stream(cellNames)
-				.map(addr -> retrieveCellByAdress(addr, workbook, sheetName)).flatMap(Stream::ofNullable)
-				.collect(Collectors.toMap(cell -> retrieveFullCellName(cell, sheetName),
+		Map<String, ExcelCell> map = Arrays.stream(cellNames).map(cn -> cn.contains("!") ? cn : sheetName + "!" + cn)
+				.map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook)).flatMap(Stream::ofNullable)
+				.collect(Collectors.toMap(
+						cell -> cell.getSheet().getSheetName() + "!" + cell.getAddress().formatAsString(),
 						cell -> computeCell(cell, exec)));
 
 		return map;
 	}
 
 	private String retrieveFullCellName(Cell cell, String defaultSheetName) {
+
 		return (defaultSheetName.compareTo(cell.getSheet().getSheetName()) != 0)
 				? cell.getSheet().getSheetName() + "!" + cell.getAddress().formatAsString()
 				: cell.getAddress().formatAsString();
@@ -203,6 +205,16 @@ public class ExcelEngine {
 
 	private void injectValue(String cellAdress, List<String> value, Workbook workbook, String defaultSheetName) {
 		updateCell(retrieveCellByAdress(cellAdress, workbook, defaultSheetName), value.get(0));
+	}
+
+	private Cell retrieveCellByAdress(CellReference cr, Workbook workbook) {
+		Cell ret = null;
+		Sheet sheet = workbook.getSheet(cr.getSheetName());
+		Row row = sheet.getRow(cr.getRow());
+		if (row != null) {
+			ret = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
+		}
+		return ret;
 	}
 
 	private Cell retrieveCellByAdress(String cellAddress, Workbook workbook, String defaultSheetName) {
@@ -373,7 +385,7 @@ public class ExcelEngine {
 	private ExcelCell celltoExcelCell(Cell cell, Function<Cell, Cell> valueFunction) {
 		ExcelCell ret = new ExcelCell();
 
-		ret.setAddress(cell.getAddress().formatAsString());
+		ret.setAddress(cell.getSheet().getSheetName() + "!" + cell.getAddress().formatAsString());
 		ret.setValue(getRawCell(valueFunction.apply(cell)));
 		ret.setType(getCellType(cell));
 		ret.setMetadata(getCellComment(cell));

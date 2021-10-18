@@ -116,7 +116,7 @@ public class EngineTest {
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
-		assertThat(map.get("C6").getValue(), is(0.0));
+		assertThat(map.get("ComputeKYC!C6").getValue(), is(0.0));
 	}
 	
 	@Test
@@ -126,7 +126,7 @@ public class EngineTest {
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
-		assertThat(map.get("C10").getValue(), is("2021-02-12"));
+		assertThat(map.get("ComputeKYC!C10").getValue(), is("2021-02-12"));
 	}
 
 	

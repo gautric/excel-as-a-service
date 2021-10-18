@@ -123,7 +123,7 @@ public class CrossRefTest {
 
 		Map<String, ExcelCell> toto = engine.mapOfCellCalculated("Primary", "Feuil1", new String[] { "B1" }, null, true);
 
-		assertEquals(44.0, toto.get("B1").getValue());
+		assertEquals(44.0, toto.get("Feuil1!B1").getValue());
 
 	}
 
