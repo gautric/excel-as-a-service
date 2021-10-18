@@ -162,6 +162,15 @@ public class ExcelEngine {
 		return streamCell(sheet).filter(predicate)
 				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
 	}
+	
+	
+	public List<ExcelCell> listOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
+		Workbook workbook = retrieveWorkbook(excelName);
+		Sheet sheet = workbook.getSheet(sheetName);
+
+		return streamCell(sheet).filter(predicate).map(this::celltoExcelCell)
+				.collect(Collectors.toList());
+	}
 
 	public Map<String, ExcelCell> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names, boolean global) {

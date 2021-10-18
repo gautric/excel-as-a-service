@@ -1,5 +1,8 @@
 package net.a.g.excel.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -25,14 +28,14 @@ public class ExcelResult {
 	public String self;
 
 	@JsonProperty(value = "results", namespace = ExcelConstants.SCHEMA_URI)
-	@Schema(oneOf = { ExcelCell[].class, ExcelResource[].class, ExcelSheet[].class })
+	@Schema(oneOf = { ExcelCell[].class, ExcelResource[].class, ExcelSheet[].class})
 	public Object results;
 
 	@JsonProperty(required = false, value = "error", namespace = ExcelConstants.SCHEMA_URI)
 	public ExcelError error;
 	
 	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
-	public ExcelLink[] links;
+	private List<ExcelLink> links = new ArrayList<ExcelLink>();
 	
 	public ExcelError getError() {
 		return error;
@@ -88,5 +91,13 @@ public class ExcelResult {
 
 	public void setResults(Object results) {
 		this.results = results;
+	}
+
+	public List<ExcelLink> getLinks() {
+		return this.links;
+	}
+
+	public void setLinks(List<ExcelLink> links) {
+		this.links = links;
 	}
 }

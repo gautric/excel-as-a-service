@@ -53,8 +53,8 @@ public class ExcelResourceTest {
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(15),
-						"results[2].address", is("ComputeKYC!C2"),
-						"results[2].value", is("IF(B2,50,0)"));
+						"results[5].address", is("ComputeKYC!C2"),
+						"results[5].value", is("IF(B2,50,0)"));
 
 	}
 	
@@ -69,6 +69,48 @@ public class ExcelResourceTest {
 				.body("_count", equalTo(1),
 						"results[0].address", is("ComputeKYC!C6"),
 						"results[0].value", is(0.0F),
+						"results[0].type", is("NUMERIC"));
+
+	}
+	
+	@Test
+	public void testKYCComputeKYCC6PEP() {
+
+		when()
+			.get("/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B2", "TRUE")
+		.then()
+			.statusCode(200)
+				.body("_count", equalTo(1),
+						"results[0].address", is("ComputeKYC!C6"),
+						"results[0].value", is(50.0F),
+						"results[0].type", is("NUMERIC"));
+
+	}
+	
+	@Test
+	public void testKYCComputeKYCCY() {
+
+		when()
+			.get("/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B3", "CY")
+		.then()
+			.statusCode(200)
+				.body("_count", equalTo(1),
+						"results[0].address", is("ComputeKYC!C6"),
+						"results[0].value", is(25.0F),
+						"results[0].type", is("NUMERIC"));
+
+	}
+	
+	@Test
+	public void testKYCComputeKYCAmount() {
+
+		when()
+			.get("/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B4", "10000000")
+		.then()
+			.statusCode(200)
+				.body("_count", equalTo(1),
+						"results[0].address", is("ComputeKYC!C6"),
+						"results[0].value", is(75.0F),
 						"results[0].type", is("NUMERIC"));
 
 	}

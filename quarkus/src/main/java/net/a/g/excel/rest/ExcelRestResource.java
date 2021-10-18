@@ -117,9 +117,9 @@ public class ExcelRestResource {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
-		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, cellNames.split(","), query, global);
-
 		Consumer<? super ExcelCell> consume = parseExcelCell(resource, sheetName, builder);
+
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, cellNames.split(","), query, global);
 
 		entity.forEach(consume);
 
@@ -148,13 +148,7 @@ public class ExcelRestResource {
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		Object entity = null;
-		if (getConf().returnMap()) {
-			entity = getEngine().lisfOfResourceName().stream()
-					.collect(Collectors.toMap(k -> k, resource -> createExcelResource(resource)));
-		} else {
-			entity = getEngine().lisfOfResourceName().stream().map(resource -> createExcelResource(resource));
-		}
+		Object entity = getEngine().lisfOfResourceName().stream().map(resource -> createExcelResource(resource));
 
 		ExcelResult ret = new ExcelResult(getEngine().countListOfResource(), entity);
 
@@ -177,13 +171,8 @@ public class ExcelRestResource {
 
 		List<String> listOfSheet = getEngine().listOfSheet(file);
 
-		Object entity = null;
+		Object entity = listOfSheet.stream().map(sheet -> createSheetResource(file, sheet));
 
-		if (getConf().returnMap()) {
-			entity = listOfSheet.stream().collect(Collectors.toMap(k -> k, sheet -> createSheetResource(file, sheet)));
-		} else {
-			entity = listOfSheet.stream().map(sheet -> createSheetResource(file, sheet));
-		}
 		ExcelResult ret = new ExcelResult(listOfSheet.size(), entity);
 
 		return ExcelRestTool.returnOK(ret, link);
@@ -265,7 +254,7 @@ public class ExcelRestResource {
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery");
 
 		Response.Status status = Response.Status.NOT_FOUND;
-		Map<String, ExcelCell> entity = null;
+		List<ExcelCell> entity = null;
 		ExcelResult ret = null;
 
 		if (!getEngine().isResourceExists(resource)) {
@@ -280,16 +269,13 @@ public class ExcelRestResource {
 			if (getEngine().isSheetExists(resource, sheetName)) {
 				status = Response.Status.OK;
 
-				entity = getEngine().mapOfCell(resource, sheetName, cell -> true);
+				entity = getEngine().listOfCell(resource, sheetName, cell -> true);
 				ret = new ExcelResult(entity.size(), entity);
 
 				Consumer<? super ExcelCell> consume = parseExcelCell(resource, sheetName, builder);
 
-				entity.values().stream().forEach(consume);
+				entity.forEach(consume);
 
-				if (getConf().returnList()) {
-					ret.setResults(entity.values());
-				}
 			} else {
 				return Response.status(status).build();
 			}
