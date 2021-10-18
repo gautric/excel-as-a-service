@@ -11,6 +11,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -140,8 +141,7 @@ public class ExcelEngine {
 
 	public boolean isSheetExists(String excelName, String sheetName) {
 		Workbook workbook = retrieveWorkbook(excelName);
-		Sheet sheet = workbook.getSheet(sheetName);
-		return sheet != null;
+		return workbook != null && workbook.getSheet(sheetName) != null;
 	}
 
 	private Sheet sheet(String excelName, String sheetName) {
@@ -174,6 +174,9 @@ public class ExcelEngine {
 
 	public Map<String, ExcelCell> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names, boolean global) {
+
+		Objects.requireNonNull(cellNames, "cellNames");
+		Objects.requireNonNull(names, "names");
 
 		// Compute All cellNames
 		return cellCalculationOld(excelName, sheetName, Arrays.asList(cellNames), names, global).stream()
@@ -211,15 +214,14 @@ public class ExcelEngine {
 			boolean global) {
 
 		Workbook workbook = retrieveWorkbook(excelName);
+		FormulaEvaluator exec = formula(workbook);
 
-		Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream()
-				.filter(r -> global || excelName.compareTo(r.getName()) == 0)
-				.collect(Collectors.toMap(ExcelResource::getFile, r -> formula(
-						(excelName.compareTo(r.getName()) == 0) ? workbook : convertByteToWorkbook(r.getDoc()))));
-
-		FormulaEvaluator exec = workbooks.get(listOfResources.get(excelName).getFile());
-
-		exec.setupReferencedWorkbooks(workbooks);
+		if (global) {
+			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream().collect(Collectors.toMap(
+					ExcelResource::getFile,
+					r -> (excelName.compareTo(r.getName()) == 0) ? exec : formula(convertByteToWorkbook(r.getDoc()))));
+			exec.setupReferencedWorkbooks(workbooks);
+		}
 
 		inputs.entrySet().stream()
 				.map(kv -> Map.entry(retrieveCellByAdress(new CellReference(kv.getKey()), workbook), kv.getValue()))
@@ -235,19 +237,7 @@ public class ExcelEngine {
 		Cell ret = null;
 		Sheet sheet = workbook.getSheet(cr.getSheetName());
 		Row row = sheet.getRow(cr.getRow());
-		if (row != null) {
-			ret = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
-		}
-		return ret;
-	}
-
-	private Cell retrieveCellByAdress(String cellAddress, Workbook workbook, String defaultSheetName) {
-		Cell ret = null;
-		CellReference cr = new CellReference(cellAddress);
-		String sheetOfCell = (cr.getSheetName() == null) ? defaultSheetName : cr.getSheetName();
-		Sheet sheet = workbook.getSheet(sheetOfCell);
-		Row row = sheet.getRow(cr.getRow());
-		if (row != null) {
+		if (Objects.isNull(row)) {
 			ret = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
 		}
 		return ret;
