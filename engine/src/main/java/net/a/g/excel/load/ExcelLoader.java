@@ -39,7 +39,7 @@ public class ExcelLoader {
 
 	private void addFile(Path file) {
 		try {
-			LOG.info("Load file from {} ({})", file.getFileName(), file.getFileName().toAbsolutePath());
+			LOG.info("Load file from {} ({})", file.getFileName(), file.toFile().toURI());
 			injectResource(FilenameUtils.removeExtension(file.getFileName().toString()),
 					FilenameUtils.getName(file.getFileName().toString()), file.toUri().toURL().openStream());
 		} catch (MalformedURLException e) {

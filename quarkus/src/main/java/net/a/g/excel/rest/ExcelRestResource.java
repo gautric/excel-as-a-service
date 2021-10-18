@@ -117,18 +117,13 @@ public class ExcelRestResource {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
-		Map<String, ExcelCell> entity = getEngine().mapOfCellCalculated(resource, sheetName, cellNames.split(","),
-				query, global);
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, cellNames.split(","), query, global);
 
 		Consumer<? super ExcelCell> consume = parseExcelCell(resource, sheetName, builder);
 
-		entity.values().stream().forEach(consume);
+		entity.forEach(consume);
 
 		ExcelResult ret = new ExcelResult(entity.size(), entity);
-
-		if (getConf().returnList()) {
-			ret.setResults(entity.values());
-		}
 
 		return ExcelRestTool.returnOK(ret, link);
 	}
@@ -136,7 +131,8 @@ public class ExcelRestResource {
 	private Consumer<? super ExcelCell> parseExcelCell(String resource, String sheetName, UriBuilder builder) {
 		return cell -> {
 			ExcelLink el = new ExcelLink();
-			el.setHref(builder.build(resource, sheetName, cell.getAddress()).toString());
+			el.setHref(builder.build(resource, cell.getAddress().split("!")[0], cell.getAddress().split("!")[1])
+					.toString());
 			el.setRel("self");
 			el.setType(MediaType.APPLICATION_JSON);
 			cell.getLinks().add(el);
@@ -271,6 +267,14 @@ public class ExcelRestResource {
 		Response.Status status = Response.Status.NOT_FOUND;
 		Map<String, ExcelCell> entity = null;
 		ExcelResult ret = null;
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+		}
+
+		if (!getEngine().isSheetExists(resource, sheetName)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
 
 		if (!sheetName.contains("!")) {
 			if (getEngine().isSheetExists(resource, sheetName)) {

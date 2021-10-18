@@ -53,7 +53,7 @@ public class ExcelResourceTest {
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(15),
-						"results[2].address", is("C2"),
+						"results[2].address", is("ComputeKYC!C2"),
 						"results[2].value", is("IF(B2,50,0)"));
 
 	}
@@ -67,7 +67,7 @@ public class ExcelResourceTest {
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(1),
-						"results[0].address", is("C6"),
+						"results[0].address", is("ComputeKYC!C6"),
 						"results[0].value", is(0.0F),
 						"results[0].type", is("NUMERIC"));
 
