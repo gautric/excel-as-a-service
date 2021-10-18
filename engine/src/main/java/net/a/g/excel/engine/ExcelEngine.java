@@ -166,6 +166,15 @@ public class ExcelEngine {
 	public Map<String, ExcelCell> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
 			Map<String, List<String>> names, boolean global) {
 
+		// Compute All cellNames
+		return cellCalculation(excelName, sheetName, cellNames, names, global).stream()
+				.collect(Collectors.toMap(ExcelCell::getAddress, Function.identity()));
+
+	}
+
+	public List<ExcelCell> cellCalculation(String excelName, String sheetName, String[] cellNames,
+			Map<String, List<String>> names, boolean global) {
+
 		Workbook workbook = retrieveWorkbook(excelName);
 
 		FormulaEvaluator exec = formula(workbook);
@@ -187,13 +196,10 @@ public class ExcelEngine {
 		}
 
 		// Compute All cellNames
-		Map<String, ExcelCell> map = Arrays.stream(cellNames).map(cn -> cn.contains("!") ? cn : sheetName + "!" + cn)
-				.map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook)).flatMap(Stream::ofNullable)
-				.collect(Collectors.toMap(
-						cell -> cell.getSheet().getSheetName() + "!" + cell.getAddress().formatAsString(),
-						cell -> computeCell(cell, exec)));
+		return Arrays.stream(cellNames).map(cn -> cn.contains("!") ? cn : sheetName + "!" + cn).map(CellReference::new)
+				.map(cr -> retrieveCellByAdress(cr, workbook)).flatMap(Stream::ofNullable)
+				.map(cell -> computeCell(cell, exec)).collect(Collectors.toList());
 
-		return map;
 	}
 
 	private String retrieveFullCellName(Cell cell, String defaultSheetName) {
