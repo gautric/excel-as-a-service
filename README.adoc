@@ -33,6 +33,30 @@ To run application
 
 == Sample Test
 
+
+	curl 'http://localhost:8080/api' | jq
+	
+```
+{
+  "_count": 1,
+  "_self": "http://localhost:8080/api",
+  "results": [
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC",
+          "type": "application/json"
+        }
+      ],
+      "name": "KYC",
+      "file": "KYC.xlsx"
+    }
+  ]
+}
+```
+
+
 with a KYC sample :
 
 	curl 'http://localhost:8080/api/KYC' | jq
@@ -43,19 +67,38 @@ with a KYC sample :
   "_self": "http://localhost:8080/api/KYC",
   "results": [
     {
-      "name": "ComputeKYC",
-      "_ref": "http://localhost:8080/api/KYC/ComputeKYC"
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC",
+          "type": "application/json"
+        }
+      ],
+      "name": "ComputeKYC"
     },
     {
-      "name": "COUNTRY",
-      "_ref": "http://localhost:8080/api/KYC/COUNTRY"
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/COUNTRY",
+          "type": "application/json"
+        }
+      ],
+      "name": "COUNTRY"
     },
     {
-      "name": "AMOUNT",
-      "_ref": "http://localhost:8080/api/KYC/AMOUNT"
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/AMOUNT",
+          "type": "application/json"
+        }
+      ],
+      "name": "AMOUNT"
     }
   ]
 }
+
 
 ```
 
@@ -63,28 +106,192 @@ with a KYC sample :
 
 ```
 {
-  "_count": 4,
+  "_count": 15,
   "_self": "http://localhost:8080/api/KYC/ComputeKYC",
   "results": [
     {
-      "address": "C3",
-      "formula": "VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)",
-      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C3"
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/A1",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!A1",
+      "value": "",
+      "type": "BLANK"
     },
     {
-      "address": "C4",
-      "formula": "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
-      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C4"
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/B1",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!B1",
+      "value": "INPUT",
+      "type": "STRING"
     },
     {
-      "address": "C6",
-      "formula": "SUM(C2:C4)",
-      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C6"
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/C1",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!C1",
+      "value": " SCORE",
+      "type": "STRING"
     },
     {
-      "address": "C2",
-      "formula": "IF(B2,50,0)",
-      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C2"
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/A2",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!A2",
+      "value": "PEP",
+      "metadata": "@input",
+      "type": "STRING"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/B2",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!B2",
+      "value": "false",
+      "type": "BOOLEAN"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/C2",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!C2",
+      "value": "IF(B2,50,0)",
+      "type": "FORMULA"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/A3",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!A3",
+      "value": "COUNTRY",
+      "metadata": "@input",
+      "type": "STRING"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/B3",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!B3",
+      "value": "FR",
+      "type": "STRING"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/C3",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!C3",
+      "value": "VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)",
+      "type": "FORMULA"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/A4",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!A4",
+      "value": "AMOUNT",
+      "metadata": "@input",
+      "type": "STRING"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/B4",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!B4",
+      "value": 0,
+      "type": "NUMERIC"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/C4",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!C4",
+      "value": "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
+      "type": "FORMULA"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/A5",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!A5",
+      "value": "",
+      "type": "BLANK"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/A6",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!A6",
+      "value": "FINAL",
+      "type": "STRING"
+    },
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!C6",
+      "value": "SUM(C2:C4)",
+      "metadata": "@output",
+      "type": "FORMULA"
     }
   ]
 }
@@ -98,12 +305,21 @@ with a KYC sample :
   "_self": "http://localhost:8080/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000",
   "results": [
     {
-      "address": "C6",
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!C6",
       "value": 125,
-      "_ref": "http://localhost:8080/api/KYC/ComputeKYC/C6"
+      "metadata": "@output",
+      "type": "NUMERIC"
     }
   ]
 }
+
 ```
 
 == Tips for Excel dev
