@@ -1,49 +1,302 @@
-openapi: 3.0.1
-#info:
-#  title: Static OpenAPI document of fruits resource
-#  description: Fruit resources Open API documentation
-#  version: "1.0"
-
-#servers:
-#  - url: http://localhost:8080/q/openapi
-#    description: Optional dev mode server description
-
+---
+openapi: 3.0.3
+info:
+  title: Excel App Engine
+  description: Engine to compute Excel 
+  contact:
+    email: gautric@redhat.com
+  version: "1.0"
+  
+servers:
+  - url: http://localhost:8080/
+    description: Local Server
+  
 paths:
-  /fruits:
+  /api:
     get:
+      tags:
+      - Excel Rest Resource
+      summary: List of Excel Resources
+      description: Retrieves and returns the list of Excel Resources
       responses:
-        200:
-          description: OK - fruits list
+        "200":
+          description: "Nominal result, return ExcelResult + ExcelResource[]"
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+  /api/{resource}:
+    get:
+      tags:
+      - Excel Rest Resource
+      summary: List of Excel Sheets
+      description: Retrieves and returns the list of Excel Sheets
+      parameters:
+      - name: resource
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "404":
+          description: "if {resource} is not found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+        "200":
+          description: "Nominal result, return ExcelResult + ExcelSheet[]"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
     post:
+      tags:
+      - Excel Rest Resource
+      summary: Create a new Excel Resource
+      description: Create a new Excel Resource
+      parameters:
+      - name: resource
+        in: path
+        required: true
+        schema:
+          type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:       # custom add
+                file:
+                  format: binary
+                  type: string
+      responses:
+        "400":
+          description: Resource uploaded is not Excel file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+        "202":
+          description: Resource is accepted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+  /api/{resource}/{sheet}:
+    get:
+      tags:
+      - Excel Rest Resource
+      summary: List of Excel Cells
+      description: Retrieves and returns the list of Excel Cell
+      parameters:
+      - name: resource
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: sheet
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "404":
+          description: "if {resource} or {sheet} is not found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+        "200":
+          description: "Nominal result, return ExcelResult + Cell[]"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+  /api/{resource}/{sheet}/{cells}:
+    get:
+      tags:
+      - Excel Rest Resource
+      summary: List of Excel Cell computed
+      description: Retrieves and returns the list of Excel Cell
+      parameters:
+      - name: cells
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: resource
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: sheet
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: _global
+        in: query
+        schema:
+          default: false
+          type: boolean
+      responses:
+        "404":
+          description: "if {resource} or {sheet} is not found"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+        "200":
+          description: "Nominal result, return ExcelResult + ExcelCell[]"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+    post:
+      tags:
+      - Excel Rest Resource
+      summary: List of Excel Cell computed
+      description: Retrieves and returns the list of Excel Cell
+      parameters:
+      - name: cells
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: resource
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: sheet
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: _global
+        in: query
+        schema:
+          default: false
+          type: boolean
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Fruit'
-      responses:
-        200:
-          description: new fruit resource created
-          content:
-            application/json: {}
-    delete:
-      requestBody:
-        content:
-          application/json:
+              type: string
+          application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/Fruit'
+              $ref: '#/components/schemas/MultivaluedMapStringString'
       responses:
-        200:
-          description: OK - fruit resource deleted
+        "404":
+          description: "if {resource} or {sheet} is not found"
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
+        "200":
+          description: "Nominal result, return ExcelResult + ExcelCell[]"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExcelResult'
 components:
   schemas:
-    Fruit:
+    ExcelCell:
+      type: object
       properties:
-        description:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExcelLink'
+        address:
           type: string
+        value:
+          type: object
+        metadata:
+          type: string
+        type:
+          type: string
+    ExcelError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    ExcelLink:
+      description: POJO that represents a ExcelLink.
+      type: object
+      properties:
+        rel:
+          description: Rel
+          type: string
+        href:
+          description: Link
+          type: string
+        type:
+          description: Type
+          type: string
+        method:
+          description: Method
+          type: string
+    ExcelResource:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExcelLink'
         name:
           type: string
-
+        file:
+          type: string
+    ExcelResult:
+      description: POJO that represents the result contents.
+      required:
+      - _count
+      type: object
+      properties:
+        _count:
+          format: int32
+          description: Counter of result item
+          type: integer
+        _next:
+          type: string
+        _previous:
+          type: string
+        _self:
+          type: string
+        results:
+          type: object
+          oneOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/ExcelCell'
+          - type: array
+            items:
+              $ref: '#/components/schemas/ExcelResource'
+          - type: array
+            items:
+              $ref: '#/components/schemas/ExcelSheet'
+        error:
+          $ref: '#/components/schemas/ExcelError'
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExcelLink'
+    ExcelSheet:
+      type: object
+      properties:
+        links:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExcelLink'
+        name:
+          type: string
+    MultivaluedMapStringString:
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          type: string
