@@ -28,6 +28,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.model.ExcelCell;
+import net.a.g.excel.model.ExcelResource;
+import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ExtendWith(WeldJunit5Extension.class)
@@ -70,7 +72,8 @@ public class EngineTest {
 
 	@Test
 	public void testResourceKYC() {
-		List<String> actual = new ArrayList(engine.lisfOfResourceName());
+		List<String> actual = new ArrayList(
+				engine.lisfOfResource().stream().map(ExcelResource::getName).collect(Collectors.toList()));
 
 		assertThat(actual, hasSize(1));
 		List<String> expect = Arrays.asList("KYC");
@@ -81,7 +84,7 @@ public class EngineTest {
 	@Test
 	public void testSheetKYC() {
 
-		List<String> actual = engine.listOfSheet("KYC");
+		List<String> actual = engine.listOfSheet("KYC").stream().map(ExcelSheet::getName).collect(Collectors.toList());
 		assertThat(actual, hasSize(3));
 
 		List<String> expect = Arrays.asList("ComputeKYC", "COUNTRY", "AMOUNT");

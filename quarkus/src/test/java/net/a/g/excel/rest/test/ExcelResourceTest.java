@@ -19,13 +19,19 @@ public class ExcelResourceTest {
 	@Test
 	public void testContextRoot() {
 
+//		when()
+//			.get("/api")
+//		.then()
+//			.statusCode(200)
+//				.body(is("{}"));
+		
 		when()
 			.get("/api")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(1),
 						"results[0].name", is("KYC"),
-						"results[0]._ref", is("http://localhost:8081/api/KYC"));
+						"results[0].links[0].href", is("http://localhost:8081/api/KYC"));
 		
 	}
 
@@ -38,9 +44,9 @@ public class ExcelResourceTest {
 			.statusCode(200)
 				.body("_count", equalTo(3),
 						"results[0].name", is("ComputeKYC"),
-						"results[0]._ref", is("http://localhost:8081/api/KYC/ComputeKYC"),
+						"results[0].links[0].href", is("http://localhost:8081/api/KYC/ComputeKYC"),
 						"results[1].name", is("COUNTRY"),
-						"results[1]._ref", is("http://localhost:8081/api/KYC/COUNTRY"));
+						"results[1].links[0].href", is("http://localhost:8081/api/KYC/COUNTRY"));
 		
 		}
 

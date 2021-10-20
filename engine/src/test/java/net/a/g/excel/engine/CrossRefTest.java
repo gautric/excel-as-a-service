@@ -31,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.model.ExcelCell;
+import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ExtendWith(WeldJunit5Extension.class)
@@ -67,7 +68,7 @@ public class CrossRefTest {
 	@Test
 	public void testSheetPrimary() {
 
-		List<String> actual = engine.listOfSheet("Primary");
+		List<String> actual = engine.listOfSheet("Primary").stream().map(ExcelSheet::getName).collect(Collectors.toList());
 		assertNotNull(actual);
 
 		assertThat(actual, hasSize(1));
@@ -79,7 +80,7 @@ public class CrossRefTest {
 	@Test
 	public void testSheetSecondary() {
 
-		List<String> actual = engine.listOfSheet("Secondary");
+		List<String> actual = engine.listOfSheet("Secondary").stream().map(ExcelSheet::getName).collect(Collectors.toList());
 		assertNotNull(actual);
 
 		assertThat(actual, hasSize(1));

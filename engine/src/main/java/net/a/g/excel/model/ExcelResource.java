@@ -11,7 +11,7 @@ import net.a.g.excel.util.ExcelConstants;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(value = Include.NON_NULL)
-public class ExcelResource {
+public class ExcelResource extends ExcelModel {
 	@JsonProperty("name")
 	private String name;
 
@@ -21,18 +21,12 @@ public class ExcelResource {
 	@JsonIgnore(value = true)
 	private byte[] doc;
 
-	@JsonProperty("_ref")
-	private String ref;
-
-	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
-	public ExcelLink[] links;
 
 	public ExcelResource() {
 	}
 
-	public ExcelResource(String name, String ref) {
+	public ExcelResource(String name) {
 		this.name = name;
-		this.ref = ref;
 	}
 
 	public String getName() {
@@ -59,16 +53,9 @@ public class ExcelResource {
 		this.doc = doc;
 	}
 
-	public String getRef() {
-		return ref;
-	}
-
-	public void setRef(String ref) {
-		this.ref = ref;
-	}
 
 	public String toString() {
 		return "ExcelResource [name=" + name + ", file=" + file + ", doc=" + Arrays.toString(doc).substring(0, 10)
-				+ ".... , ref=" + ref + "]";
+				+ ".... ]";
 	}
 }

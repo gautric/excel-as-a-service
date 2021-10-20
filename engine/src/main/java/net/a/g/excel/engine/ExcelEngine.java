@@ -6,8 +6,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
+import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelUtils;
 
@@ -75,9 +76,11 @@ public class ExcelEngine {
 		return listOfResources.keySet().size();
 	}
 
-	public Set<String> lisfOfResourceName() {
-		return listOfResources.keySet();
+
+	public Collection<ExcelResource> lisfOfResource() {
+		return listOfResources.values();
 	}
+	
 
 	public boolean isResourceExists(String name) {
 		return listOfResources.containsKey(name);
@@ -120,20 +123,14 @@ public class ExcelEngine {
 		return wb.getCreationHelper().createFormulaEvaluator();
 	}
 
-	public List<String> listOfSheet(String name) {
-		List<String> list = null;
+	public List<ExcelSheet> listOfSheet(String name) {
+		List<ExcelSheet> list = null;
 
 		if (listOfResources.containsKey(name)) {
 
-			Workbook workbook = retrieveWorkbook(name);
+			list = StreamSupport.stream(retrieveWorkbook(name).spliterator(), false).map(Sheet::getSheetName)
+					.map(ExcelSheet::new).collect(toList());
 
-			int numberOfSheet = workbook.getNumberOfSheets();
-
-			list = new ArrayList<String>(numberOfSheet);
-
-			for (int i = 0; i < numberOfSheet; i++) {
-				list.add(workbook.getSheetAt(i).getSheetName());
-			}
 		}
 		return list;
 	}
@@ -214,10 +211,9 @@ public class ExcelEngine {
 		FormulaEvaluator exec = formula(workbook);
 
 		if (global) {
-			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream()
-					.collect(
-							Collectors.toMap(ExcelResource::getFile, r -> (excelName.compareTo(r.getName()) == 0) ? exec
-									: formula(convertByteToWorkbook(r.getDoc()))));
+			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream().collect(Collectors.toMap(
+					ExcelResource::getFile,
+					r -> (excelName.compareTo(r.getName()) == 0) ? exec : formula(convertByteToWorkbook(r.getDoc()))));
 			exec.setupReferencedWorkbooks(workbooks);
 		}
 

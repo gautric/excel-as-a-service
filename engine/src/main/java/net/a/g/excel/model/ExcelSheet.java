@@ -5,15 +5,22 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(value = Include.NON_NULL)
-public class ExcelSheet {
+public class ExcelSheet extends ExcelModel {
 	@JsonProperty("name")
-	public String name;
+	private String name;
 
-	@JsonProperty("_ref")
-	public String ref;
+	public ExcelSheet() {
+	}
 
-	public ExcelSheet(String name, String ref) {
+	public ExcelSheet(String name) {
 		this.name = name;
-		this.ref = ref;
+	}
+
+	public String getName() {
+		return this.name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }

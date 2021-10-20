@@ -1,16 +1,11 @@
 package net.a.g.excel.model;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import net.a.g.excel.util.ExcelConstants;
-
 @JsonInclude(value = Include.NON_NULL)
-public class ExcelCell {
+public class ExcelCell extends ExcelModel {
 	@JsonProperty("address")
 	private String address;
 
@@ -22,17 +17,6 @@ public class ExcelCell {
 
 	@JsonProperty("type")
 	private String type;
-
-	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
-	private List<ExcelLink> links = new ArrayList<ExcelLink>();
-
-	public List<ExcelLink> getLinks() {
-		return this.links;
-	}
-
-	public void setLinks(List<ExcelLink> links) {
-		this.links = links;
-	}
 
 	public String getAddress() {
 		return address;
