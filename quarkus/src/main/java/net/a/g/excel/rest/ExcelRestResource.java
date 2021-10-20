@@ -71,6 +71,10 @@ public class ExcelRestResource {
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelCell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "List of Excel Cell computed", description = "Retrieves and returns the list of Excel Cell")
 	public Response cellBody(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
 			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global,
 			final String jsonBody) {
@@ -86,6 +90,10 @@ public class ExcelRestResource {
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelCell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "List of Excel Cell computed", description = "Retrieves and returns the list of Excel Cell")
 	public Response cellForm(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
 			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global,
 			final MultivaluedMap<String, String> queryurlencoded) {
@@ -98,6 +106,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/{sheet}/{cells}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelCell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "List of Excel Cell computed", description = "Retrieves and returns the list of Excel Cell")
 	public Response cellQuery(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
 			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global) {
 
@@ -143,8 +155,10 @@ public class ExcelRestResource {
 
 		Collection<ExcelResource> entity = getEngine().lisfOfResource();
 
+		entity.forEach(e -> e.getLinks().clear());
+
 		entity.forEach(e -> injectLink(() -> new String[] { e.getName() }, builder).accept(e));
-		
+
 		ExcelResult ret = new ExcelResult(getEngine().countListOfResource(), entity);
 
 		return ExcelRestTool.returnOK(ret, link);
@@ -154,7 +168,7 @@ public class ExcelRestResource {
 	@Path("{resource}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
-			@APIResponse(responseCode = "404", description = "Resource not Found", content = @Content(mediaType = "application/json")),
+			@APIResponse(responseCode = "404", description = "if {resource} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelSheet[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "List of Excel Sheets", description = "Retrieves and returns the list of Excel Sheets")
 	public Response sheets(@PathParam("resource") String resource) {
@@ -255,6 +269,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/{sheet}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + Cell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "List of Excel Cells", description = "Retrieves and returns the list of Excel Cell")
 	public Response sheet(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri()).path(ExcelRestResource.class, "cellQuery");
@@ -287,10 +305,6 @@ public class ExcelRestResource {
 			}
 		}
 		return ExcelRestTool.returnOK(ret, link);
-	}
-
-	private ExcelResource createExcelResource(String resource) {
-		return new ExcelResource(resource);
 	}
 
 	public ExcelConfiguration getConf() {
