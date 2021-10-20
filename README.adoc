@@ -322,6 +322,34 @@ with a KYC sample :
 
 ```
 
+You can use also POST
+
+    curl -X POST -H "Content-Type: application/json" -d @sample/ComputeKYC.json http://localhost:8080/api/KYC/ComputeKYC/C6
+
+
+```
+{
+  "_count": 1,
+  "_self": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+  "results": [
+    {
+      "links": [
+        {
+          "rel": "self",
+          "href": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+          "type": "application/json"
+        }
+      ],
+      "address": "ComputeKYC!C6",
+      "value": 125,
+      "metadata": "@output",
+      "type": "NUMERIC"
+    }
+  ]
+}
+
+```
+
 == Tips for Excel dev
 
 * Include a default value into all Excel cells
