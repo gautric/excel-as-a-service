@@ -141,24 +141,19 @@ public class ExcelEngine {
 		return sheet != null;
 	}
 
-	private Sheet sheet(String excelName, String sheetName) {
-		Workbook workbook = retrieveWorkbook(excelName);
-		return workbook.getSheet(sheetName);
-	}
-
 	public Map<String, ExcelCell> mapOfFormularCell(String excelName, String sheetName) {
 		return retrieveCell(excelName, sheetName, "FORMULA");
 	}
 
-	private Map<String, ExcelCell> retrieveCell(String excelName, String sheetName, String cellType) {
-		return mapOfCell(excelName, sheetName, cell -> CellType.valueOf(cellType) == cell.getCellType());
+	private Map<String, ExcelCell> retrieveCell(String resource, String sheet, String cellType) {
+		return mapOfCell(resource, sheet, cell -> CellType.valueOf(cellType) == cell.getCellType());
 	}
 
-	public Map<String, ExcelCell> mapOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
-		Workbook workbook = retrieveWorkbook(excelName);
-		Sheet sheet = workbook.getSheet(sheetName);
+	public Map<String, ExcelCell> mapOfCell(String resource, String sheet, Predicate<Cell> predicate) {
+		Workbook workbook = retrieveWorkbook(resource);
+		Sheet sheetObject = workbook.getSheet(sheet);
 
-		return streamCell(sheet).filter(predicate)
+		return streamCell(sheetObject).filter(predicate)
 				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
 	}
 
@@ -169,51 +164,51 @@ public class ExcelEngine {
 		return streamCell(sheet).filter(predicate).map(this::celltoExcelCell).collect(Collectors.toList());
 	}
 
-	public Map<String, ExcelCell> mapOfCellCalculated(String excelName, String sheetName, String[] cellNames,
-			Map<String, List<String>> names, boolean global) {
+	public Map<String, ExcelCell> mapOfCellCalculated(String resource, String sheet, String[] outputs,
+			Map<String, List<String>> inputs, boolean global) {
 
 		// Compute All cellNames
-		return cellCalculationOld(excelName, sheetName, Arrays.asList(cellNames), names, global).stream()
+		return cellCalculationOld(resource, sheet, Arrays.asList(outputs), inputs, global).stream()
 				.collect(Collectors.toMap(ExcelCell::getAddress, Function.identity()));
 
 	}
 
-	public List<ExcelCell> cellCalculationOld(String excelName, String sheetName, List<String> cellNames,
-			Map<String, List<String>> names, boolean global) {
+	public List<ExcelCell> cellCalculationOld(String resource, String sheet, List<String> outputs,
+			Map<String, List<String>> inputs, boolean global) {
 
-		names = (names == null) ? Map.of() : names;
+		inputs = (inputs == null) ? Map.of() : inputs;
 
-		return cellCalculation(excelName, sheetName, cellNames,
-				names.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0))),
+		return cellCalculation(resource, sheet, outputs,
+				inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0))),
 				global);
 
 	}
 
-	public List<ExcelCell> cellCalculation(String excelName, String sheetName, List<String> outputCell,
-			Map<String, String> inputCell, boolean global) {
+	public List<ExcelCell> cellCalculation(String resource, String sheet, List<String> output,
+			Map<String, String> input, boolean global) {
 
-		Function<String, String> renameFunction = cn -> cn.contains("!") ? cn : sheetName + "!" + cn;
+		Function<String, String> renameFunction = cn -> cn.contains("!") ? cn : sheet + "!" + cn;
 
-		return cellCalculation(excelName, outputCell.stream().map(renameFunction).collect(toList()),
-				inputCell.entrySet().stream()
+		return cellCalculation(resource, output.stream().map(renameFunction).collect(toList()),
+				input.entrySet().stream()
 						.collect(Collectors.toMap(e -> renameFunction.apply(e.getKey()), Map.Entry::getValue)),
 				global);
 	}
 
-	public List<ExcelCell> cellCalculation(String excelName, List<String> cellNames, boolean global) {
-		return cellCalculation(excelName, cellNames, Map.<String, String>of(), global);
+	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, boolean global) {
+		return cellCalculation(resource, outputs, Map.<String, String>of(), global);
 	}
 
-	public List<ExcelCell> cellCalculation(String excelName, List<String> inputCell, Map<String, String> inputs,
+	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, Map<String, String> inputs,
 			boolean global) {
 
-		Workbook workbook = retrieveWorkbook(excelName);
+		Workbook workbook = retrieveWorkbook(resource);
 		FormulaEvaluator exec = formula(workbook);
 
 		if (global) {
 			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream().collect(Collectors.toMap(
 					ExcelResource::getFile,
-					r -> (excelName.compareTo(r.getName()) == 0) ? exec : formula(convertByteToWorkbook(r.getDoc()))));
+					r -> (resource.compareTo(r.getName()) == 0) ? exec : formula(convertByteToWorkbook(r.getDoc()))));
 			exec.setupReferencedWorkbooks(workbooks);
 		}
 
@@ -222,7 +217,7 @@ public class ExcelEngine {
 				.forEach(kv -> updateCell(kv.getKey(), kv.getValue()));
 
 		// Compute All cellNames
-		return inputCell.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
+		return outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
 				.flatMap(Stream::ofNullable).map(cell -> computeCell(cell, exec)).collect(toList());
 
 	}
@@ -230,18 +225,6 @@ public class ExcelEngine {
 	private Cell retrieveCellByAdress(CellReference cr, Workbook workbook) {
 		Cell ret = null;
 		Sheet sheet = workbook.getSheet(cr.getSheetName());
-		Row row = sheet.getRow(cr.getRow());
-		if (row != null) {
-			ret = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
-		}
-		return ret;
-	}
-
-	private Cell retrieveCellByAdress(String cellAddress, Workbook workbook, String defaultSheetName) {
-		Cell ret = null;
-		CellReference cr = new CellReference(cellAddress);
-		String sheetOfCell = (cr.getSheetName() == null) ? defaultSheetName : cr.getSheetName();
-		Sheet sheet = workbook.getSheet(sheetOfCell);
 		Row row = sheet.getRow(cr.getRow());
 		if (row != null) {
 			ret = row.getCell(cr.getCol(), MissingCellPolicy.CREATE_NULL_AS_BLANK);
@@ -352,27 +335,6 @@ public class ExcelEngine {
 				break;
 			}
 		}
-	}
-
-	/**
-	 * Return Cell from Excel position
-	 * 
-	 * D1 => Cell
-	 * 
-	 * @param a
-	 * @return
-	 */
-	private Cell getCell(Sheet sheet, String excelPosition) {
-
-		Cell cell = null;
-
-		int[] pos = ExcelUtils.getPosition(excelPosition);
-
-		Row row = sheet.getRow(pos[1]); // 0-based.
-
-		cell = row.getCell(pos[0]); // Also 0-based;
-
-		return cell;
 	}
 
 	private Stream<Cell> streamCell(Workbook workbook) {
