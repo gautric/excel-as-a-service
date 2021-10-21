@@ -26,12 +26,12 @@ public class ExcelResourceTest {
 //				.body(is("{}"));
 		
 		when()
-			.get("/api")
+			.get("/eaas/api")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(1),
 						"results[0].name", is("KYC"),
-						"results[0].links[0].href", is("http://localhost:8081/api/KYC"));
+						"results[0].links[0].href", is("http://localhost:8081/eaas/KYC"));
 		
 	}
 
@@ -39,14 +39,14 @@ public class ExcelResourceTest {
 	public void testKYC() {
 		
 		when()
-			.get("/api/{resource}","KYC")
+			.get("/eaas/api/{resource}","KYC")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(3),
 						"results[0].name", is("ComputeKYC"),
-						"results[0].links[0].href", is("http://localhost:8081/api/KYC/ComputeKYC"),
+						"results[0].links[0].href", is("http://localhost:8081/eaas/KYC/ComputeKYC"),
 						"results[1].name", is("COUNTRY"),
-						"results[1].links[0].href", is("http://localhost:8081/api/KYC/COUNTRY"));
+						"results[1].links[0].href", is("http://localhost:8081/eaas/KYC/COUNTRY"));
 		
 		}
 
@@ -55,7 +55,7 @@ public class ExcelResourceTest {
 	public void testKYCComputeKYC2() {
 
 		when()
-			.get("/api/{resource}/{sheet}", "KYC", "ComputeKYC")
+			.get("/eaas/api/{resource}/{sheet}", "KYC", "ComputeKYC")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(15),
@@ -69,7 +69,7 @@ public class ExcelResourceTest {
 	public void testKYCComputeKYCC6() {
 
 		when()
-			.get("/api/{resource}/{sheet}/{cell}", "KYC", "ComputeKYC", "C6")
+			.get("/eaas/api/{resource}/{sheet}/{cell}", "KYC", "ComputeKYC", "C6")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(1),
@@ -83,7 +83,7 @@ public class ExcelResourceTest {
 	public void testKYCComputeKYCC6PEP() {
 
 		when()
-			.get("/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B2", "TRUE")
+			.get("/eaas/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B2", "TRUE")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(1),
@@ -97,7 +97,7 @@ public class ExcelResourceTest {
 	public void testKYCComputeKYCCY() {
 
 		when()
-			.get("/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B3", "CY")
+			.get("/eaas/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B3", "CY")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(1),
@@ -111,7 +111,7 @@ public class ExcelResourceTest {
 	public void testKYCComputeKYCAmount() {
 
 		when()
-			.get("/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B4", "10000000")
+			.get("/eaas/api/{resource}/{sheet}/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6","B4", "10000000")
 		.then()
 			.statusCode(200)
 				.body("_count", equalTo(1),

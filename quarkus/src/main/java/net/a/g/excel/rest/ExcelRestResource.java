@@ -52,7 +52,7 @@ import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelConstants;
 
-@Path("/")
+@Path("/api")
 @OpenAPIDefinition(externalDocs = @ExternalDocumentation(description = "schema", url = ExcelConstants.SCHEMA_URI), info = @Info(version = "1.0", title = "Excel Quarkus"))
 public class ExcelRestResource {
 
