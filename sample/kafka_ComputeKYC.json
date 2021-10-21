@@ -1,0 +1,16 @@
+{
+	"uuid": "b00f82d6-206a-450b-bd31-d1d3a3ac5d4a",
+	"resource": "KYC",
+	"sheet": "ComputeKYC",
+	"outputs": [
+		"C6",
+		"C4",
+		"C3",
+		"C2"
+	],
+	"inputs": {
+		"ComputeKYC!B2": true,
+		"ComputeKYC!B3": "CY",
+		"ComputeKYC!B4": 1000000
+	}
+}

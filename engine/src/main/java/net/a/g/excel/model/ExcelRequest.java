@@ -17,18 +17,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ExcelRequest {
 
 	@JsonProperty("uuid")
+	@Schema(name = "uuid", description = "UUID request")
 	private String uuid;
 
 	@JsonProperty("resource")
+	@Schema(name = "resource", description = "Resource to execute the request")
 	private String resource;
 
 	@JsonProperty("sheet")
+	@Schema(name = "sheet", description = "Default sheet request")
 	private String sheet;
 
 	@JsonProperty("outputs")
+	@Schema(name = "outputs", description = "List of cell adress")
 	private List<String> outputs = new ArrayList<String>();
 
 	@JsonProperty("inputs")
+	@Schema(name = "inputs", description = "Map of cell and value")
 	private Map<String, String> inputs = new HashMap<String, String>();
 
 	public ExcelRequest() {
