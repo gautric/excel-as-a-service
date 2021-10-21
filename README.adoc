@@ -39,13 +39,13 @@ To run application
 ```
 {
   "_count": 1,
-  "_self": "http://localhost:8080/api",
+  "_self": "http://localhost:8080/eaas/api",
   "results": [
     {
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC",
+          "href": "http://localhost:8080/eaas/api/KYC",
           "type": "application/json"
         }
       ],
@@ -54,23 +54,24 @@ To run application
     }
   ]
 }
+
 ```
 
 
 with a KYC sample :
 
-	curl 'http://localhost:8080/api/KYC' | jq
+	curl 'http://localhost:8080/eaas/api/KYC' | jq
 	
 ```
 {
   "_count": 3,
-  "_self": "http://localhost:8080/api/KYC",
+  "_self": "http://localhost:8080/eaas/api/KYC",
   "results": [
     {
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC",
           "type": "application/json"
         }
       ],
@@ -80,7 +81,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/COUNTRY",
+          "href": "http://localhost:8080/eaas/api/KYC/COUNTRY",
           "type": "application/json"
         }
       ],
@@ -90,7 +91,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/AMOUNT",
+          "href": "http://localhost:8080/eaas/api/KYC/AMOUNT",
           "type": "application/json"
         }
       ],
@@ -102,18 +103,18 @@ with a KYC sample :
 
 ```
 
-    curl 'http://localhost:8080/api/KYC/ComputeKYC'  | jq
+    curl 'http://localhost:8080/eaas/api/KYC/ComputeKYC'  | jq
 
 ```
 {
   "_count": 15,
-  "_self": "http://localhost:8080/api/KYC/ComputeKYC",
+  "_self": "http://localhost:8080/eaas/api/KYC/ComputeKYC",
   "results": [
     {
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/A1",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A1",
           "type": "application/json"
         }
       ],
@@ -125,7 +126,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/B1",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B1",
           "type": "application/json"
         }
       ],
@@ -137,7 +138,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/C1",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C1",
           "type": "application/json"
         }
       ],
@@ -149,7 +150,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/A2",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A2",
           "type": "application/json"
         }
       ],
@@ -162,7 +163,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/B2",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B2",
           "type": "application/json"
         }
       ],
@@ -174,7 +175,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/C2",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C2",
           "type": "application/json"
         }
       ],
@@ -186,7 +187,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/A3",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A3",
           "type": "application/json"
         }
       ],
@@ -199,7 +200,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/B3",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B3",
           "type": "application/json"
         }
       ],
@@ -211,7 +212,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/C3",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C3",
           "type": "application/json"
         }
       ],
@@ -223,7 +224,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/A4",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A4",
           "type": "application/json"
         }
       ],
@@ -236,7 +237,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/B4",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B4",
           "type": "application/json"
         }
       ],
@@ -248,7 +249,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/C4",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C4",
           "type": "application/json"
         }
       ],
@@ -260,7 +261,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/A5",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A5",
           "type": "application/json"
         }
       ],
@@ -272,7 +273,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/A6",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A6",
           "type": "application/json"
         }
       ],
@@ -284,7 +285,7 @@ with a KYC sample :
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
           "type": "application/json"
         }
       ],
@@ -297,18 +298,18 @@ with a KYC sample :
 }
 ```
 
-    curl 'http://localhost:8080/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000' | jq
+    curl 'http://localhost:8080/eaas/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000' | jq
 
 ```
 {
   "_count": 1,
-  "_self": "http://localhost:8080/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000",
+  "_self": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000",
   "results": [
     {
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
           "type": "application/json"
         }
       ],
@@ -324,19 +325,19 @@ with a KYC sample :
 
 You can use also POST
 
-    curl -X POST -H "Content-Type: application/json" -d @sample/api_ComputeKYC.json http://localhost:8080/api/KYC/ComputeKYC/C6
+    curl -X POST -H "Content-Type: application/json" -d @sample/api_ComputeKYC.json http://localhost:8080/eaas/api/KYC/ComputeKYC/C6
 
 
 ```
 {
   "_count": 1,
-  "_self": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+  "_self": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
   "results": [
     {
       "links": [
         {
           "rel": "self",
-          "href": "http://localhost:8080/api/KYC/ComputeKYC/C6",
+          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
           "type": "application/json"
         }
       ],
