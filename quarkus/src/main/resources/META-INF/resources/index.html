@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Excel As A Service</title>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/css/patternfly-additions.min.css">
+    <link rel=stylesheet type="text/css" href="https://cdn.jsdelivr.net/npm/pretty-print-json@1.1/dist/pretty-print-json.css">
+    <style>
+        #result {
+          resize: none;
+          overflow: hidden;
+          min-height: 300px;
+          max-height: 600px;
+      }
+    </style>
+</head>
+
+<body>
+        <nav class="navbar navbar-default navbar-pf" role="navigation">
+                <div class="navbar-header">                  
+                  <a class="navbar-brand" href="/">
+                   <p>Excel As A Service</p>
+                  </a>
+                </div>
+        </nav>
+    <div class="container">
+      <br/>
+      <div class="row">
+         <button id="connect" class="col-md-1 btn btn-primary" type="button">connect</button>
+          <br/>
+          <br/>
+      </div>
+      <div class="row">
+          <pre class="col-md-8" id="result"></pre> 
+
+      </div>
+      
+      <div class="row">
+          
+          <textarea id="request" name="request"
+			          rows="8" cols="33" class="col-md-8">
+        </textarea>
+      </div>
+      
+      
+            <div class="row">
+          
+         
+          
+          <button class="col-md-1 btn btn-primary" id="send" type="button" disabled>send</button>
+      </div>
+      
+      </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/patternfly/3.24.0/js/patternfly.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pretty-print-json@1.1/dist/pretty-print-json.min.js"></script>
+
+    <script type="text/javascript">
+      var connected = false;
+      var socket;
+
+      $( document ).ready(function() {
+          $("#connect").click(connect);
+          $("#send").click(sendMessage);
+
+
+          $("#request").keypress(function(event) {
+              if(event.keyCode == 13 || event.which == 13) {
+                  sendMessage();
+              }
+          });
+
+        $("#result").change(function() {
+            scrollToBottom();
+          });
+
+          
+          connect();
+      });
+
+      var connect = function() {
+          if (! connected) {
+              socket = new WebSocket("ws://" + location.host + "/eaas/ws");
+              socket.onopen = function() {
+                  connected = true;
+                  console.log("Connected to the web socket");
+                  $("#send").attr("disabled", false);
+                  $("#connect").attr("disabled", true).text("connected");
+                  $("#request").focus();
+              };
+              socket.onmessage =function(m) {
+                  console.log("Got message: " + m.data);
+
+                  $("#result").html(prettyPrintJson.toHtml(JSON.parse(m.data)));
+
+                  scrollToBottom();
+              };
+          }
+      };
+
+      var sendMessage = function() {
+          if (connected) {
+              var value = $("#request").val();
+              console.log("Sending " + value);
+              
+              socket.send(value);
+          }
+      };
+
+      var scrollToBottom = function () {
+        $('#result').scrollTop($('#result')[0].scrollHeight);
+      };
+
+    </script>
+</body>
+
+</html>
