@@ -19,7 +19,7 @@ public class ExcelProducer {
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelProducer.class);
 
 	@Inject
-	@Channel("eaas-out")
+	@Channel("eaas-request-cmd-in")
 	Emitter<Record<String, String>> emitter;
 
 	@Inject

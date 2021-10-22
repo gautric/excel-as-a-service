@@ -14,6 +14,11 @@ import net.a.g.excel.util.ExcelConstants;
 @JsonInclude(value = Include.NON_NULL)
 @Schema(name = "ExcelResult", description = "POJO that represents the result contents.")
 public class ExcelResult {
+
+	@JsonProperty("uuid")
+	@Schema(name = "uuid", description = "UUID request")
+	private String uuid;
+
 	@Schema(required = true, description = "Counter of result item")
 	@JsonProperty(value = "_count", namespace = ExcelConstants.SCHEMA_URI)
 	public int count;
@@ -28,15 +33,32 @@ public class ExcelResult {
 	public String self;
 
 	@JsonProperty(value = "results", namespace = ExcelConstants.SCHEMA_URI)
-	@Schema(oneOf = { ExcelCell[].class, ExcelResource[].class, ExcelSheet[].class})
+	@Schema(oneOf = { ExcelCell[].class, ExcelResource[].class, ExcelSheet[].class })
 	public Object results;
 
 	@JsonProperty(required = false, value = "error", namespace = ExcelConstants.SCHEMA_URI)
 	public ExcelError error;
-	
+
 	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
 	private List<ExcelLink> links = new ArrayList<ExcelLink>();
+
 	
+	public ExcelResult() {
+	}
+
+	public ExcelResult(int count, Object results) {
+		this.count = count;
+		this.results = results;
+	}
+	
+	public String getUuid() {
+		return this.uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
 	public ExcelError getError() {
 		return error;
 	}
@@ -53,13 +75,7 @@ public class ExcelResult {
 		this.self = self;
 	}
 
-	public ExcelResult() {
-	}
 
-	public ExcelResult(int count, Object results) {
-		this.count = count;
-		this.results = results;
-	}
 
 	public int getCount() {
 		return count;
