@@ -11,7 +11,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -40,7 +39,6 @@ import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.util.ExcelConfiguration;
-import net.a.g.excel.util.ExcelUtils;
 
 @ApplicationScoped
 @Named
@@ -68,6 +66,10 @@ public class ExcelEngine {
 		return true;
 	}
 
+	public ExcelResource getResource(String resource) {
+		return listOfResources.get(resource);
+	}
+
 	public void clearAllResource() {
 		listOfResources.clear();
 	}
@@ -76,11 +78,9 @@ public class ExcelEngine {
 		return listOfResources.keySet().size();
 	}
 
-
 	public Collection<ExcelResource> lisfOfResource() {
 		return listOfResources.values();
 	}
-	
 
 	public boolean isResourceExists(String name) {
 		return listOfResources.containsKey(name);
@@ -135,8 +135,12 @@ public class ExcelEngine {
 		return list;
 	}
 
-	public boolean isSheetExists(String excelName, String sheetName) {
-		Workbook workbook = retrieveWorkbook(excelName);
+	public ExcelSheet getSheet(String resource, String sheet) {
+		return (isSheetExists(resource, sheet)) ? new ExcelSheet(sheet) : null;
+	}
+
+	public boolean isSheetExists(String resource, String sheetName) {
+		Workbook workbook = retrieveWorkbook(resource);
 		Sheet sheet = workbook.getSheet(sheetName);
 		return sheet != null;
 	}
@@ -189,9 +193,8 @@ public class ExcelEngine {
 
 		Function<String, String> renameFunction = cn -> cn.contains("!") ? cn : sheet + "!" + cn;
 
-		return cellCalculation(resource, output.stream().map(renameFunction).collect(toList()),
-				input.entrySet().stream()
-						.collect(Collectors.toMap(e -> renameFunction.apply(e.getKey()), Map.Entry::getValue)),
+		return cellCalculation(resource, output.stream().map(renameFunction).collect(toList()), input.entrySet()
+				.stream().collect(Collectors.toMap(e -> renameFunction.apply(e.getKey()), Map.Entry::getValue)),
 				global);
 	}
 
