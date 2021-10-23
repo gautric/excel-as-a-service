@@ -49,6 +49,8 @@ public class ExcelEngine {
 	@Inject
 	ExcelConfiguration conf;
 
+	private final Function<Cell, ExcelCell> rawMapping = cell -> celltoExcelCell(cell);
+
 	private Map<String, ExcelResource> listOfResources = new HashMap<String, ExcelResource>();
 
 	public boolean addResource(ExcelResource resource) {
@@ -208,7 +210,7 @@ public class ExcelEngine {
 		Workbook workbook = retrieveWorkbook(resource);
 		FormulaEvaluator exec = formula(workbook);
 
-		if (global) {
+		if (global && inputs.size() > 0) {
 			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream().collect(Collectors.toMap(
 					ExcelResource::getFile,
 					r -> (resource.compareTo(r.getName()) == 0) ? exec : formula(convertByteToWorkbook(r.getDoc()))));
@@ -224,7 +226,7 @@ public class ExcelEngine {
 		if (inputs.size() > 0) {
 			execFunction = cell -> computeCell(cell, exec);
 		} else {
-			execFunction = cell -> celltoExcelCell(cell);
+			execFunction = rawMapping;
 		}
 
 		// Compute All cellNames
