@@ -5,9 +5,6 @@ import java.util.Arrays;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
-
-import net.a.g.excel.util.ExcelConstants;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonInclude(value = Include.NON_NULL)
@@ -20,7 +17,6 @@ public class ExcelResource extends ExcelModel {
 
 	@JsonIgnore(value = true)
 	private byte[] doc;
-
 
 	public ExcelResource() {
 	}
@@ -52,7 +48,6 @@ public class ExcelResource extends ExcelModel {
 	public void setDoc(byte[] doc) {
 		this.doc = doc;
 	}
-
 
 	public String toString() {
 		return "ExcelResource [name=" + name + ", file=" + file + ", doc=" + Arrays.toString(doc).substring(0, 10)

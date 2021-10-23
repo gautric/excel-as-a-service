@@ -24,11 +24,9 @@ import net.a.g.excel.model.ExcelResult;
 @Path("/sse")
 public class ExcelSSEProducer {
 
-	private final Logger  LOG = LoggerFactory.getLogger(ExcelSSEProducer.class);
+	private final Logger LOG = LoggerFactory.getLogger(ExcelSSEProducer.class);
 
-	
 	private OutboundSseEvent.Builder eventBuilder;
-	private Sse sse;
 	private SseEventSink sseEventSink = null;
 
 	@Inject
@@ -36,7 +34,6 @@ public class ExcelSSEProducer {
 
 	@Context
 	public void setSse(Sse sse) {
-		this.sse = sse;
 		this.eventBuilder = sse.newEventBuilder();
 	}
 
