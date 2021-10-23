@@ -50,10 +50,10 @@ public class CrossRefTest {
 	@BeforeEach
 	public void setup() throws MalformedURLException, IOException {
 		assertNotNull(engine);
-		assertTrue(loader.injectResource("Primary", "Primary.xlsx", FileUtils
-				.openInputStream(new File("../sample/Primary.xlsx"))));
-		assertTrue(loader.injectResource("Secondary", "Secondary.xlsx", FileUtils
-				.openInputStream(new File("../sample/Secondary.xlsx"))));
+		assertTrue(loader.injectResource("Primary", "Primary.xlsx",
+				FileUtils.openInputStream(new File("../sample/Primary.xlsx"))));
+		assertTrue(loader.injectResource("Secondary", "Secondary.xlsx",
+				FileUtils.openInputStream(new File("../sample/Secondary.xlsx"))));
 
 		assertEquals(2, engine.countListOfResource());
 
@@ -68,7 +68,8 @@ public class CrossRefTest {
 	@Test
 	public void testSheetPrimary() {
 
-		List<String> actual = engine.listOfSheet("Primary").stream().map(ExcelSheet::getName).collect(Collectors.toList());
+		List<String> actual = engine.listOfSheet("Primary").stream().map(ExcelSheet::getName)
+				.collect(Collectors.toList());
 		assertNotNull(actual);
 
 		assertThat(actual, hasSize(1));
@@ -80,7 +81,8 @@ public class CrossRefTest {
 	@Test
 	public void testSheetSecondary() {
 
-		List<String> actual = engine.listOfSheet("Secondary").stream().map(ExcelSheet::getName).collect(Collectors.toList());
+		List<String> actual = engine.listOfSheet("Secondary").stream().map(ExcelSheet::getName)
+				.collect(Collectors.toList());
 		assertNotNull(actual);
 
 		assertThat(actual, hasSize(1));
@@ -97,7 +99,7 @@ public class CrossRefTest {
 		assertNotNull(actual);
 		assertThat(actual, hasSize(2));
 
-		List<String> expect = Arrays.asList("[1]Feuil1!$A$1+[1]Feuil1!$B$1+[1]Feuil1!$C$1", "A1+2");
+		List<String> expect = Arrays.asList("[1]Feuil1!$A$1+[1]Feuil1!$B$1+[1]Feuil1!$C$1", "A1+2+C1");
 		assertThat(actual, is(expect));
 	}
 
@@ -122,9 +124,27 @@ public class CrossRefTest {
 		List<String> expect = Arrays.asList("A1", "B1");
 		assertThat(actual, is(expect));
 
-		Map<String, ExcelCell> toto = engine.mapOfCellCalculated("Primary", "Feuil1", new String[] { "B1" }, null, true);
+		Map<String, ExcelCell> toto = engine.mapOfCellCalculated("Primary", "Feuil1", new String[] { "B1" },
+				Map.of("C1", List.of("10")), true);
 
-		assertEquals(44.0, toto.get("Feuil1!B1").getValue());
+		assertEquals(54.0, toto.get("Feuil1!B1").getValue());
+
+	}
+
+	@Test
+	public void testSheetPrimaryCallList() {
+
+		List<String> actual = new ArrayList(engine.mapOfFormularCell("Primary", "Feuil1").keySet());
+		assertNotNull(actual);
+		assertThat(actual, hasSize(2));
+
+		List<String> expect = Arrays.asList("A1", "B1");
+		assertThat(actual, is(expect));
+
+		List<ExcelCell> result = engine.cellCalculation("Primary", List.of("Feuil1!B1"), Map.of("Feuil1!C1", "10"),
+				true);
+
+		assertEquals(54.0, result.get(0).getValue());
 
 	}
 

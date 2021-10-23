@@ -215,13 +215,21 @@ public class ExcelEngine {
 			exec.setupReferencedWorkbooks(workbooks);
 		}
 
+		Function<Cell, ExcelCell> execFunction = null;
+
 		inputs.entrySet().stream()
 				.map(kv -> Map.entry(retrieveCellByAdress(new CellReference(kv.getKey()), workbook), kv.getValue()))
 				.forEach(kv -> updateCell(kv.getKey(), kv.getValue()));
 
+		if (inputs.size() > 0) {
+			execFunction = cell -> computeCell(cell, exec);
+		} else {
+			execFunction = cell -> celltoExcelCell(cell);
+		}
+
 		// Compute All cellNames
 		return outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
-				.flatMap(Stream::ofNullable).map(cell -> computeCell(cell, exec)).collect(toList());
+				.flatMap(Stream::ofNullable).map(execFunction).collect(toList());
 
 	}
 

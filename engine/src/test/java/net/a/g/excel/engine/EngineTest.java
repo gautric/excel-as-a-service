@@ -121,7 +121,17 @@ public class EngineTest {
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
-		assertThat(map.get("ComputeKYC!C6").getValue(), is(0.0));
+		assertThat(map.get("ComputeKYC!C6").getValue(), is("SUM(C2:C4)"));
+	}
+
+	@Test
+	public void testComputeKYCC6Compute() {
+
+		List<ExcelCell> map = engine.cellCalculation("KYC", List.of("ComputeKYC!C6"), Map.of("ComputeKYC!C9", "43"),
+				false);
+		assertThat(map, hasSize(1));
+
+		assertThat(map.get(0).getValue(), is(0.0));
 	}
 
 	@Test
@@ -132,7 +142,27 @@ public class EngineTest {
 		List<String> actual = new ArrayList(map.values());
 		assertThat(actual, hasSize(1));
 
-		assertThat(map.get("ComputeKYC!C10").getValue(), is("2021-02-12"));
+		assertThat(map.get("ComputeKYC!C10").getValue(), is("B9+C9"));
+	}
+
+	@Test
+	public void testComputeKYCC10Compute() {
+
+		List<ExcelCell> map = engine.cellCalculation("KYC", List.of("ComputeKYC!C10"), Map.of("ComputeKYC!C9", "42"),
+				false);
+		assertThat(map, hasSize(1));
+
+		assertThat(map.get(0).getValue(), is("2021-02-12"));
+	}
+
+	@Test
+	public void testComputeKYCC10Compute43() {
+
+		List<ExcelCell> map = engine.cellCalculation("KYC", List.of("ComputeKYC!C10"), Map.of("ComputeKYC!C9", "43"),
+				false);
+		assertThat(map, hasSize(1));
+
+		assertThat(map.get(0).getValue(), is("2021-02-13"));
 	}
 
 	@Test
