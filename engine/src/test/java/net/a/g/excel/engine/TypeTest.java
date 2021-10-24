@@ -67,7 +67,7 @@ public class TypeTest {
 	@MethodSource("testCellwithParamValue")
 	void testCellwithParam(String input, Object value, String type) {
 
-		List<ExcelCell> map = engine.cellCalculation("Error", List.of("Sheet1!" + input), false);
+		List<ExcelCell> map = engine.cellCalculation("Type", List.of("Sheet1!" + input), false);
 		assertThat(map, hasSize(1));
 
 		assertThat(map.get(0).getValue(), is(value));
@@ -95,7 +95,7 @@ public class TypeTest {
 	@MethodSource("testCellwithParamValueCall")
 	void testCellwithParamCall(String input, Object value, String type) {
 
-		List<ExcelCell> map = engine.cellCalculation("Error", List.of("Sheet1!" + input), Map.of("Sheet1!B1", "LBLLB"),
+		List<ExcelCell> map = engine.cellCalculation("Type", List.of("Sheet1!" + input), Map.of("Sheet1!B1", "LBLLB"),
 				false);
 		assertThat(map, hasSize(1));
 
