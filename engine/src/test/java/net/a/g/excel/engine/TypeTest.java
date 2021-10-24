@@ -50,8 +50,8 @@ public class TypeTest {
 	@BeforeEach
 	public void setup() throws MalformedURLException, IOException {
 		assertNotNull(engine);
-		assertTrue(loader.injectResource("Type", "Type.xlsx",
-				FileUtils.openInputStream(new File("../sample/Type.xlsx"))));
+		assertTrue(
+				loader.injectResource("Type", "Type.xlsx", FileUtils.openInputStream(new File("../sample/Type.xlsx"))));
 
 		assertEquals(1, engine.countListOfResource());
 
@@ -67,7 +67,7 @@ public class TypeTest {
 	@MethodSource("testCellwithParamValue")
 	void testCellwithParam(String input, Object value, String type) {
 
-		List<ExcelCell> map = engine.cellCalculation("Type", List.of("Sheet1!" + input), false);
+		List<ExcelCell> map = engine.cellCalculation("Type", List.of("Sheet1!" + input));
 		assertThat(map, hasSize(1));
 
 		assertThat(map.get(0).getValue(), is(value));
@@ -95,8 +95,7 @@ public class TypeTest {
 	@MethodSource("testCellwithParamValueCall")
 	void testCellwithParamCall(String input, Object value, String type) {
 
-		List<ExcelCell> map = engine.cellCalculation("Type", List.of("Sheet1!" + input), Map.of("Sheet1!B1", "LBLLB"),
-				false);
+		List<ExcelCell> map = engine.cellCalculation("Type", List.of("Sheet1!" + input), Map.of("Sheet1!B1", "LBLLB"));
 		assertThat(map, hasSize(1));
 
 		assertThat(map.get(0).getValue(), is(value));
@@ -114,7 +113,7 @@ public class TypeTest {
 				Arguments.of("A5", "2021-01-01", "DATE"), 
 				Arguments.of("A6", 123.0, "NUMERIC"),
 				Arguments.of("A7", "Hello ", "STRING"), 
-				Arguments.of("A8", "", "ERROR"),
+				Arguments.of("A8", "#ERROR", "ERROR"),
 				Arguments.of("A9", 42.0, "NUMERIC")
 
 		);

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -200,8 +201,17 @@ public class ExcelEngine {
 				global);
 	}
 
+	public List<ExcelCell> cellCalculation(String resource, List<String> outputs) {
+		return cellCalculation(resource, outputs, Map.<String, String>of(), false);
+
+	}
+
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, boolean global) {
 		return cellCalculation(resource, outputs, Map.<String, String>of(), global);
+	}
+
+	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, Map<String, String> inputs) {
+		return cellCalculation(resource, outputs, inputs, false);
 	}
 
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, Map<String, String> inputs,
@@ -233,6 +243,11 @@ public class ExcelEngine {
 		return outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
 				.flatMap(Stream::ofNullable).map(execFunction).collect(toList());
 
+	}
+
+	public List<ExcelCell> cellCalculation(Supplier<String> resource, Supplier<List<String>> outputs,
+			Supplier<Map<String, String>> inputs, boolean global) {
+		return cellCalculation(resource.get(), outputs.get(), inputs.get(), global);
 	}
 
 	private Cell retrieveCellByAdress(CellReference cr, Workbook workbook) {
@@ -271,6 +286,7 @@ public class ExcelEngine {
 				ret = "" + cell.getStringCellValue();
 				break;
 			case ERROR:
+				ret = "#ERROR";
 				break;
 			case FORMULA:
 				ret = cell.getCellFormula();
