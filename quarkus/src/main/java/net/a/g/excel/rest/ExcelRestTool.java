@@ -1,8 +1,5 @@
 package net.a.g.excel.rest;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -16,13 +13,10 @@ public class ExcelRestTool {
 		ExcelResult ret = new ExcelResult();
 		ExcelError err = new ExcelError();
 
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw);
-
 		err.setCode("" + status.getStatusCode());
 		err.setError(message);
 		ret.setError(err);
-
+	
 		return Response.status(status).entity(ret).build();
 
 	}
