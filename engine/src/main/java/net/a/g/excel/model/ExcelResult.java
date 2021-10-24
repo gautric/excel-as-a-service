@@ -1,7 +1,8 @@
 package net.a.g.excel.model;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 
@@ -13,7 +14,7 @@ import net.a.g.excel.util.ExcelConstants;
 
 @JsonInclude(value = Include.NON_NULL)
 @Schema(name = "ExcelResult", description = "POJO that represents the result contents.")
-public class ExcelResult {
+public class ExcelResult extends ExcelModel {
 
 	@JsonProperty("uuid")
 	@Schema(name = "uuid", description = "UUID request")
@@ -21,36 +22,40 @@ public class ExcelResult {
 
 	@Schema(required = true, description = "Counter of result item")
 	@JsonProperty(value = "_count", namespace = ExcelConstants.SCHEMA_URI)
-	public int count;
+	private int count;
 
-	@JsonProperty(value = "_next", namespace = ExcelConstants.SCHEMA_URI)
-	public String next;
+	@JsonProperty(value = "cells", namespace = ExcelConstants.SCHEMA_URI)
+	@Schema(oneOf = { ExcelCell[].class })
+	private Collection<ExcelCell> cells;
 
-	@JsonProperty(value = "_previous", namespace = ExcelConstants.SCHEMA_URI)
-	public String previous;
+	@JsonProperty(value = "resources", namespace = ExcelConstants.SCHEMA_URI)
+	@Schema(oneOf = { ExcelResource[].class })
+	private Collection<ExcelResource> resources;
 
-	@JsonProperty(value = "_self", namespace = ExcelConstants.SCHEMA_URI)
-	public String self;
-
-	@JsonProperty(value = "results", namespace = ExcelConstants.SCHEMA_URI)
-	@Schema(oneOf = { ExcelCell[].class, ExcelResource[].class, ExcelSheet[].class })
-	public Object results;
+	@JsonProperty(value = "sheets", namespace = ExcelConstants.SCHEMA_URI)
+	@Schema(oneOf = { ExcelSheet[].class })
+	private Collection<ExcelSheet> sheets;
 
 	@JsonProperty(required = false, value = "error", namespace = ExcelConstants.SCHEMA_URI)
-	public ExcelError error;
+	private ExcelError error;
 
-	@JsonProperty(value = "links", namespace = ExcelConstants.SCHEMA_URI)
-	private List<ExcelLink> links = new ArrayList<ExcelLink>();
-
-	
 	public ExcelResult() {
 	}
 
-	public ExcelResult(int count, Object results) {
-		this.count = count;
-		this.results = results;
+	public ExcelResult(Collection<? extends ExcelModel> results) {
+		this.count = results.size();
+		if (results.size() > 0 && results.iterator().next() instanceof ExcelSheet) {
+			this.sheets = results.stream().map(e -> (ExcelSheet) e).collect(Collectors.toList());
+
+		} else if (results.iterator().next() instanceof ExcelCell) {
+			this.cells = results.stream().map(e -> (ExcelCell) e).collect(Collectors.toList());
+
+		} else {
+			this.resources = results.stream().map(e -> (ExcelResource) e).collect(Collectors.toList());
+
+		}
 	}
-	
+
 	public String getUuid() {
 		return this.uuid;
 	}
@@ -67,16 +72,6 @@ public class ExcelResult {
 		this.error = error;
 	}
 
-	public String getSelf() {
-		return self;
-	}
-
-	public void setSelf(String self) {
-		this.self = self;
-	}
-
-
-
 	public int getCount() {
 		return count;
 	}
@@ -85,35 +80,27 @@ public class ExcelResult {
 		this.count = count;
 	}
 
-	public String getNext() {
-		return next;
+	public Collection<ExcelCell> getCells() {
+		return this.cells;
 	}
 
-	public void setNext(String next) {
-		this.next = next;
+	public void setCells(Collection<ExcelCell> cells) {
+		this.cells = cells;
 	}
 
-	public String getPrevious() {
-		return previous;
+	public Collection<ExcelResource> getResources() {
+		return this.resources;
 	}
 
-	public void setPrevious(String previous) {
-		this.previous = previous;
+	public void setResources(Collection<ExcelResource> resources) {
+		this.resources = resources;
 	}
 
-	public Object getResults() {
-		return results;
+	public Collection<ExcelSheet> getSheets() {
+		return this.sheets;
 	}
 
-	public void setResults(Object results) {
-		this.results = results;
-	}
-
-	public List<ExcelLink> getLinks() {
-		return this.links;
-	}
-
-	public void setLinks(List<ExcelLink> links) {
-		this.links = links;
+	public void setSheets(List<ExcelSheet> sheets) {
+		this.sheets = sheets;
 	}
 }

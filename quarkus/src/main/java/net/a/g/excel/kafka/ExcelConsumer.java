@@ -46,7 +46,7 @@ public class ExcelConsumer {
 
 			ret.setUuid(er.getUuid());
 			ret.setCount(reply.size());
-			ret.setResults(reply);
+			ret.setCells(reply);
 
 			LOG.info("{}", om.writeValueAsString(reply));
 		} catch (Exception ex) {

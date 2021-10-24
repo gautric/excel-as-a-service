@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,7 @@ import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
 import javax.ws.rs.core.UriInfo;
 
@@ -40,7 +42,6 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 import org.jboss.resteasy.plugins.providers.multipart.InputPart;
 import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,136 +70,107 @@ public class ExcelRestResource {
 	@Context
 	UriInfo uriInfo;
 
-	@POST
-	@Path("{resource}/{sheet}/{cells}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_JSON)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelCell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "List of Excel Cell computed", description = "Retrieves and returns the list of Excel Cell")
-	public Response cellBody(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
-			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global,
-			final String jsonBody) {
-		JSONObject body = new JSONObject(jsonBody);
+	private void addLink(ExcelResource er) {
 
-		Map<String, List<String>> query = body.toMap().entrySet().stream()
-				.collect(Collectors.toMap(Map.Entry::getKey, e -> Arrays.asList(e.getValue().toString())));
+		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "resources");
+		injectLink(resourceBuilder, () -> new String[] {}, "list-of-resource").accept(er);
 
-		return computeCells(resource, sheetName, cellNames, global, query);
+		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
+		injectLink(selfBuilder, () -> new String[] { er.getName() }, "self").accept(er);
+		UriBuilder dwnBuilder = getURIBuilder().path(ExcelRestResource.class, "download");
+		injectLink(dwnBuilder, () -> new String[] { er.getName() }, "download",
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").accept(er);
+		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "listOfSheet");
+		injectLink(sheetsBuilder, () -> new String[] { er.getName() }, "list-of-sheet").accept(er);
 	}
 
-	@POST
-	@Path("{resource}/{sheet}/{cells}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelCell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "List of Excel Cell computed", description = "Retrieves and returns the list of Excel Cell")
-	public Response cellForm(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
-			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global,
-			final MultivaluedMap<String, String> queryurlencoded) {
+	private void addLink(String resource, ExcelSheet es) {
+		UriBuilder upBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
+		injectLink(upBuilder, () -> new String[] { resource }, "resource").accept(es);
 
-		Map<String, List<String>> query = queryurlencoded;
+		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
+		injectLink(selfBuilder, () -> new String[] { resource, es.getName() }, "self").accept(es);
+		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "listOfCell");
+		injectLink(sheetsBuilder, () -> new String[] { resource, es.getName() }, "list-of-cell").accept(es);
+	}
 
-		return computeCells(resource, sheetName, cellNames, global, query);
+	private void addLink(String resource, ExcelCell cell) {
+		String sheet = cell.getAddress().split("!")[0];
+		String address = cell.getAddress().split("!")[1];
+
+		UriBuilder upBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
+		injectLink(upBuilder, () -> new String[] { resource }, "resource").accept(cell);
+
+		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
+		injectLink(selfBuilder, () -> new String[] { resource, sheet }, "sheet").accept(cell);
+
+		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "cell");
+		injectLink(sheetsBuilder, () -> new String[] { resource, sheet, address }, "self").accept(cell);
+
+		if (uriInfo.getQueryParameters().size() > 0) {
+			ExcelLink el = new ExcelLink();
+			el.setHref(uriInfo.getRequestUri().toString());
+			el.setRel("query");
+			el.setType(MediaType.APPLICATION_JSON);
+			cell.getLinks().add(el);
+
+		}
+
 	}
 
 	@GET
-	@Path("{resource}/{sheet}/{cells}")
-	@Produces(MediaType.APPLICATION_JSON)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelCell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "List of Excel Cell computed", description = "Retrieves and returns the list of Excel Cell")
-	public Response cellQuery(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
-			@PathParam("cells") String cellNames, @QueryParam("_global") @DefaultValue("false") boolean global) {
-
-		Map<String, List<String>> query = uriInfo.getQueryParameters();
-
-		return computeCells(resource, sheetName, cellNames, global, query);
-	}
-
-	private Response computeCells(String resource, String sheetName, String input, boolean global,
-			Map<String, List<String>> query) {
+	@Path("{resource}/download")
+	@Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	public Response download(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri() + API).path(ExcelRestResource.class, "cellQuery");
 
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return Response.status(Response.Status.NOT_FOUND).links(link).build();
 		}
 
-		if (!getEngine().isSheetExists(resource, sheetName)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
-		}
+		ExcelResource file = getEngine().getResource(resource);
 
-		List<ExcelCell> entity = getEngine().cellCalculationOld(resource, sheetName, Arrays.asList(input.split(",")),
-				query, global);
-
-		entity.forEach(e -> injectLink(
-				() -> new String[] { resource, e.getAddress().split("!")[0], e.getAddress().split("!")[1] }, builder)
-						.accept(e));
-
-		ExcelResult ret = new ExcelResult(entity.size(), entity);
-
-		return ExcelRestTool.returnOK(ret, link);
+		return Response.ok(file.getDoc()).header("content-disposition", "attachment; filename=" + file.getFile())
+				.build();
 	}
 
 	@GET
+	@Path("")
 	@Produces(MediaType.APPLICATION_JSON)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelResource[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "List of Excel Resources", description = "Retrieves and returns the list of Excel Resources")
 	public Response resources() throws Exception {
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-		UriBuilder builder = UriBuilder.fromUri(uriInfo.getRequestUri()).path(ExcelRestResource.class, "sheets");
 
 		Collection<ExcelResource> entity = getEngine().lisfOfResource();
 
 		entity.forEach(e -> e.getLinks().clear());
 
-		entity.forEach(e -> injectLink(() -> new String[] { e.getName() }, builder).accept(e));
+		entity.forEach(e -> addLink(e));
 
-		ExcelResult ret = new ExcelResult(getEngine().countListOfResource(), entity);
-
+		ExcelResult ret = new ExcelResult(entity);
 		return ExcelRestTool.returnOK(ret, link);
 	}
 
 	@GET
 	@Path("{resource}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "404", description = "if {resource} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + ExcelSheet[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "List of Excel Sheets", description = "Retrieves and returns the list of Excel Sheets")
-	public Response sheets(@PathParam("resource") String resource) {
+	public Response resource(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-
-		UriBuilder builder = uriInfo.getAbsolutePathBuilder().path(ExcelRestResource.class, "sheets");
 
 		if (!getEngine().isResourceExists(resource)) {
 			return Response.status(Response.Status.NOT_FOUND).links(link).build();
 		}
 
-		List<ExcelSheet> listOfSheet = getEngine().listOfSheet(resource);
+		ExcelResource ret = getEngine().getResource(resource);
 
-		listOfSheet.forEach(s -> injectLink(() -> new String[] { s.getName() }, builder).accept(s));
+		ret.getLinks().clear();
+		addLink(ret);
 
-		ExcelResult ret = new ExcelResult(listOfSheet.size(), listOfSheet);
-
-		return ExcelRestTool.returnOK(ret, link);
+		return Response.ok(ret).links(link).build();
 	}
 
-	private Consumer<? super ExcelModel> injectLink(Supplier<String[]> supply, UriBuilder builder) {
-		return cell -> {
-			ExcelLink el = new ExcelLink();
-			el.setHref(builder.build(supply.get()).toString());
-			el.setRel("self");
-			el.setType(MediaType.APPLICATION_JSON);
-			cell.getLinks().add(el);
-		};
+	private UriBuilder getURIBuilder() {
+		return UriBuilder.fromUri(uriInfo.getBaseUri() + API);
 	}
 
 	@POST
@@ -207,7 +179,7 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
 			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
 	@Operation(summary = "Create a new Excel Resource", description = "Create a new Excel Resource")
 	public Response uploadFile(@PathParam("resource") String resource, MultipartFormDataInput input)
 			throws IOException {
@@ -228,21 +200,17 @@ public class ExcelRestResource {
 			bytes = IOUtils.toByteArray(inputStream);
 		}
 
-		ExcelResource excelResource = new ExcelResource();
-		excelResource.setName(resource);
-		excelResource.setFile(fileName);
-		excelResource.setDoc(bytes);
+		ExcelResource ret = new ExcelResource();
+		ret.setName(resource);
+		ret.setFile(fileName);
+		ret.setDoc(bytes);
 
-		if (!getEngine().addResource(excelResource)) {
+		if (!getEngine().addResource(ret)) {
 			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,
 					"Server cannot accept/recognize format file provided");
 		}
 
-		String url = uriInfo.getRequestUri().toString();
-
-		ExcelResult ret = new ExcelResult();
-		ret.setSelf(url);
-		ret.setResults(excelResource);
+		addLink(ret);
 
 		return Response.accepted(ret).build();
 	}
@@ -269,17 +237,53 @@ public class ExcelRestResource {
 	}
 
 	@GET
-	@Path("{resource}/{sheet}")
+	@Path("{resource}/sheets")
 	@Produces(MediaType.APPLICATION_JSON)
-	@APIResponses(value = {
-			@APIResponse(responseCode = "404", description = "if {resource} or {sheet} is not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Nominal result, return ExcelResult + Cell[]", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "List of Excel Cells", description = "Retrieves and returns the list of Excel Cell")
+	public Response listOfSheet(@PathParam("resource") String resource) {
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+		}
+
+		List<ExcelSheet> listOfSheet = getEngine().listOfSheet(resource);
+
+		listOfSheet.forEach(es -> addLink(resource, es));
+
+		ExcelResult ret = new ExcelResult(listOfSheet);
+
+		return ExcelRestTool.returnOK(ret, link);
+	}
+
+	@GET
+	@Path("{resource}/sheet/{sheet}")
+	@Produces(MediaType.APPLICATION_JSON)
 	public Response sheet(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-		UriBuilder builder = UriBuilder.fromUri(uriInfo.getBaseUri() + API).path(ExcelRestResource.class, "cellQuery");
 
-		Response.Status status = Response.Status.NOT_FOUND;
+		ExcelSheet ret = null;
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+		}
+
+		if (!getEngine().isSheetExists(resource, sheetName)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		ret = new ExcelSheet(sheetName);
+
+		addLink(resource, ret);
+
+		return Response.status(Response.Status.OK).entity(ret).links(link).build();
+	}
+
+	@GET
+	@Path("{resource}/sheet/{sheet}/cells")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response listOfCell(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+
 		List<ExcelCell> entity = null;
 		ExcelResult ret = null;
 
@@ -291,22 +295,111 @@ public class ExcelRestResource {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
-		if (!sheetName.contains("!")) {
-			if (getEngine().isSheetExists(resource, sheetName)) {
-				status = Response.Status.OK;
+		entity = getEngine().listOfCell(resource, sheetName, cell -> true);
 
-				entity = getEngine().listOfCell(resource, sheetName, cell -> true);
-				ret = new ExcelResult(entity.size(), entity);
+		entity.forEach(cell -> addLink(resource, cell));
+		ret = new ExcelResult(entity);
 
-				entity.forEach(e -> injectLink(
-						() -> new String[] { resource, e.getAddress().split("!")[0], e.getAddress().split("!")[1] },
-						builder).accept(e));
-
-			} else {
-				return Response.status(status).build();
-			}
-		}
 		return ExcelRestTool.returnOK(ret, link);
+	}
+
+	@GET
+	@Path("{resource}/sheet/{sheet}/cells/{cells : .*,.*}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response cellsQuery(@PathParam("resource") String resource, @PathParam("sheet") String sheet,
+			@PathParam("cells") String cells, @QueryParam("_global") @DefaultValue("false") boolean global) {
+
+		Map<String, List<String>> param = uriInfo.getQueryParameters();
+
+		Map<String, String> query = param.entrySet().stream()
+				.collect(Collectors.toMap(e -> renameFunction(sheet).apply(e.getKey()), kv -> kv.getValue().get(0)));
+
+		return computeCells(resource, sheet, cells, global, query);
+
+	}
+
+	private Response computeCells(String resource, String sheetName, String input, boolean global,
+			Map<String, String> query) {
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		if (!getEngine().isSheetExists(resource, sheetName)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, Arrays.asList(input.split(",")),
+				query, global);
+
+		entity.forEach(cell -> addLink(resource, cell));
+
+		ExcelResult ret = new ExcelResult();
+		ret.setCells(entity);
+
+		return ExcelRestTool.returnOK(ret, link);
+	}
+
+	@GET
+	@Path("{resource}/sheet/{sheet}/cell/{cell}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response cell(@PathParam("resource") String resource, @PathParam("sheet") String sheet,
+			@PathParam("cell") String cell, @QueryParam("_global") @DefaultValue("false") boolean global) {
+
+		Map<String, List<String>> param = uriInfo.getQueryParameters();
+		Map<String, String> query = param.entrySet().stream()
+				.collect(Collectors.toMap(e -> renameFunction(sheet).apply(e.getKey()), kv -> kv.getValue().get(0)));
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		if (!getEngine().isSheetExists(resource, sheet)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		List<ExcelCell> engineRet = null;
+
+		if (query.size() == 0) {
+
+			engineRet = getEngine().listOfCell(resource, sheet, c -> c.getAddress().toString().contains(cell));
+
+		} else {
+			engineRet = getEngine().cellCalculation(resource, Arrays.asList(sheet + "!" + cell), query, global);
+		}
+
+		if (engineRet.size() == 0) {
+
+			return Response.status(Status.NOT_FOUND).build();
+
+		} else {
+			ExcelCell ret = engineRet.get(0);
+
+			addLink(resource, ret);
+
+			return Response.ok(ret).build();
+		}
+	}
+
+	private Function<String, String> renameFunction(String sheet) {
+
+		return cn -> cn.contains("!") ? cn : sheet + "!" + cn;
+	}
+
+	private Consumer<? super ExcelModel> injectLink(UriBuilder builder, Supplier<String[]> supply, String rel,
+			String type) {
+		return cell -> {
+			ExcelLink el = new ExcelLink();
+			el.setHref(builder.build(supply.get()).toString());
+			el.setRel(rel);
+			el.setType(type);
+			cell.getLinks().add(el);
+		};
+	}
+
+	private Consumer<? super ExcelModel> injectLink(UriBuilder builder, Supplier<String[]> supply, String rel) {
+		return injectLink(builder, supply, rel, MediaType.APPLICATION_JSON);
 	}
 
 	public ExcelConfiguration getConf() {
@@ -320,5 +413,4 @@ public class ExcelRestResource {
 	public UriInfo getUriInfo() {
 		return uriInfo;
 	}
-
 }

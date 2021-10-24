@@ -73,7 +73,7 @@ public class ExcelWebSocket {
 
 		ret.setUuid(er.getUuid());
 		ret.setCount(reply.size());
-		ret.setResults(reply);
+		ret.setCells(reply);
 
 		String result = om.writeValueAsString(ret);
 		LOG.info("{}", result);
