@@ -335,10 +335,7 @@ public class ExcelRestResource {
 
 		entity.forEach(cell -> addLink(resource, cell));
 
-		ExcelResult ret = new ExcelResult();
-		ret.setCells(entity);
-
-		return ExcelRestTool.returnOK(ret, link);
+		return ExcelRestTool.returnOK(new ExcelResult(entity), link);
 	}
 
 	@GET
@@ -361,13 +358,7 @@ public class ExcelRestResource {
 
 		List<ExcelCell> engineRet = null;
 
-		if (query.size() == 0) {
-
-			engineRet = getEngine().listOfCell(resource, sheet, c -> c.getAddress().toString().contains(cell));
-
-		} else {
-			engineRet = getEngine().cellCalculation(resource, Arrays.asList(sheet + "!" + cell), query, global);
-		}
+		engineRet = getEngine().cellCalculation(resource, Arrays.asList(sheet + "!" + cell), query, global);
 
 		if (engineRet.size() == 0) {
 

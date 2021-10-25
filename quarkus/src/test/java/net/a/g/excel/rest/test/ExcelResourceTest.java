@@ -20,15 +20,23 @@ public class ExcelResourceTest {
 //			.statusCode(200)
 //				.body(is("{}"));
 //		
-		when().get("/eaas/api").then().statusCode(200).body("_count", equalTo(1), "resources[0].name", is("KYC"),
-				"resources[0].file", is("KYC.xlsx"), "resources[0]._links[0].href",
-				is("http://localhost:8081/eaas/api"), "resources[0]._links[0].rel", is("list-of-resource"),
-				"resources[0]._links[1].href", is("http://localhost:8081/eaas/api/KYC"), "resources[0]._links[1].rel",
-				is("self"), "resources[0]._links[2].href", is("http://localhost:8081/eaas/api/KYC/download"),
+		when().get("/eaas/api")
+
+				.then().statusCode(200)
+
+				// @formatter:off
+			.body("_count", equalTo(1), 
+				"resources[0].name", is("KYC"),
+				"resources[0].file", is("KYC.xlsx"),
+				"resources[0]._links[0].href", is("http://localhost:8081/eaas/api"), 
+				"resources[0]._links[0].rel", is("list-of-resource"),
+				"resources[0]._links[1].href", is("http://localhost:8081/eaas/api/KYC"), 
+				"resources[0]._links[1].rel", is("self"), 
+				"resources[0]._links[2].href", is("http://localhost:8081/eaas/api/KYC/download"),
 				"resources[0]._links[3].href", is("http://localhost:8081/eaas/api/KYC/sheets"),
 				"resources[0]._links[3].rel", is("list-of-sheet")
-
-		);
+			// @formatter:on
+				);
 
 	}
 
@@ -89,6 +97,13 @@ public class ExcelResourceTest {
 					+ "}"));
 		// @formatter:on
 
+	}
+
+	@Test
+	public void testKYCComputeKYC_404() {
+
+		when().get("/eaas/api/{resource}/sheet/{sheet}/cell/{cell}", "KYC", "ComputeKYC", "CPPL").then()
+			.statusCode(404);
 	}
 
 	@Test
@@ -223,6 +238,3 @@ public class ExcelResourceTest {
 	}
 
 }
-
-
-
