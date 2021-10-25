@@ -45,7 +45,9 @@ import net.a.g.excel.util.ExcelConfiguration;
 @Named
 public class ExcelEngine {
 
-	public final static Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
+	public static final  Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
+
+	private static final Predicate<Cell> FORMULA_PREDICATE = cell -> CellType.FORMULA == cell.getCellType();
 
 	@Inject
 	ExcelConfiguration conf;
@@ -149,26 +151,24 @@ public class ExcelEngine {
 	}
 
 	public Map<String, ExcelCell> mapOfFormularCell(String excelName, String sheetName) {
-		return retrieveCell(excelName, sheetName, "FORMULA");
-	}
-
-	private Map<String, ExcelCell> retrieveCell(String resource, String sheet, String cellType) {
-		return mapOfCell(resource, sheet, cell -> CellType.valueOf(cellType) == cell.getCellType());
+		return mapOfCell(excelName, sheetName, FORMULA_PREDICATE);
 	}
 
 	public Map<String, ExcelCell> mapOfCell(String resource, String sheet, Predicate<Cell> predicate) {
 		Workbook workbook = retrieveWorkbook(resource);
-		Sheet sheetObject = workbook.getSheet(sheet);
 
-		return streamCell(sheetObject).filter(predicate)
+		return streamOfCell(workbook, sheet, predicate)
 				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
 	}
 
 	public List<ExcelCell> listOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
 		Workbook workbook = retrieveWorkbook(excelName);
-		Sheet sheet = workbook.getSheet(sheetName);
 
-		return streamCell(sheet).filter(predicate).map(this::celltoExcelCell).collect(Collectors.toList());
+		return streamOfCell(workbook, sheetName, predicate).map(this::celltoExcelCell).collect(Collectors.toList());
+	}
+
+	private Stream<Cell> streamOfCell(Workbook workbook, String sheetName, Predicate<Cell> predicate) {
+		return streamCell(workbook, sheetName).filter(predicate);
 	}
 
 	public Map<String, ExcelCell> mapOfCellCalculated(String resource, String sheet, String[] outputs,
@@ -240,9 +240,10 @@ public class ExcelEngine {
 		}
 
 		// Compute All cellNames
-		return outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
-				.flatMap(Stream::ofNullable).map(execFunction).collect(toList());
+		Stream<Cell> stream = outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
+				.flatMap(Stream::ofNullable);
 
+		return stream.map(execFunction).collect(toList());
 	}
 
 	public List<ExcelCell> cellCalculation(Supplier<String> resource, Supplier<List<String>> outputs,
@@ -367,7 +368,15 @@ public class ExcelEngine {
 	}
 
 	private Stream<Cell> streamCell(Workbook workbook) {
-		return StreamSupport.stream(workbook.spliterator(), false).flatMap(sheet -> StreamSupport
+		return streamCell(workbook, s -> true);
+	}
+
+	private Stream<Cell> streamCell(Workbook workbook, String sheetName) {
+		return streamCell(workbook, s -> s.getSheetName().compareTo(sheetName) == 0);
+	}
+
+	private Stream<Cell> streamCell(Workbook workbook, Predicate<? super Sheet> predicate) {
+		return StreamSupport.stream(workbook.spliterator(), false).filter(predicate).flatMap(sheet -> StreamSupport
 				.stream(sheet.spliterator(), false).flatMap(r -> StreamSupport.stream(r.spliterator(), false)));
 	}
 
