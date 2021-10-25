@@ -4,7 +4,7 @@
 
 This project provides an Excel Engine Executor. It loads couple of Excel file (xls, xlsx) and compute all Cells needed.
 
-[![eaas-ci](https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.yml/badge.svg)](https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.yml)
+image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.yml/badge.svg[]
 
 == Run Application 
 
