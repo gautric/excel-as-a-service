@@ -1,5 +1,8 @@
 package net.a.g.excel.rest;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -26,7 +29,7 @@ public class ExcelRestTool {
 	public static Response returnOK(ExcelResult ret, Link link) {
 
 		ExcelLink el = new ExcelLink();
-		el.setHref(link.getUri().toString());
+		el.setHref(URLDecoder.decode(link.getUri().toString(), StandardCharsets.UTF_8));
 		el.setRel("self");
 		el.setType(MediaType.APPLICATION_JSON);
 
