@@ -539,6 +539,27 @@ public class ExcelResourceTest {
 	// @formatter:on
 
 	}
+	
+	
+	@Test
+	public void testKYCComputeKYCAPI_KO() {
 
+		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT").then().statusCode(400);
+	// @formatter:off
+			
+	// @formatter:on
+
+	}
+
+	
+	@Test
+	public void testKYCComputeKYCAPI_NO() {
+
+		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE").then().statusCode(500);
+	// @formatter:off
+		
+	// @formatter:on
+
+	}
 }
 
