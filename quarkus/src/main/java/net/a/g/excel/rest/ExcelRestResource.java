@@ -4,7 +4,6 @@ import static net.a.g.excel.rest.ExcelConstants.API;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -18,6 +17,7 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -338,16 +338,15 @@ public class ExcelRestResource {
 				+ extract(v.getMetadata()) + ": " + mapType(v.getType()) + "}").collect(Collectors.joining(""))
 				.replaceFirst("/", "");
 
-		String out = mapOfCell.get("OUT").stream().map(v -> extract(v.getMetadata())).collect(Collectors.joining(","));
-
 		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
 
-		for (String string : pullParam) {
-			LOG.debug(resourceBuilder.buildFromEncoded(resource, sheetName, string, in).getRawPath());
-			URI uri = resourceBuilder.buildFromEncoded(resource, sheetName, string, in);
+		Map<String, String> template = pullParam.stream()
+				.collect(Collectors.toMap(Function.identity(),
+						outP -> URLDecoder.decode(
+								resourceBuilder.buildFromEncoded(resource, sheetName, outP, in).toString(),
+								StandardCharsets.UTF_8)));
 
-			LOG.debug(URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8));
-		}
+		LOG.debug("Template {}", template);
 
 		Map<String, ExcelCell> inputParam = mapOfCell.get("IN").stream()
 				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
@@ -368,10 +367,20 @@ public class ExcelRestResource {
 			}
 		}
 
-		pullParam = (List<String>) pullParam.stream().map(p -> outputParam.get(p).getAddress())
-				.collect(Collectors.toList());
+		pullParam = (List<String>) pullParam.stream().map(outputParam::get).flatMap(Stream::ofNullable)
+				.map(ExcelCell::getAddress).collect(Collectors.toList());
 
 		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, pullParam, injectParam, false);
+
+		entity.forEach(cell -> {
+
+			ExcelLink el = new ExcelLink();
+			el.setHref(template.get(extract(cell.getMetadata())));
+			el.setRel("template");
+			el.setType(MediaType.APPLICATION_JSON);
+			cell.getLinks().add(el);
+
+		});
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
