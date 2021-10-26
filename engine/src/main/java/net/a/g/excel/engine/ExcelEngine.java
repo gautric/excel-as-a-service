@@ -45,7 +45,7 @@ import net.a.g.excel.util.ExcelConfiguration;
 @Named
 public class ExcelEngine {
 
-	public static final  Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
+	public static final Logger LOG = LoggerFactory.getLogger(ExcelEngine.class);
 
 	private static final Predicate<Cell> FORMULA_PREDICATE = cell -> CellType.FORMULA == cell.getCellType();
 
@@ -98,6 +98,14 @@ public class ExcelEngine {
 			workbook = convertByteToWorkbook(byteArray);
 		}
 		return workbook;
+	}
+
+	private Supplier<Workbook> retrieveWorkbookSupplier(String name) {
+		if (listOfResources.containsKey(name)) {
+			byte[] byteArray = listOfResources.get(name).getDoc();
+			return () -> convertByteToWorkbook(byteArray);
+		}
+		return null;
 	}
 
 	private Workbook convertByteToWorkbook(byte[] byteArray) {
@@ -161,6 +169,27 @@ public class ExcelEngine {
 				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
 	}
 
+	public List<ExcelCell> listOfInput(String resource, String sheet) {
+		return listOfCell(resource, sheet, cell -> {
+			String content = getCellComment(cell);
+			return content != null && content.contains("@input");
+		});
+	}
+
+	public List<ExcelCell> listOfOutput(String resource, String sheet) {
+		return listOfCell(resource, sheet, cell -> {
+			String content = getCellComment(cell);
+			return content != null && content.contains("@output");
+		});
+	}
+
+	public List<ExcelCell> listOfAPI(String resource, String sheet) {
+		return listOfCell(resource, sheet, cell -> {
+			String content = getCellComment(cell);
+			return content != null && (content.contains("@output") || content.contains("@input"));
+		});
+	}
+
 	public List<ExcelCell> listOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
 		Workbook workbook = retrieveWorkbook(excelName);
 
@@ -221,6 +250,8 @@ public class ExcelEngine {
 		FormulaEvaluator exec = formula(workbook);
 
 		if (global && inputs.size() > 0) {
+			LOG.debug("mode global aka cross-ref enable");
+
 			Map<String, FormulaEvaluator> workbooks = listOfResources.values().stream().collect(Collectors.toMap(
 					ExcelResource::getFile,
 					r -> (resource.compareTo(r.getName()) == 0) ? exec : formula(convertByteToWorkbook(r.getDoc()))));
@@ -238,12 +269,19 @@ public class ExcelEngine {
 		} else {
 			execFunction = rawMapping;
 		}
+		LOG.debug("Resource {} ", resource);
+
+		LOG.debug("Inputs: {}", inputs);
+		LOG.debug("Outputs: {}", outputs);
+
 
 		// Compute All cellNames
-		Stream<Cell> stream = outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
-				.flatMap(Stream::ofNullable);
+		List<ExcelCell> ret = outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
+				.flatMap(Stream::ofNullable).map(execFunction).collect(toList());
 
-		return stream.map(execFunction).collect(toList());
+		LOG.debug("Computed: {}", ret);
+
+		return ret;
 	}
 
 	public List<ExcelCell> cellCalculation(Supplier<String> resource, Supplier<List<String>> outputs,
@@ -265,6 +303,7 @@ public class ExcelEngine {
 
 		Object ret = "";
 		if (cell != null) {
+			LOG.debug("{} {} ", cell.getAddress(),cell.getCellType());
 
 			switch (cell.getCellType()) {
 			case BOOLEAN:
@@ -303,6 +342,7 @@ public class ExcelEngine {
 
 		String ret = "";
 		if (cell != null) {
+			LOG.debug("{} {} ", cell.getAddress(),cell.getCellType());
 
 			CellType type = cell.getCellType();
 			switch (cell.getCellType()) {
@@ -331,6 +371,7 @@ public class ExcelEngine {
 	private void updateCell(Cell cell, String value) {
 
 		if (cell != null) {
+			LOG.debug("{} {} ", cell.getAddress(),cell.getCellType());
 
 			switch (cell.getCellType()) {
 			case BOOLEAN:
@@ -411,4 +452,5 @@ public class ExcelEngine {
 		ret.setMetadata(getCellComment(cell));
 		return ret;
 	}
+
 }
