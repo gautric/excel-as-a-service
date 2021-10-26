@@ -56,6 +56,7 @@ import net.a.g.excel.engine.ExcelEngine;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelLink;
 import net.a.g.excel.model.ExcelModel;
+import net.a.g.excel.model.ExcelRequest;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelResult;
 import net.a.g.excel.model.ExcelSheet;
@@ -330,17 +331,27 @@ public class ExcelRestResource {
 			return Response.status(Response.Status.BAD_REQUEST).entity("input path should be even").build();
 		}
 
-		Map<String, List<ExcelCell>> pp = getEngine().listOfAPI(resource, sheetName).stream()
+		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
 				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
 
-		String in = pp.get("IN").stream().map(v -> "/" + extract(v.getMetadata()) + "/{" + mapType(v.getType()) + "}")
-				.collect(Collectors.joining("")).replaceFirst("/", "");
+		String in = mapOfCell.get("IN").stream().map(v -> "/" + extract(v.getMetadata()) + "/{"
+				+ extract(v.getMetadata()) + ": " + mapType(v.getType()) + "}").collect(Collectors.joining(""))
+				.replaceFirst("/", "");
 
-		String out = pp.get("OUT").stream().map(v -> extract(v.getMetadata())).collect(Collectors.joining(","));
+		String out = mapOfCell.get("OUT").stream().map(v -> extract(v.getMetadata())).collect(Collectors.joining(","));
 
-		Map<String, ExcelCell> inputParam = pp.get("IN").stream()
+		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
+
+		for (String string : pullParam) {
+			LOG.debug(resourceBuilder.buildFromEncoded(resource, sheetName, string, in).getRawPath());
+			URI uri = resourceBuilder.buildFromEncoded(resource, sheetName, string, in);
+
+			LOG.debug(URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8));
+		}
+
+		Map<String, ExcelCell> inputParam = mapOfCell.get("IN").stream()
 				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
-		Map<String, ExcelCell> outputParam = pp.get("OUT").stream()
+		Map<String, ExcelCell> outputParam = mapOfCell.get("OUT").stream()
 				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
 
 		Map<String, String> injectParam = new HashMap<>();
@@ -362,12 +373,55 @@ public class ExcelRestResource {
 
 		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, pullParam, injectParam, false);
 
-		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		LOG.debug(resourceBuilder.buildFromEncoded(resource, sheetName, out, in).getRawPath());
-		URI uri = resourceBuilder.buildFromEncoded(resource, sheetName, out, in);
+		return ExcelRestTool.returnOK(new ExcelResult(entity), link);
 
-		LOG.debug(URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8));
+	}
+
+	@POST
+	@Path("{resource}/sheet/{sheet}/compute")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response computePOST(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
+			final ExcelRequest request) {
+
+		List<String> pullParam = request.getOutputs();
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		if (!getEngine().isSheetExists(resource, sheetName)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
+				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+
+		Map<String, ExcelCell> inputParam = mapOfCell.get("IN").stream()
+				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
+		Map<String, ExcelCell> outputParam = mapOfCell.get("OUT").stream()
+				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
+
+		Map<String, String> injectParam = new HashMap<>();
+		for (Map.Entry<String, String> entry : request.getInputs().entrySet()) {
+			String param = entry.getKey();
+			String value = entry.getValue();
+
+			ExcelCell cell = inputParam.get(param);
+			if (cell != null) {
+				LOG.debug("Add param '{}' -> {} = '{}' ", param, cell.getAddress(), value);
+				injectParam.put(cell.getAddress(), value);
+			} else {
+				LOG.error("Param '{}' = '{}' is not found, skipped", param, value);
+			}
+		}
+
+		pullParam = (List<String>) pullParam.stream().map(p -> outputParam.get(p).getAddress())
+				.collect(Collectors.toList());
+
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, pullParam, injectParam, false);
+
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		return ExcelRestTool.returnOK(new ExcelResult(entity), link);

@@ -1,0 +1,13 @@
+{
+    "uuid": "b00f82d6-206a-450b-bd31-d1d3a3ac5d4a",
+    "resource": "KYC",
+    "sheet": "ComputeKYC",
+    "outputs": [
+        "SCORE"
+    ],
+    "inputs": {
+        "PEP": true,
+        "COUNTRY": "CY",
+        "AMOUNT": 1000000
+    }
+}
