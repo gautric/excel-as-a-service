@@ -182,7 +182,6 @@ public class ExcelResourceTest {
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!A2\",\n"
 					+ "    \"value\" : \"PEP\",\n"
-					+ "    \"metadata\" : \"@input\",\n"
 					+ "    \"type\" : \"STRING\"\n"
 					+ "  }, {\n"
 					+ "    \"_links\" : [ {\n"
@@ -200,6 +199,7 @@ public class ExcelResourceTest {
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!B2\",\n"
 					+ "    \"value\" : \"false\",\n"
+					+ "    \"metadata\" : \"@input(PEP)\",\n"
 					+ "    \"type\" : \"BOOLEAN\"\n"
 					+ "  }, {\n"
 					+ "    \"_links\" : [ {\n"
@@ -234,7 +234,6 @@ public class ExcelResourceTest {
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!A3\",\n"
 					+ "    \"value\" : \"COUNTRY\",\n"
-					+ "    \"metadata\" : \"@input\",\n"
 					+ "    \"type\" : \"STRING\"\n"
 					+ "  }, {\n"
 					+ "    \"_links\" : [ {\n"
@@ -252,6 +251,7 @@ public class ExcelResourceTest {
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!B3\",\n"
 					+ "    \"value\" : \"FR\",\n"
+					+ "    \"metadata\" : \"@input(COUNTRY)\",\n"
 					+ "    \"type\" : \"STRING\"\n"
 					+ "  }, {\n"
 					+ "    \"_links\" : [ {\n"
@@ -286,7 +286,6 @@ public class ExcelResourceTest {
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!A4\",\n"
 					+ "    \"value\" : \"AMOUNT\",\n"
-					+ "    \"metadata\" : \"@input\",\n"
 					+ "    \"type\" : \"STRING\"\n"
 					+ "  }, {\n"
 					+ "    \"_links\" : [ {\n"
@@ -304,6 +303,7 @@ public class ExcelResourceTest {
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!B4\",\n"
 					+ "    \"value\" : 0.0,\n"
+					+ "    \"metadata\" : \"@input(AMOUNT)\",\n"
 					+ "    \"type\" : \"NUMERIC\"\n"
 					+ "  }, {\n"
 					+ "    \"_links\" : [ {\n"
@@ -372,7 +372,7 @@ public class ExcelResourceTest {
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!C6\",\n"
 					+ "    \"value\" : \"SUM(C2:C4)\",\n"
-					+ "    \"metadata\" : \"@output\",\n"
+					+ "    \"metadata\" : \"@output(SCORE)\",\n"
 					+ "    \"type\" : \"FORMULA\"\n"
 					+ "  } ]\n"
 					+ "}"));
@@ -409,7 +409,7 @@ public class ExcelResourceTest {
 					+ "  } ],\n"
 					+ "  \"address\" : \"ComputeKYC!C6\",\n"
 					+ "  \"value\" : \"SUM(C2:C4)\",\n"
-					+ "  \"metadata\" : \"@output\",\n"
+					+ "  \"metadata\" : \"@output(SCORE)\",\n"
 					+ "  \"type\" : \"FORMULA\"\n"
 					+ "}"));
 		// @formatter:on
@@ -443,7 +443,7 @@ public class ExcelResourceTest {
 					+ "  } ],\n"
 					+ "  \"address\" : \"ComputeKYC!C6\",\n"
 					+ "  \"value\" : 50.0,\n"
-					+ "  \"metadata\" : \"@output\",\n"
+					+ "  \"metadata\" : \"@output(SCORE)\",\n"
 					+ "  \"type\" : \"NUMERIC\"\n"
 					+ "}"));
 	// @formatter:on
@@ -477,7 +477,7 @@ public class ExcelResourceTest {
 					+ "  } ],\n"
 					+ "  \"address\" : \"ComputeKYC!C6\",\n"
 					+ "  \"value\" : 25.0,\n"
-					+ "  \"metadata\" : \"@output\",\n"
+					+ "  \"metadata\" : \"@output(SCORE)\",\n"
 					+ "  \"type\" : \"NUMERIC\"\n"
 					+ "}"));
 	// @formatter:on
@@ -510,22 +510,22 @@ public class ExcelResourceTest {
 					+ "  } ],\n"
 					+ "  \"address\" : \"ComputeKYC!C6\",\n"
 					+ "  \"value\" : 75.0,\n"
-					+ "  \"metadata\" : \"@output\",\n"
+					+ "  \"metadata\" : \"@output(SCORE)\",\n"
 					+ "  \"type\" : \"NUMERIC\"\n"
 					+ "}"));
 	// @formatter:on
 
 	}
 	
-	//@Test
+	@Test
 	public void testKYCComputeKYCAPI() {
 
-		when().get("/eaas/api/KYCAPI/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT/1000000").then().statusCode(200)
+		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT/1000000").then().statusCode(200)
 	// @formatter:off
 			.body(is("{\n"
 					+ "  \"_links\" : [ {\n"
 					+ "    \"rel\" : \"self\",\n"
-					+ "    \"href\" : \"http://localhost:8080/eaas/api/KYCAPI/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT/1000000\",\n"
+					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT/1000000\",\n"
 					+ "    \"type\" : \"application/json\"\n"
 					+ "  } ],\n"
 					+ "  \"_count\" : 1,\n"
