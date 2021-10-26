@@ -303,7 +303,7 @@ public class ExcelEngine {
 
 		Object ret = "";
 		if (cell != null) {
-			LOG.debug("{} {} ", cell.getAddress(),cell.getCellType());
+			LOG.debug("Read {} {} ", cell.getAddress(),cell.getCellType());
 
 			switch (cell.getCellType()) {
 			case BOOLEAN:
@@ -342,7 +342,7 @@ public class ExcelEngine {
 
 		String ret = "";
 		if (cell != null) {
-			LOG.debug("{} {} ", cell.getAddress(),cell.getCellType());
+			LOG.debug("Read Type {} {} ", cell.getAddress(),cell.getCellType());
 
 			CellType type = cell.getCellType();
 			switch (cell.getCellType()) {
@@ -371,7 +371,7 @@ public class ExcelEngine {
 	private void updateCell(Cell cell, String value) {
 
 		if (cell != null) {
-			LOG.debug("{} {} ", cell.getAddress(),cell.getCellType());
+			LOG.debug("Write {} {} ", cell.getAddress(),cell.getCellType());
 
 			switch (cell.getCellType()) {
 			case BOOLEAN:
