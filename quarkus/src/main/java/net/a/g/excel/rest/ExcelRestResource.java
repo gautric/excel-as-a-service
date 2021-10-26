@@ -4,13 +4,19 @@ import static net.a.g.excel.rest.ExcelConstants.API;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -26,6 +32,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Link;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.PathSegment;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriBuilder;
@@ -301,6 +308,96 @@ public class ExcelRestResource {
 		ret = new ExcelResult(entity);
 
 		return ExcelRestTool.returnOK(ret, link);
+	}
+
+	@GET
+	@Path("{resource}/sheet/{sheet}/compute/{output}/{input: .*}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response compute(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
+			@PathParam("output") String output, @PathParam("input") List<PathSegment> input) {
+
+		List<String> pullParam = List.of(output.split(","));
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		if (!getEngine().isSheetExists(resource, sheetName)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		if (input.size() % 2 != 0) {
+			return Response.status(Response.Status.BAD_REQUEST).entity("input path should be even").build();
+		}
+
+		Map<String, List<ExcelCell>> pp = getEngine().listOfAPI(resource, sheetName).stream()
+				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+
+		String in = pp.get("IN").stream().map(v -> "/" + extract(v.getMetadata()) + "/{" + mapType(v.getType()) + "}")
+				.collect(Collectors.joining("")).replaceFirst("/", "");
+
+		String out = pp.get("OUT").stream().map(v -> extract(v.getMetadata())).collect(Collectors.joining(","));
+
+		Map<String, ExcelCell> inputParam = pp.get("IN").stream()
+				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
+		Map<String, ExcelCell> outputParam = pp.get("OUT").stream()
+				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
+
+		Map<String, String> injectParam = new HashMap<>();
+		for (int i = 0; i < input.size() / 2; i++) {
+			String param = input.get(i * 2).getPath();
+			String value = input.get(i * 2 + 1).getPath();
+
+			ExcelCell cell = inputParam.get(param);
+			if (cell != null) {
+				LOG.debug("Add param '{}' -> {} = '{}' ", param, cell.getAddress(), value);
+				injectParam.put(cell.getAddress(), value);
+			} else {
+				LOG.error("Param '{}' = '{}' is not found, skipped", param, value);
+			}
+		}
+
+		pullParam = (List<String>) pullParam.stream().map(p -> outputParam.get(p).getAddress())
+				.collect(Collectors.toList());
+
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, pullParam, injectParam, false);
+
+		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
+
+		LOG.debug(resourceBuilder.buildFromEncoded(resource, sheetName, out, in).getRawPath());
+		URI uri = resourceBuilder.buildFromEncoded(resource, sheetName, out, in);
+
+		LOG.debug(URLDecoder.decode(uri.toString(), StandardCharsets.UTF_8));
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+
+		return ExcelRestTool.returnOK(new ExcelResult(entity), link);
+
+	}
+
+	private String extract(String input) {
+		Pattern p = Pattern.compile("@(input|output)\\(\"?(?<input>[A-Za-z0-9]+)\"?\\)");
+		Matcher m = p.matcher(input);
+		while (m.matches()) {
+			return m.group("input");
+		}
+		return null;
+	}
+
+	private String mapType(String metadata) {
+
+		switch (metadata) {
+		case "BOOLEAN":
+			return "true|false";
+		case "STRING":
+			return "[^/]%2B";
+		case "NUMERIC":
+			return "[%2B-]?([0-9]*).?[0-9]%2B";
+		case "DATE":
+			return "\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01])%2A";
+		default:
+			return "";
+		}
+
 	}
 
 	@GET
