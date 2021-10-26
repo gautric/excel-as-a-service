@@ -56,6 +56,12 @@ public class ExcelCell extends ExcelModel {
 	public ExcelCell(String adress, String formula, Object value, String ref, String metadata) {
 		this.address = adress;
 		this.value = value;
+	}
+
+	@Override
+	public String toString() {
+		return "ExcelCell [address=" + this.address + ", value=" + this.value + ", metadata=" + this.metadata
+				+ ", type=" + this.type + "]";
 	};
 
 }
