@@ -1,4 +1,4 @@
-package net.a.g.excel.main;
+package net.a.g.excel.kafka.main;
 
 import io.quarkus.runtime.Quarkus;
 import io.quarkus.runtime.annotations.QuarkusMain;
