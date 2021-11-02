@@ -334,9 +334,9 @@ public class ExcelRestResource {
 		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
 				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
 
-		String in = mapOfCell.get("IN").stream().map(v -> "/" + extract(v.getMetadata()) + "/{"
-				+ extract(v.getMetadata()) + ": " + mapType(v.getType()) + "}").collect(Collectors.joining(""))
-				.replaceFirst("/", "");
+		String in = mapOfCell.get("IN").stream()
+				.map(v -> "/" + extract(v.getMetadata()) + "/{" + extract(v.getMetadata()) + "}")
+				.collect(Collectors.joining("")).replaceFirst("/", "");
 
 		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
 
@@ -344,7 +344,8 @@ public class ExcelRestResource {
 				.collect(Collectors.toMap(Function.identity(),
 						outP -> URLDecoder.decode(
 								resourceBuilder.buildFromEncoded(resource, sheetName, outP, in).toString(),
-								StandardCharsets.UTF_8)));
+								StandardCharsets.UTF_8),
+						(n, o) -> o));
 
 		LOG.debug("Template {}", template);
 
@@ -376,7 +377,7 @@ public class ExcelRestResource {
 
 			ExcelLink el = new ExcelLink();
 			el.setHref(template.get(extract(cell.getMetadata())));
-			el.setRel("template");
+			el.setRel("uri-template");
 			el.setType(MediaType.APPLICATION_JSON);
 			cell.getLinks().add(el);
 
@@ -386,6 +387,51 @@ public class ExcelRestResource {
 
 		return ExcelRestTool.returnOK(new ExcelResult(entity), link);
 
+	}
+
+	@GET
+	@Path("{resource}/sheet/{sheet}/compute")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response computeDefinition(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
+
+		if (!getEngine().isResourceExists(resource)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		if (!getEngine().isSheetExists(resource, sheetName)) {
+			return Response.status(Response.Status.NOT_FOUND).build();
+		}
+
+		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
+				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+
+		String in = mapOfCell.get("IN").stream()
+				.map(v -> "/" + extract(v.getMetadata()) + "/{" + extract(v.getMetadata()) + "}")
+				.collect(Collectors.joining("")).replaceFirst("/", "");
+
+		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
+
+		Map<String, String> template = mapOfCell.get("OUT").stream().map(ExcelCell::getMetadata).map(this::extract)
+				.collect(Collectors.toMap(Function.identity(),
+						outP -> URLDecoder.decode(
+								resourceBuilder.buildFromEncoded(resource, sheetName, outP, in).toString(),
+								StandardCharsets.UTF_8)));
+
+		LOG.debug("Template {}", template);
+
+		ExcelResult er = new ExcelResult();
+
+		template.entrySet().stream().forEach(kv -> {
+			ExcelLink el = new ExcelLink();
+			el.setHref(kv.getValue());
+			el.setRel("uri-template-" + kv.getKey().toLowerCase());
+			el.setType(MediaType.APPLICATION_JSON);
+			er.getLinks().add(el);
+		});
+
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+
+		return ExcelRestTool.returnOK(er, link);
 	}
 
 	@POST
