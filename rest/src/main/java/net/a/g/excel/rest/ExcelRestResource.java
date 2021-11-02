@@ -85,9 +85,11 @@ public class ExcelRestResource {
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
 		injectLink(selfBuilder, () -> new String[] { er.getName() }, "self").accept(er);
+
 		UriBuilder dwnBuilder = getURIBuilder().path(ExcelRestResource.class, "download");
 		injectLink(dwnBuilder, () -> new String[] { er.getName() }, "download",
 				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").accept(er);
+
 		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "listOfSheet");
 		injectLink(sheetsBuilder, () -> new String[] { er.getName() }, "list-of-sheet").accept(er);
 	}
@@ -98,8 +100,12 @@ public class ExcelRestResource {
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
 		injectLink(selfBuilder, () -> new String[] { resource, es.getName() }, "self").accept(es);
+
 		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "listOfCell");
 		injectLink(sheetsBuilder, () -> new String[] { resource, es.getName() }, "list-of-cell").accept(es);
+
+		UriBuilder computeBuilder = getURIBuilder().path(ExcelRestResource.class, "computeDefinition");
+		injectLink(computeBuilder, () -> new String[] { resource, es.getName() }, "list-of-template").accept(es);
 	}
 
 	private void addLink(String resource, ExcelCell cell) {
@@ -385,7 +391,12 @@ public class ExcelRestResource {
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
-		return ExcelRestTool.returnOK(new ExcelResult(entity), link);
+		ExcelResult er = new ExcelResult(entity);
+
+		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
+		injectLink(selfBuilder, () -> new String[] { resource, sheetName }, "sheet").accept(er);
+
+		return ExcelRestTool.returnOK(er, link);
 
 	}
 
@@ -428,6 +439,9 @@ public class ExcelRestResource {
 			el.setType(MediaType.APPLICATION_JSON);
 			er.getLinks().add(el);
 		});
+
+		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
+		injectLink(selfBuilder, () -> new String[] { resource, sheetName }, "sheet").accept(er);
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
