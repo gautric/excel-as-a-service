@@ -1,0 +1,81 @@
+{
+  "_count": 15,
+  "_self": "http://localhost:8080/api/KYC/ComputeKYC",
+  "results": [
+    {
+      "address": "C1",
+      "value": " SCORE",
+      "type": "STRING"
+    },
+    {
+      "address": "B1",
+      "value": "INPUT",
+      "type": "STRING"
+    },
+    {
+      "address": "C2",
+      "formula": "IF(B2,50,0)",
+      "type": "FORMULA"
+    },
+    {
+      "address": "A1",
+      "value": "",
+      "type": "BLANK"
+    },
+    {
+      "address": "B2",
+      "value": "false",
+      "type": "BOOLEAN"
+    },
+    {
+      "address": "C3",
+      "formula": "VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)",
+      "type": "FORMULA"
+    },
+    {
+      "address": "A2",
+      "value": "PEP",
+      "type": "STRING"
+    },
+    {
+      "address": "B3",
+      "value": "FR",
+      "type": "STRING"
+    },
+    {
+      "address": "C4",
+      "formula": "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
+      "type": "FORMULA"
+    },
+    {
+      "address": "A3",
+      "value": "COUNTRY",
+      "type": "STRING"
+    },
+    {
+      "address": "B4",
+      "value": 0,
+      "type": "NUMERIC"
+    },
+    {
+      "address": "A4",
+      "value": "AMOUNT",
+      "type": "STRING"
+    },
+    {
+      "address": "C6",
+      "formula": "SUM(C2:C4)",
+      "type": "FORMULA"
+    },
+    {
+      "address": "A5",
+      "value": "",
+      "type": "BLANK"
+    },
+    {
+      "address": "A6",
+      "value": "FINAL",
+      "type": "STRING"
+    }
+  ]
+}

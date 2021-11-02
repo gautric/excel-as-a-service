@@ -52,6 +52,7 @@
 	</dependencyManagement>
 	<modules>
 		<module>engine</module>
-		<module>quarkus</module>
+		<module>rest</module>
+		<module>kafka</module>
 	</modules>
 </project>
