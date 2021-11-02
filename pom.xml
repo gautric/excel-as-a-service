@@ -18,14 +18,19 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
 		<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
-		
-		<quarkus.platform.version>2.3.1.Final</quarkus.platform.version>
-        <camel-quarkus.platform.version>${quarkus.platform.version}</camel-quarkus.platform.version>
-    
-        <camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
-        <camel-quarkus.platform.artifact-id>quarkus-camel-bom</camel-quarkus.platform.artifact-id>
-		
+
+		<quarkus.platform.version>2.4.0.Final</quarkus.platform.version>
+		<camel-quarkus.platform.version>${quarkus.platform.version}</camel-quarkus.platform.version>
+
+		<camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
+		<camel-quarkus.platform.artifact-id>quarkus-camel-bom</camel-quarkus.platform.artifact-id>
+
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+		<weld-se-core.version>3.1.8.Final</weld-se-core.version>
+		<weld-junit5.version>2.0.2.Final</weld-junit5.version>
+		<hamcrest.version>2.2</hamcrest.version>
+		<json.version>20210307</json.version>
+		<microprofile-openapi-api.version>2.0.1-RC1</microprofile-openapi-api.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -36,13 +41,13 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-            <dependency>
-                <groupId>${camel-quarkus.platform.group-id}</groupId>
-                <artifactId>${camel-quarkus.platform.artifact-id}</artifactId>
-                <version>${camel-quarkus.platform.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
+			<dependency>
+				<groupId>${camel-quarkus.platform.group-id}</groupId>
+				<artifactId>${camel-quarkus.platform.artifact-id}</artifactId>
+				<version>${camel-quarkus.platform.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<modules>
