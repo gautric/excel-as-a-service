@@ -33,7 +33,7 @@ public class ExcelConsumer {
 	@Inject
 	ObjectMapper om;
 
-	@Incoming("eaas-request-cmd-out")
+	@Incoming("eaas-request-cmd-in")
 	@Broadcast
 	@Outgoing("eaas-response-channel")
 	public ExcelResult receive(Record<String, String> record) {
