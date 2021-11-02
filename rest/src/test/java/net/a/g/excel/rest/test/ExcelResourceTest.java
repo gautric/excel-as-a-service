@@ -92,6 +92,10 @@ public class ExcelResourceTest {
 					+ "    \"rel\" : \"list-of-cell\",\n"
 					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/cells\",\n"
 					+ "    \"type\" : \"application/json\"\n"
+					+ "  }, {\n"
+					+ "    \"rel\" : \"list-of-template\",\n"
+					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/compute\",\n"
+					+ "    \"type\" : \"application/json\"\n"
 					+ "  } ],\n"
 					+ "  \"name\" : \"ComputeKYC\"\n"
 					+ "}"));
@@ -386,6 +390,22 @@ public class ExcelResourceTest {
 		when().get("/eaas/api/{resource}/sheet/{sheet}/cell/{cell}", "KYC", "ComputeKYC", "CPPL").then()
 			.statusCode(404);
 	}
+	
+	
+	@Test
+	public void testKYCComputeKYC000_404() {
+
+		when().get("/eaas/api/{resource}", "KYC000").then()
+			.statusCode(404);
+	}
+	
+	@Test
+	public void testKYCComputeKYC_CompuKYCKYC_404() {
+
+		when().get("/eaas/api/{resource}/sheet/{sheet}", "KYC", "CompuKYCKYC").then()
+			.statusCode(404);
+	}
+	
 
 	@Test
 	public void testKYCComputeKYCC6() {
@@ -524,6 +544,10 @@ public class ExcelResourceTest {
 	// @formatter:off
 			.body(is("{\n"
 					+ "  \"_links\" : [ {\n"
+					+ "    \"rel\" : \"sheet\",\n"
+					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC\",\n"
+					+ "    \"type\" : \"application/json\"\n"
+					+ "  }, {\n"
 					+ "    \"rel\" : \"self\",\n"
 					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT/1000000\",\n"
 					+ "    \"type\" : \"application/json\"\n"
@@ -531,8 +555,8 @@ public class ExcelResourceTest {
 					+ "  \"_count\" : 1,\n"
 					+ "  \"cells\" : [ {\n"
 					+ "    \"_links\" : [ {\n"
-					+ "      \"rel\" : \"template\",\n"
-					+ "      \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/{PEP: true|false}/COUNTRY/{COUNTRY: [^/]+}/AMOUNT/{AMOUNT: [+-]?([0-9]*).?[0-9]+}\",\n"
+					+ "      \"rel\" : \"uri-template\",\n"
+					+ "      \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/{PEP}/COUNTRY/{COUNTRY}/AMOUNT/{AMOUNT}\",\n"
 					+ "      \"type\" : \"application/json\"\n"
 					+ "    } ],\n"
 					+ "    \"address\" : \"ComputeKYC!C6\",\n"
