@@ -188,7 +188,7 @@ public class ExcelRestResource {
 	}
 
 	@POST
-	@Path("/{resource}")
+	@Path("{resource}")
 	@Consumes(MediaType.MULTIPART_FORM_DATA)
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
