@@ -569,6 +569,38 @@ public class ExcelResourceTest {
 
 	}
 	
+	@Test
+	public void testKYCComputeKYCAPI_withInvalidParam() {
+
+		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/TOTOTO/1000000").then().statusCode(200)
+	// @formatter:off
+			.body(is("{\n"
+					+ "  \"_links\" : [ {\n"
+					+ "    \"rel\" : \"sheet\",\n"
+					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC\",\n"
+					+ "    \"type\" : \"application/json\"\n"
+					+ "  }, {\n"
+					+ "    \"rel\" : \"self\",\n"
+					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/TOTOTO/1000000\",\n"
+					+ "    \"type\" : \"application/json\"\n"
+					+ "  } ],\n"
+					+ "  \"_count\" : 1,\n"
+					+ "  \"cells\" : [ {\n"
+					+ "    \"_links\" : [ {\n"
+					+ "      \"rel\" : \"uri-template\",\n"
+					+ "      \"href\" : \"http://localhost:8081/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/{PEP}/COUNTRY/{COUNTRY}/AMOUNT/{AMOUNT}\",\n"
+					+ "      \"type\" : \"application/json\"\n"
+					+ "    } ],\n"
+					+ "    \"address\" : \"ComputeKYC!C6\",\n"
+					+ "    \"value\" : 75.0,\n"
+					+ "    \"metadata\" : \"@output(SCORE)\",\n"
+					+ "    \"type\" : \"NUMERIC\"\n"
+					+ "  } ]\n"
+					+ "}"));
+	// @formatter:on
+
+	}
+	
 	
 	@Test
 	public void testKYCComputeKYCAPI_KO() {
@@ -591,4 +623,3 @@ public class ExcelResourceTest {
 
 	}
 }
-

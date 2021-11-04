@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
@@ -77,6 +78,9 @@ public class ExcelRestResource {
 
 	@Context
 	UriInfo uriInfo;
+	
+	@Inject
+	Instance<ExcelResult> result;
 
 	private void addLink(ExcelResource er) {
 
@@ -377,7 +381,7 @@ public class ExcelRestResource {
 		pullParam = (List<String>) pullParam.stream().map(outputParam::get).flatMap(Stream::ofNullable)
 				.map(ExcelCell::getAddress).collect(Collectors.toList());
 
-		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, pullParam, injectParam, false);
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, pullParam, injectParam, false);
 
 		entity.forEach(cell -> {
 
