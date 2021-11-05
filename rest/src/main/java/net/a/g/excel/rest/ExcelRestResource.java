@@ -65,7 +65,7 @@ import net.a.g.excel.util.ExcelConfiguration;
 import net.a.g.excel.util.ExcelConstants;
 
 @Path(API)
-@OpenAPIDefinition(externalDocs = @ExternalDocumentation(description = "schema", url = ExcelConstants.SCHEMA_URI), info = @Info(version = "1.0", title = "Excel Quarkus"))
+@OpenAPIDefinition(externalDocs = @ExternalDocumentation(description = "schema", url = ExcelConstants.SCHEMA_URI), info = @Info(version = "1.0", title = "Excel As A Service"))
 public class ExcelRestResource {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelRestResource.class);
@@ -78,38 +78,38 @@ public class ExcelRestResource {
 
 	@Context
 	UriInfo uriInfo;
-	
+
 	@Inject
 	Instance<ExcelResult> result;
 
 	private void addLink(ExcelResource er) {
 
 		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "resources");
-		injectLink(resourceBuilder, () -> new String[] {}, "list-of-resource").accept(er);
+		injectLink(er,resourceBuilder, () -> new String[] {}, "list-of-resource");
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
-		injectLink(selfBuilder, () -> new String[] { er.getName() }, "self").accept(er);
+		injectLink(er,selfBuilder, () -> new String[] { er.getName() }, "self");
 
 		UriBuilder dwnBuilder = getURIBuilder().path(ExcelRestResource.class, "download");
-		injectLink(dwnBuilder, () -> new String[] { er.getName() }, "download",
-				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet").accept(er);
+		injectLink(er,dwnBuilder, () -> new String[] { er.getName() }, "download",
+				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "listOfSheet");
-		injectLink(sheetsBuilder, () -> new String[] { er.getName() }, "list-of-sheet").accept(er);
+		injectLink(er,sheetsBuilder, () -> new String[] { er.getName() }, "list-of-sheet");
 	}
 
 	private void addLink(String resource, ExcelSheet es) {
 		UriBuilder upBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
-		injectLink(upBuilder, () -> new String[] { resource }, "resource").accept(es);
+		injectLink(es, upBuilder, () -> new String[] { resource }, "resource");
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
-		injectLink(selfBuilder, () -> new String[] { resource, es.getName() }, "self").accept(es);
+		injectLink(es, selfBuilder, () -> new String[] { resource, es.getName() }, "self");
 
 		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "listOfCell");
-		injectLink(sheetsBuilder, () -> new String[] { resource, es.getName() }, "list-of-cell").accept(es);
+		injectLink(es, sheetsBuilder, () -> new String[] { resource, es.getName() }, "list-of-cell");
 
 		UriBuilder computeBuilder = getURIBuilder().path(ExcelRestResource.class, "computeDefinition");
-		injectLink(computeBuilder, () -> new String[] { resource, es.getName() }, "list-of-template").accept(es);
+		injectLink(es, computeBuilder, () -> new String[] { resource, es.getName() }, "list-of-template");
 	}
 
 	private void addLink(String resource, ExcelCell cell) {
@@ -117,13 +117,13 @@ public class ExcelRestResource {
 		String address = cell.getAddress().split("!")[1];
 
 		UriBuilder upBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
-		injectLink(upBuilder, () -> new String[] { resource }, "resource").accept(cell);
+		injectLink(cell,upBuilder, () -> new String[] { resource }, "resource");
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
-		injectLink(selfBuilder, () -> new String[] { resource, sheet }, "sheet").accept(cell);
+		injectLink(cell, selfBuilder, () -> new String[] { resource, sheet }, "sheet");
 
 		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "cell");
-		injectLink(sheetsBuilder, () -> new String[] { resource, sheet, address }, "self").accept(cell);
+		injectLink(cell, sheetsBuilder, () -> new String[] { resource, sheet, address }, "self");
 
 		if (uriInfo.getQueryParameters().size() > 0) {
 			ExcelLink el = new ExcelLink();
@@ -600,6 +600,19 @@ public class ExcelRestResource {
 	private Function<String, String> renameFunction(String sheet) {
 
 		return cn -> cn.contains("!") ? cn : sheet + "!" + cn;
+	}
+
+	private void injectLink(ExcelModel obj, UriBuilder builder, Supplier<String[]> supply, String rel) {
+		injectLink(obj, builder, supply, rel, MediaType.APPLICATION_JSON);
+
+	}
+
+	private void injectLink(ExcelModel obj, UriBuilder builder, Supplier<String[]> supply, String rel, String type) {
+		ExcelLink el = new ExcelLink();
+		el.setHref(builder.build(supply.get()).toString());
+		el.setRel(rel);
+		el.setType(type);
+		obj.getLinks().add(el);
 	}
 
 	private Consumer<? super ExcelModel> injectLink(UriBuilder builder, Supplier<String[]> supply, String rel,
