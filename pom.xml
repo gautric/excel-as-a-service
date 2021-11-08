@@ -52,7 +52,7 @@
 	</dependencyManagement>
 	<modules>
 		<module>excel-engine</module>
-		<module>rest</module>
+		<module>excel-rest</module>
 		<module>kafka</module>
 	</modules>
 </project>
