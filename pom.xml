@@ -53,6 +53,6 @@
 	<modules>
 		<module>excel-engine</module>
 		<module>excel-rest</module>
-		<module>kafka</module>
+		<module>excel-kafka</module>
 	</modules>
 </project>
