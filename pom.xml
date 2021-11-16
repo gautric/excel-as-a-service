@@ -41,18 +41,12 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
-			<dependency>
-				<groupId>${camel-quarkus.platform.group-id}</groupId>
-				<artifactId>${camel-quarkus.platform.artifact-id}</artifactId>
-				<version>${camel-quarkus.platform.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<modules>
 		<module>excel-engine</module>
 		<module>excel-rest</module>
 		<module>excel-kafka</module>
+		<module>excel-grpc</module>
 	</modules>
 </project>

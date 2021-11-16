@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "net.a.g.excel.grpc";
+option java_outer_classname = "ExcelProto";
+option objc_class_prefix = "Excel";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+
+package net.a.g.excel.grpc;
+
+message ExcelResource {
+  string name = 1;
+}
+
+message ExcelSheet {
+  string name = 1;
+}
+
+message ExcelCell {
+  optional string address = 1;
+  optional string metadata = 2;
+  optional string type = 3;
+  optional google.protobuf.Any value = 4;
+  
+}
+
+message ExcelRequest {
+    string resource = 1;
+    string sheet = 2;
+    repeated string outputs = 3;    
+    map<string, string> inputs = 4;
+}
+
+message ExcelResult {
+    repeated ExcelCell outputs = 1;
+}
+
+service Excel {
+    rpc listOfResource (google.protobuf.Empty) returns (stream ExcelResource) {}
+    rpc listOfSheet (ExcelRequest) returns (stream ExcelSheet) {}     
+    rpc listOfCell (ExcelRequest) returns (stream ExcelCell) {}     
+    rpc computeCell (ExcelRequest) returns (stream ExcelCell) {}       
+  
+}
