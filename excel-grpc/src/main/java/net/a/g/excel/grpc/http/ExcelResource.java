@@ -75,31 +75,6 @@ public class ExcelResource {
 
 		Multi<net.a.g.excel.grpc.ExcelCell> ret = client.computeCell(request);
 
-		ret.subscribe().with(System.out::println);
-
-		Function<ExcelCell, String> totot = c -> {
-
-			if (c.getValue().is(DoubleValue.class)) {
-				try {
-					return Double.toString(c.getValue().unpack(DoubleValue.class).getValue());
-				} catch (InvalidProtocolBufferException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-
-			if (c.getValue().is(StringValue.class)) {
-				try {
-					return c.getValue().unpack(StringValue.class).getValue();
-				} catch (InvalidProtocolBufferException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-			return "";
-
-		};
-
 		return ret;
 	}
 
