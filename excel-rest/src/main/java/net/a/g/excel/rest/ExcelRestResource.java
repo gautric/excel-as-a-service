@@ -398,7 +398,7 @@ public class ExcelRestResource {
 		ExcelResult er = new ExcelResult(entity);
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
-		injectLink(selfBuilder, () -> new String[] { resource, sheetName }, "sheet").accept(er);
+		injectLink(er, selfBuilder, () -> new String[] { resource, sheetName }, "sheet");
 
 		return ExcelRestTool.returnOK(er, link);
 
@@ -446,7 +446,7 @@ public class ExcelRestResource {
 		});
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
-		injectLink(selfBuilder, () -> new String[] { resource, sheetName }, "sheet").accept(er);
+		injectLink(er, selfBuilder, () -> new String[] { resource, sheetName }, "sheet");
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -614,22 +614,7 @@ public class ExcelRestResource {
 		el.setRel(rel);
 		el.setType(type);
 		obj.getLinks().add(el);
-	}
-
-	private Consumer<? super ExcelModel> injectLink(UriBuilder builder, Supplier<String[]> supply, String rel,
-			String type) {
-		return cell -> {
-			ExcelLink el = new ExcelLink();
-			el.setHref(builder.build(supply.get()).toString());
-			el.setRel(rel);
-			el.setType(type);
-			cell.getLinks().add(el);
-		};
-	}
-
-	private Consumer<? super ExcelModel> injectLink(UriBuilder builder, Supplier<String[]> supply, String rel) {
-		return injectLink(builder, supply, rel, MediaType.APPLICATION_JSON);
-	}
+	}	
 
 	public ExcelConfiguration getConf() {
 		return conf;
