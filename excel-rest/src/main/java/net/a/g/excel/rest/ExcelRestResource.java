@@ -85,17 +85,17 @@ public class ExcelRestResource {
 	private void addLink(ExcelResource er) {
 
 		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "resources");
-		injectLink(er,resourceBuilder, () -> new String[] {}, "list-of-resource");
+		injectLink(er, resourceBuilder, () -> new String[] {}, "list-of-resource");
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
-		injectLink(er,selfBuilder, () -> new String[] { er.getName() }, "self");
+		injectLink(er, selfBuilder, () -> new String[] { er.getName() }, "self");
 
 		UriBuilder dwnBuilder = getURIBuilder().path(ExcelRestResource.class, "download");
-		injectLink(er,dwnBuilder, () -> new String[] { er.getName() }, "download",
+		injectLink(er, dwnBuilder, () -> new String[] { er.getName() }, "download",
 				"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
 
 		UriBuilder sheetsBuilder = getURIBuilder().path(ExcelRestResource.class, "listOfSheet");
-		injectLink(er,sheetsBuilder, () -> new String[] { er.getName() }, "list-of-sheet");
+		injectLink(er, sheetsBuilder, () -> new String[] { er.getName() }, "list-of-sheet");
 	}
 
 	private void addLink(String resource, ExcelSheet es) {
@@ -117,7 +117,7 @@ public class ExcelRestResource {
 		String address = cell.getAddress().split("!")[1];
 
 		UriBuilder upBuilder = getURIBuilder().path(ExcelRestResource.class, "resource");
-		injectLink(cell,upBuilder, () -> new String[] { resource }, "resource");
+		injectLink(cell, upBuilder, () -> new String[] { resource }, "resource");
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
 		injectLink(cell, selfBuilder, () -> new String[] { resource, sheet }, "sheet");
@@ -420,13 +420,14 @@ public class ExcelRestResource {
 		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
 				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
 
-		String in = mapOfCell.get("IN").stream()
+		String in = mapOfCell.getOrDefault("IN", List.of()).stream()
 				.map(v -> "/" + extract(v.getMetadata()) + "/{" + extract(v.getMetadata()) + "}")
 				.collect(Collectors.joining("")).replaceFirst("/", "");
 
 		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
 
-		Map<String, String> template = mapOfCell.get("OUT").stream().map(ExcelCell::getMetadata).map(this::extract)
+		Map<String, String> template = mapOfCell.getOrDefault("OUT", List.of()).stream().map(ExcelCell::getMetadata)
+				.map(this::extract)
 				.collect(Collectors.toMap(Function.identity(),
 						outP -> URLDecoder.decode(
 								resourceBuilder.buildFromEncoded(resource, sheetName, outP, in).toString(),
