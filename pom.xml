@@ -1,53 +1,55 @@
 <?xml version="1.0"?>
 <project
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-	xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>net.a.g.excel</groupId>
-	<artifactId>excel-app</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
-	<packaging>pom</packaging>
-    <name>EXCEL APP</name>
-	<properties>
-		<compiler-plugin.version>3.8.1</compiler-plugin.version>
-		<maven.compiler.parameters>true</maven.compiler.parameters>
-		<maven.compiler.source>11</maven.compiler.source>
-		<maven.compiler.target>11</maven.compiler.target>
-		<org.apache.poi.version>5.0.0</org.apache.poi.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
-		<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>net.a.g.excel</groupId>
+  <artifactId>excel-app</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>EXCEL APP</name>
+  <properties>
+    <compiler-plugin.version>3.8.1</compiler-plugin.version>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <org.apache.poi.version>5.1.0</org.apache.poi.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
+    <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
 
-		<quarkus.platform.version>2.6.1.Final</quarkus.platform.version>
-		<camel-quarkus.platform.version>${quarkus.platform.version}</camel-quarkus.platform.version>
+    <quarkus.platform.version>2.6.1.Final</quarkus.platform.version>
+    <camel-quarkus.platform.version>${quarkus.platform.version}</camel-quarkus.platform.version>
 
-		<camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
-		<camel-quarkus.platform.artifact-id>quarkus-camel-bom</camel-quarkus.platform.artifact-id>
+    <camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
+    <camel-quarkus.platform.artifact-id>quarkus-camel-bom</camel-quarkus.platform.artifact-id>
 
-		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
-		<weld-se-core.version>3.1.8.Final</weld-se-core.version>
-		<weld-junit5.version>2.0.2.Final</weld-junit5.version>
-		<hamcrest.version>2.2</hamcrest.version>
-		<json.version>20210307</json.version>
-		<microprofile-openapi-api.version>2.0.1-RC1</microprofile-openapi-api.version>
-	</properties>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>${quarkus.platform.group-id}</groupId>
-				<artifactId>${quarkus.platform.artifact-id}</artifactId>
-				<version>${quarkus.platform.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-	<modules>
-		<module>excel-engine</module>
-		<module>excel-rest</module>
-		<module>excel-kafka</module>
-		<module>excel-grpc</module>
-	</modules>
+    <surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
+    <weld-se-core.version>3.1.8.Final</weld-se-core.version>
+    <weld-junit5.version>2.0.2.Final</weld-junit5.version>
+    <hamcrest.version>2.2</hamcrest.version>
+    <json.version>20210307</json.version>
+    <microprofile-openapi-api.version>2.0.1-RC1</microprofile-openapi-api.version>
+    <slf4j.version>1.7.32</slf4j.version>
+    <logback-classic.version>1.2.10</logback-classic.version>
+  </properties>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>${quarkus.platform.group-id}</groupId>
+        <artifactId>${quarkus.platform.artifact-id}</artifactId>
+        <version>${quarkus.platform.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <modules>
+    <module>excel-engine</module>
+    <module>excel-rest</module>
+    <module>excel-kafka</module>
+    <module>excel-grpc</module>
+  </modules>
 </project>
