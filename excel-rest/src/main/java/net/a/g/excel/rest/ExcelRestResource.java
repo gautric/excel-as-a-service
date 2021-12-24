@@ -141,7 +141,7 @@ public class ExcelRestResource {
 	@Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Excel Resource into OpenXmlFormats ", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
+			@APIResponse(responseCode = "200", description = "Excel Resource into OpenXmlFormats ", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "Retrieve the Excel Resource full file", description = "The Excel Resource into OpenXmlFormats standard (binary file)")
 	public Response download(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
@@ -160,7 +160,7 @@ public class ExcelRestResource {
 	@Path("")
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", description = "List of all resources", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
+			@APIResponse(responseCode = "200", description = "List of all resources", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "Retrieve the list of all Excel Resources", description = "List of all Excel Resources")
 	public Response resources() throws Exception {
 
@@ -181,7 +181,7 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
 			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
+			@APIResponse(responseCode = "200", description = "Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "Retrieve the Excel Resource", description = "The Excel Resource")
 	public Response resource(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
@@ -208,7 +208,7 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
 			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
+			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "Create a new Excel Resource", description = "Create a new Excel Resource")
 	public Response uploadFile(@PathParam("resource") String resource, MultipartFormDataInput input)
 			throws IOException {
@@ -268,6 +268,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/sheets")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "List of all Sheets for the Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "Retrieve the list of all Sheets for the Excel Resource", description = "List of all Sheets for the Excel Resource")
 	public Response listOfSheet(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -625,7 +629,7 @@ public class ExcelRestResource {
 		el.setRel(rel);
 		el.setType(type);
 		obj.getLinks().add(el);
-	}	
+	}
 
 	public ExcelConfiguration getConf() {
 		return conf;
