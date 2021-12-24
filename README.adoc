@@ -36,267 +36,434 @@ To run application
 == Sample Test
 
 
-	curl 'http://localhost:8080/api' | jq
-	
+	curl 'http://localhost:8080/eaas/api' 
+
 ```
 {
-  "_count": 1,
-  "_self": "http://localhost:8080/eaas/api",
-  "results": [
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC",
-          "type": "application/json"
-        }
-      ],
-      "name": "KYC",
-      "file": "KYC.xlsx"
-    }
-  ]
+  "_links" : [ {
+    "rel" : "self",
+    "href" : "http://localhost:8080/eaas/api",
+    "type" : "application/json"
+  } ],
+  "_count" : 1,
+  "resources" : [ {
+    "_links" : [ {
+      "rel" : "list-of-resource",
+      "href" : "http://localhost:8080/eaas/api",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "download",
+      "href" : "http://localhost:8080/eaas/api/KYC/download",
+      "type" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    }, {
+      "rel" : "list-of-sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheets",
+      "type" : "application/json"
+    } ],
+    "name" : "KYC",
+    "file" : "KYC.xlsx"
+  }]
 }
-
 ```
 
+  curl 'http://localhost:8080/eaas/api/KYC' 
+
+```
+{
+  "_links" : [ {
+    "rel" : "list-of-resource",
+    "href" : "http://localhost:8080/eaas/api",
+    "type" : "application/json"
+  }, {
+    "rel" : "self",
+    "href" : "http://localhost:8080/eaas/api/KYC",
+    "type" : "application/json"
+  }, {
+    "rel" : "download",
+    "href" : "http://localhost:8080/eaas/api/KYC/download",
+    "type" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  }, {
+    "rel" : "list-of-sheet",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheets",
+    "type" : "application/json"
+  } ],
+  "name" : "KYC",
+  "file" : "KYC.xlsx"
+}
+```
 
 with a KYC sample :
 
-	curl 'http://localhost:8080/eaas/api/KYC' | jq
-	
-```
+	curl 'http://localhost:8080/eaas/api/KYC/sheets' 
+
+```  
 {
-  "_count": 3,
-  "_self": "http://localhost:8080/eaas/api/KYC",
-  "results": [
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC",
-          "type": "application/json"
-        }
-      ],
-      "name": "ComputeKYC"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/COUNTRY",
-          "type": "application/json"
-        }
-      ],
-      "name": "COUNTRY"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/AMOUNT",
-          "type": "application/json"
-        }
-      ],
-      "name": "AMOUNT"
-    }
-  ]
+  "_links" : [ {
+    "rel" : "self",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheets",
+    "type" : "application/json"
+  } ],
+  "_count" : 3,
+  "sheets" : [ {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "list-of-cell",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cells",
+      "type" : "application/json"
+    }, {
+      "rel" : "list-of-template",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/compute",
+      "type" : "application/json"
+    } ],
+    "name" : "ComputeKYC"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/COUNTRY",
+      "type" : "application/json"
+    }, {
+      "rel" : "list-of-cell",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/COUNTRY/cells",
+      "type" : "application/json"
+    }, {
+      "rel" : "list-of-template",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/COUNTRY/compute",
+      "type" : "application/json"
+    } ],
+    "name" : "COUNTRY"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/AMOUNT",
+      "type" : "application/json"
+    }, {
+      "rel" : "list-of-cell",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/AMOUNT/cells",
+      "type" : "application/json"
+    }, {
+      "rel" : "list-of-template",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/AMOUNT/compute",
+      "type" : "application/json"
+    } ],
+    "name" : "AMOUNT"
+  } ]
 }
-
-
 ```
 
-    curl 'http://localhost:8080/eaas/api/KYC/ComputeKYC'  | jq
+  curl 'http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC' 
 
 ```
 {
-  "_count": 15,
-  "_self": "http://localhost:8080/eaas/api/KYC/ComputeKYC",
-  "results": [
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A1",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!A1",
-      "value": "",
-      "type": "BLANK"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B1",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!B1",
-      "value": "INPUT",
-      "type": "STRING"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C1",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!C1",
-      "value": " SCORE",
-      "type": "STRING"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A2",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!A2",
-      "value": "PEP",
-      "metadata": "@input",
-      "type": "STRING"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B2",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!B2",
-      "value": "false",
-      "type": "BOOLEAN"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C2",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!C2",
-      "value": "IF(B2,50,0)",
-      "type": "FORMULA"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A3",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!A3",
-      "value": "COUNTRY",
-      "metadata": "@input",
-      "type": "STRING"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B3",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!B3",
-      "value": "FR",
-      "type": "STRING"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C3",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!C3",
-      "value": "VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)",
-      "type": "FORMULA"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A4",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!A4",
-      "value": "AMOUNT",
-      "metadata": "@input",
-      "type": "STRING"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/B4",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!B4",
-      "value": 0,
-      "type": "NUMERIC"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C4",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!C4",
-      "value": "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
-      "type": "FORMULA"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A5",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!A5",
-      "value": "",
-      "type": "BLANK"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/A6",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!A6",
-      "value": "FINAL",
-      "type": "STRING"
-    },
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!C6",
-      "value": "SUM(C2:C4)",
-      "metadata": "@output",
-      "type": "FORMULA"
-    }
-  ]
+  "_links" : [ {
+    "rel" : "resource",
+    "href" : "http://localhost:8080/eaas/api/KYC",
+    "type" : "application/json"
+  }, {
+    "rel" : "self",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+    "type" : "application/json"
+  }, {
+    "rel" : "list-of-cell",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cells",
+    "type" : "application/json"
+  }, {
+    "rel" : "list-of-template",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/compute",
+    "type" : "application/json"
+  } ],
+  "name" : "ComputeKYC"
+}
+```
+
+    curl 'http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cells' 
+
+```
+{
+  "_links" : [ {
+    "rel" : "self",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cells",
+    "type" : "application/json"
+  } ],
+  "_count" : 15,
+  "cells" : [ {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/A1",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!A1",
+    "value" : "",
+    "type" : "BLANK"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/B1",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!B1",
+    "value" : "INPUT",
+    "type" : "STRING"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C1",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!C1",
+    "value" : " SCORE",
+    "type" : "STRING"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/A2",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!A2",
+    "value" : "PEP",
+    "metadata" : "@input",
+    "type" : "STRING"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/B2",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!B2",
+    "value" : "false",
+    "type" : "BOOLEAN"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C2",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!C2",
+    "value" : "IF(B2,50,0)",
+    "type" : "FORMULA"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/A3",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!A3",
+    "value" : "COUNTRY",
+    "metadata" : "@input",
+    "type" : "STRING"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/B3",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!B3",
+    "value" : "FR",
+    "type" : "STRING"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C3",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!C3",
+    "value" : "VLOOKUP(B3,COUNTRY!A1:B5,2,FALSE)",
+    "type" : "FORMULA"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/A4",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!A4",
+    "value" : "AMOUNT",
+    "metadata" : "@input",
+    "type" : "STRING"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/B4",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!B4",
+    "value" : 0.0,
+    "type" : "NUMERIC"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C4",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!C4",
+    "value" : "VLOOKUP(B4,AMOUNT!A1:B5,2,TRUE)",
+    "type" : "FORMULA"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/A5",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!A5",
+    "value" : "",
+    "type" : "BLANK"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/A6",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!A6",
+    "value" : "FINAL",
+    "type" : "STRING"
+  }, {
+    "_links" : [ {
+      "rel" : "resource",
+      "href" : "http://localhost:8080/eaas/api/KYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "sheet",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+      "type" : "application/json"
+    }, {
+      "rel" : "self",
+      "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C6",
+      "type" : "application/json"
+    } ],
+    "address" : "ComputeKYC!C6",
+    "value" : "SUM(C2:C4)",
+    "metadata" : "@output",
+    "type" : "FORMULA"
+  } ]
 }
 ```
 
