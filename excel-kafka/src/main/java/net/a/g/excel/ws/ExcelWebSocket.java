@@ -55,7 +55,7 @@ public class ExcelWebSocket {
 
 	@OnError
 	public void onError(Session session, Throwable throwable) {
-		LOG.info("onError {}", session.getId());
+		LOG.error("onError {} {}", session.getId(), throwable);
 		sessions.remove(session.getId());
 	}
 
