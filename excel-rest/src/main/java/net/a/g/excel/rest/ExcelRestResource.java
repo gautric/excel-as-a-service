@@ -514,7 +514,7 @@ public class ExcelRestResource {
 			}
 		}
 
-		pullParam = (List<String>) pullParam.stream().map(p -> outputParam.get(p).getAddress())
+		pullParam = (List<String>) pullParam.stream().map(p -> outputParam.get(p)).map(ExcelCell::getAddress)
 				.collect(Collectors.toList());
 
 		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, pullParam, injectParam, false);
