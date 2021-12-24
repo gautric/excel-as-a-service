@@ -71,7 +71,7 @@ public class ExcelLoader {
 				}
 			}
 		} catch (Exception ex) {
-			LOG.error("Error while loading file", ex);
+			LOG.debug("Error while loading file", ex);
 		}
 	}
 
