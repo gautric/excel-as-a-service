@@ -160,8 +160,8 @@ public class ExcelRestResource {
 	@Path("")
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
-			@APIResponse(responseCode = "200", description = "List of all resources", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "Retrieve the list of all Excel Resources", description = "List of all Excel Resources")
+			@APIResponse(responseCode = "200", description = "List of Excel Resources", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "Retrieve the list of Excel Resources", description = "List of Excel Resources")
 	public Response resources() throws Exception {
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
@@ -270,8 +270,8 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
 			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "List of all Sheets for the Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "Retrieve the list of all Sheets for the Excel Resource", description = "List of all Sheets for the Excel Resource")
+			@APIResponse(responseCode = "200", description = "List of Sheets for the Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "Retrieve the list of Sheets for the Excel Resource", description = "List of Sheets for the Excel Resource")
 	public Response listOfSheet(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
