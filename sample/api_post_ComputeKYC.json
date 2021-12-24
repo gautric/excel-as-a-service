@@ -1,6 +1,6 @@
 {
     "uuid": "b00f82d6-206a-450b-bd31-d1d3a3ac5d4a",
-    "resource": "KYC",
+    "resource": "KYCAPI",
     "sheet": "ComputeKYC",
     "outputs": [
         "SCORE"

@@ -492,33 +492,28 @@ with a KYC sample :
   "value" : 125.0,
   "metadata" : "@output",
   "type" : "NUMERIC"
-
+}
 ```
 
 You can use also POST
 
-    curl -X POST -H "Content-Type: application/json" -d @sample/api_ComputeKYC.json http://localhost:8080/eaas/api/KYC/ComputeKYC/C6
+    curl -X POST -H "Content-Type: application/json" -d @sample/api_post_ComputeKYC.json http://localhost:8080/eaas/api/KYCAPI/sheet/ComputeKYC/compute 
 
 
 ```
 {
-  "_count": 1,
-  "_self": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
-  "results": [
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!C6",
-      "value": 125,
-      "metadata": "@output",
-      "type": "NUMERIC"
-    }
-  ]
+  "_links" : [ {
+    "rel" : "self",
+    "href" : "http://localhost:8080/eaas/api/KYCAPI/sheet/ComputeKYC/compute",
+    "type" : "application/json"
+  } ],
+  "_count" : 1,
+  "cells" : [ {
+    "address" : "ComputeKYC!C6",
+    "value" : 125.0,
+    "metadata" : "@output(SCORE)",
+    "type" : "NUMERIC"
+  } ]
 }
 
 ```
