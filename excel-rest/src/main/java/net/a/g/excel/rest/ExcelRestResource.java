@@ -139,6 +139,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/download")
 	@Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "Excel Resource into OpenXmlFormats ", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
+	@Operation(summary = "Retrieve the Excel Resource full file", description = "The Excel Resource into OpenXmlFormats standard (binary file)")
 	public Response download(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -155,6 +159,9 @@ public class ExcelRestResource {
 	@GET
 	@Path("")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "200", description = "List of all resources", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
+	@Operation(summary = "Retrieve the list of all Excel Resources", description = "List of all Excel Resources")
 	public Response resources() throws Exception {
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
@@ -172,6 +179,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
+	@Operation(summary = "Retrieve the Excel Resource", description = "The Excel Resource")
 	public Response resource(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
