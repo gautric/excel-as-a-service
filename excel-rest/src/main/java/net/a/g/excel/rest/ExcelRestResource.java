@@ -181,7 +181,7 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
 			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
-			@APIResponse(responseCode = "200", description = "Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+			@APIResponse(responseCode = "200", description = "Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResource.class))) })
 	@Operation(summary = "Retrieve the Excel Resource", description = "The Excel Resource")
 	public Response resource(@PathParam("resource") String resource) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
@@ -291,6 +291,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/sheet/{sheet}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Sheet or Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "Sheet of Excel Resource", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelSheet.class))) })
+	@Operation(summary = "Retrieve the Sheet of Excel Resource", description = "The Sheet of Excel Resource")
 	public Response sheet(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -314,6 +318,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/sheet/{sheet}/cells")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Sheet or Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "List of Cells for the sheet", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "Retrieve the list of Cells for the sheet", description = "List of Cells for the sheet")
 	public Response listOfCell(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
