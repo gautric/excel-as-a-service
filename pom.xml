@@ -31,7 +31,7 @@
     <weld-junit5.version>2.0.2.Final</weld-junit5.version>
     <hamcrest.version>2.2</hamcrest.version>
     <json.version>20210307</json.version>
-    <microprofile-openapi-api.version>2.0.1-RC1</microprofile-openapi-api.version>
+    <microprofile-openapi-api.version>3.0</microprofile-openapi-api.version>
     <slf4j.version>1.7.32</slf4j.version>
     <logback-classic.version>1.2.10</logback-classic.version>
   </properties>
