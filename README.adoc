@@ -10,7 +10,9 @@ image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.y
 
 To run application 
 
-	mvn compile quarkus:dev -Dexcel.static.resouces.uri=../sample
+    mvn clean install
+    cd excel-rest
+	mvn quarkus:dev -Dexcel.static.resouces.uri=../sample
 
 == Call REST API
 
