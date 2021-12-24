@@ -12,7 +12,7 @@ To run application
 
     mvn clean install
     cd excel-rest
-	mvn quarkus:dev -Dexcel.static.resouces.uri=../sample
+    mvn quarkus:dev -Dexcel.static.resouces.uri=../sample
 
 == Call REST API
 
@@ -300,28 +300,31 @@ with a KYC sample :
 }
 ```
 
-    curl 'http://localhost:8080/eaas/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000' | jq
+  curl 'http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C6?B2=TRUE&B3=CY&B4=1000000' 
 
 ```
 {
-  "_count": 1,
-  "_self": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6?B2=TRUE&B3=CY&B4=1000000",
-  "results": [
-    {
-      "links": [
-        {
-          "rel": "self",
-          "href": "http://localhost:8080/eaas/api/KYC/ComputeKYC/C6",
-          "type": "application/json"
-        }
-      ],
-      "address": "ComputeKYC!C6",
-      "value": 125,
-      "metadata": "@output",
-      "type": "NUMERIC"
-    }
-  ]
-}
+  "_links" : [ {
+    "rel" : "resource",
+    "href" : "http://localhost:8080/eaas/api/KYC",
+    "type" : "application/json"
+  }, {
+    "rel" : "sheet",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC",
+    "type" : "application/json"
+  }, {
+    "rel" : "self",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C6",
+    "type" : "application/json"
+  }, {
+    "rel" : "query",
+    "href" : "http://localhost:8080/eaas/api/KYC/sheet/ComputeKYC/cell/C6?B2=TRUE&B3=CY&B4=1000000",
+    "type" : "application/json"
+  } ],
+  "address" : "ComputeKYC!C6",
+  "value" : 125.0,
+  "metadata" : "@output",
+  "type" : "NUMERIC"
 
 ```
 
