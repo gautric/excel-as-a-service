@@ -30,8 +30,8 @@ public class ExcelConfiguration {
 	@ConfigProperty(name = ExcelConstants.EXCEL_FORMAT_DATE, defaultValue = ExcelConstants.FORMAT_DATE_ISO)
 	String formatDate = ExcelConstants.FORMAT_DATE_ISO;
 
-	@ConfigProperty(name = ExcelConstants.EXCEL_HIDDE_FORMULAR, defaultValue = ExcelConstants.EXCEL_HIDDE_FORMULAR_DEFAULT)
-	boolean hiddeFormular = false;
+	@ConfigProperty(name = ExcelConstants.EXCEL_HIDE_FORMULAR, defaultValue = ExcelConstants.EXCEL_HIDE_FORMULAR_DEFAULT)
+	boolean hideFormular = false;
 
 	public EXCELRETURN getFormatRetour() {
 		return retourFormat;
@@ -61,14 +61,14 @@ public class ExcelConfiguration {
 		return this.retourFormat;
 	}
 
-	public boolean isHiddeFormular() {
-		return this.hiddeFormular;
+	public boolean isHideFormular() {
+		return this.hideFormular;
 	}
 
 	@Override
 	public String toString() {
 		return "ExcelConfiguration [resouceUri=" + this.resouceUri + ", readOnly=" + this.readOnly + ", retourFormat="
-				+ this.retourFormat + ", formatDate=" + this.formatDate + ", hiddeFormular=" + this.hiddeFormular + "]";
+				+ this.retourFormat + ", formatDate=" + this.formatDate + ", hideFormular=" + this.hideFormular + "]";
 	}
 
 	@PostConstruct

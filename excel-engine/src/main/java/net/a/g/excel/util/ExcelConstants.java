@@ -19,6 +19,6 @@ public class ExcelConstants {
 	public static final String SCHEMA_URI = "urn://excel-quarkus/v1.0";
 	public static final String EXCEL_FORMAT_DATE = "excel.date.format";
 	public static final String FORMAT_DATE_ISO =  "yyyy-MM-dd";
-	public static final String EXCEL_HIDDE_FORMULAR = "excel.hidde.formular";
-	public static final String EXCEL_HIDDE_FORMULAR_DEFAULT = "false";
+	public static final String EXCEL_HIDE_FORMULAR = "excel.hide.formular";
+	public static final String EXCEL_HIDE_FORMULAR_DEFAULT = "false";
 }
