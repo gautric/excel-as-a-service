@@ -16,7 +16,7 @@ import net.a.g.excel.util.ExcelConstants;
 @Schema(name = "ExcelResult", description = "POJO that represents the result contents.")
 public class ExcelResult extends ExcelModel {
 
-	@JsonProperty("uuid")
+	@JsonProperty(value = "uuid", namespace = ExcelConstants.SCHEMA_URI)
 	@Schema(name = "uuid", description = "UUID request")
 	private String uuid;
 
