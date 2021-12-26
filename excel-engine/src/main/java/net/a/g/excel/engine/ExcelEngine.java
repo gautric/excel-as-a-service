@@ -190,6 +190,11 @@ public class ExcelEngine {
 		});
 	}
 
+	public Map<String, List<ExcelCell>> mapOfAPI(String resource, String sheet) {
+		return listOfAPI(resource, sheet).stream()
+				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+	}
+
 	public List<ExcelCell> listOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
 		Workbook workbook = retrieveWorkbook(excelName);
 

@@ -430,18 +430,17 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/sheet/{sheet}/compute")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response computeDefinition(@PathParam("resource") String resource, @PathParam("sheet") String sheetName) {
+	public Response computeDefinition(@PathParam("resource") String resource, @PathParam("sheet") String sheet) {
 
 		if (!getEngine().isResourceExists(resource)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
-		if (!getEngine().isSheetExists(resource, sheetName)) {
+		if (!getEngine().isSheetExists(resource, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
-		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
-				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+		Map<String, List<ExcelCell>> mapOfCell = getEngine().mapOfAPI(resource, sheet);
 
 		String in = mapOfCell.getOrDefault("IN", List.of()).stream()
 				.map(v -> "/" + extract(v.getMetadata()) + "/{" + extract(v.getMetadata()) + "}")
@@ -453,7 +452,7 @@ public class ExcelRestResource {
 				.map(this::extract)
 				.collect(Collectors.toMap(Function.identity(),
 						outP -> URLDecoder.decode(
-								resourceBuilder.buildFromEncoded(resource, sheetName, outP, in).toString(),
+								resourceBuilder.buildFromEncoded(resource, sheet, outP, in).toString(),
 								StandardCharsets.UTF_8)));
 
 		LOG.debug("Template {}", template);
@@ -469,7 +468,7 @@ public class ExcelRestResource {
 		});
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
-		injectLink(er, selfBuilder, () -> new String[] { resource, sheetName }, "sheet");
+		injectLink(er, selfBuilder, () -> new String[] { resource, sheet }, "sheet");
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -479,7 +478,7 @@ public class ExcelRestResource {
 	@POST
 	@Path("{resource}/sheet/{sheet}/compute")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response computePOST(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
+	public Response computePOST(@PathParam("resource") String resource, @PathParam("sheet") String sheet,
 			final ExcelRequest request) {
 
 		List<String> pullParam = request.getOutputs();
@@ -488,12 +487,11 @@ public class ExcelRestResource {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
-		if (!getEngine().isSheetExists(resource, sheetName)) {
+		if (!getEngine().isSheetExists(resource, sheet)) {
 			return Response.status(Response.Status.NOT_FOUND).build();
 		}
 
-		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
-				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+		Map<String, List<ExcelCell>> mapOfCell = getEngine().mapOfAPI(resource, sheet);
 
 		Map<String, ExcelCell> inputParam = mapOfCell.get("IN").stream()
 				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
@@ -517,7 +515,7 @@ public class ExcelRestResource {
 		pullParam = (List<String>) pullParam.stream().map(p -> outputParam.get(p)).map(ExcelCell::getAddress)
 				.collect(Collectors.toList());
 
-		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, pullParam, injectParam, false);
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheet, pullParam, injectParam, false);
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
