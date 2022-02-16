@@ -100,14 +100,6 @@ public class ExcelEngine {
 		return workbook;
 	}
 
-	private Supplier<Workbook> retrieveWorkbookSupplier(String name) {
-		if (listOfResources.containsKey(name)) {
-			byte[] byteArray = listOfResources.get(name).getDoc();
-			return () -> convertByteToWorkbook(byteArray);
-		}
-		return null;
-	}
-
 	private Workbook convertByteToWorkbook(byte[] byteArray) {
 		try {
 			return WorkbookFactory.create(new ByteArrayInputStream(byteArray));
@@ -413,10 +405,6 @@ public class ExcelEngine {
 		}
 	}
 
-	private Stream<Cell> streamCell(Workbook workbook) {
-		return streamCell(workbook, s -> true);
-	}
-
 	private Stream<Cell> streamCell(Workbook workbook, String sheetName) {
 		return streamCell(workbook, s -> s.getSheetName().compareTo(sheetName) == 0);
 	}
@@ -424,11 +412,6 @@ public class ExcelEngine {
 	private Stream<Cell> streamCell(Workbook workbook, Predicate<? super Sheet> predicate) {
 		return StreamSupport.stream(workbook.spliterator(), false).filter(predicate).flatMap(sheet -> StreamSupport
 				.stream(sheet.spliterator(), false).flatMap(r -> StreamSupport.stream(r.spliterator(), false)));
-	}
-
-	private Stream<Cell> streamCell(Sheet sheet) {
-		return StreamSupport.stream(sheet.spliterator(), false)
-				.flatMap(r -> StreamSupport.stream(r.spliterator(), false));
 	}
 
 	private String getCellComment(Cell cell) {
