@@ -6,6 +6,14 @@ This project provides an Excel Engine Executor. It loads couple of Excel file (x
 
 image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.yml/badge.svg[]
 
+== Dependencies
+
+* POI
+** 5.2.2
+
+* Quarkus 
+** 2.7.5.Final
+
 == Run Application 
 
 To run application 
