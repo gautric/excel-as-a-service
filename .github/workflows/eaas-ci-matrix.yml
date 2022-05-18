@@ -1,0 +1,19 @@
+name: eaas-ci-matrix
+
+on: [push]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        version: [11, 17]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.version }}
+          distribution: 'adopt'
+      - name: Build with Maven
+        run: mvn --batch-mode --update-snapshots verify
