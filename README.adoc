@@ -12,7 +12,7 @@ image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.y
 ** 5.2.2
 
 * Quarkus 
-** 2.10.2.Final
+** 2.11.2.Final
 
 == Run Application 
 
