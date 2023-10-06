@@ -12,6 +12,10 @@
   <artifactId>excel-grpc</artifactId>
   <name>EXCEL APP :: EXCEL GRPC</name>
   <dependencies>
+	<dependency>
+	    <groupId>jakarta.ws.rs</groupId>
+	    <artifactId>jakarta.ws.rs-api</artifactId>
+	</dependency>
     <dependency>
       <groupId>net.a.g.excel</groupId>
       <artifactId>excel-engine</artifactId>

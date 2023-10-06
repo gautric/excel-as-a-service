@@ -4,9 +4,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.List;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.inject.Inject;
-
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.slf4j.Logger;
@@ -16,6 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.smallrye.reactive.messaging.annotations.Broadcast;
 import io.smallrye.reactive.messaging.kafka.Record;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import net.a.g.excel.engine.ExcelEngine;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelError;

@@ -6,22 +6,18 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.UriInfo;
-
-import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Empty;
-import com.google.protobuf.InvalidProtocolBufferException;
-import com.google.protobuf.StringValue;
 
 import io.quarkus.grpc.GrpcClient;
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Multi;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.UriInfo;
 import net.a.g.excel.grpc.Excel;
 import net.a.g.excel.grpc.ExcelCell;
 import net.a.g.excel.grpc.ExcelRequest;

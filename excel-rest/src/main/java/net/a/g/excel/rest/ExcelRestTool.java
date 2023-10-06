@@ -3,11 +3,10 @@ package net.a.g.excel.rest;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 
-import javax.ws.rs.core.Link;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
+import jakarta.ws.rs.core.Link;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 import net.a.g.excel.model.ExcelError;
 import net.a.g.excel.model.ExcelLink;
 import net.a.g.excel.model.ExcelResult;
