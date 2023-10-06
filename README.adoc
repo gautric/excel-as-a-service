@@ -9,10 +9,10 @@ image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.y
 == Dependencies
 
 * POI
-** 5.2.2
+** 5.2.4
 
 * Quarkus 
-** 2.11.2.Final
+** 3.4.2
 
 == Run Application 
 
