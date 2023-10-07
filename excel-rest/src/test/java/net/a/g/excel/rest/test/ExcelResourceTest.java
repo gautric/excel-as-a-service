@@ -32,7 +32,7 @@ public class ExcelResourceTest {
 				"resources[0]._links[0].rel", is("list-of-resource"),
 				"resources[0]._links[1].href", is("http://localhost:8081/eaas/api/KYC"), 
 				"resources[0]._links[1].rel", is("self"), 
-				"resources[0]._links[2].href", is("http://localhost:8081/eaas/api/KYC/download"),
+				"resources[0]._links[2].href", is("http://localhost:8081/eaas/api/KYC/_download"),
 				"resources[0]._links[3].href", is("http://localhost:8081/eaas/api/KYC/sheets"),
 				"resources[0]._links[3].rel", is("list-of-sheet")
 			// @formatter:on
@@ -57,7 +57,7 @@ public class ExcelResourceTest {
 					+ "    \"type\" : \"application/json\"\n"
 					+ "  }, {\n"
 					+ "    \"rel\" : \"download\",\n"
-					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/download\",\n"
+					+ "    \"href\" : \"http://localhost:8081/eaas/api/KYC/_download\",\n"
 					+ "    \"type\" : \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\"\n"
 					+ "  }, {\n"
 					+ "    \"rel\" : \"list-of-sheet\",\n"

@@ -135,7 +135,7 @@ public class ExcelRestResource {
 	}
 
 	@GET
-	@Path("{resource}/download")
+	@Path("{resource}/_download")
 	@Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 	@APIResponses(value = {
 			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),

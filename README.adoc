@@ -65,7 +65,7 @@ To run application
       "type" : "application/json"
     }, {
       "rel" : "download",
-      "href" : "http://localhost:8080/eaas/api/KYC/download",
+      "href" : "http://localhost:8080/eaas/api/KYC/_download",
       "type" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     }, {
       "rel" : "list-of-sheet",
@@ -92,7 +92,7 @@ To run application
     "type" : "application/json"
   }, {
     "rel" : "download",
-    "href" : "http://localhost:8080/eaas/api/KYC/download",
+    "href" : "http://localhost:8080/eaas/api/KYC/_download",
     "type" : "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
   }, {
     "rel" : "list-of-sheet",
