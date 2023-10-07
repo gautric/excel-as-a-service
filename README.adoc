@@ -27,19 +27,19 @@ To run application
 
 === Retrieve all Excel resources available
 
-	curl http://localhost:8080/api
+	curl http://localhost:8080/eaas/api
 
 === Retrieve all Sheet of the Excel resources
 
-	curl http://localhost:8080/api/{resource}
+	curl http://localhost:8080/eaas/api/{resource}
 
 === Retrieve all Formula from a Sheet of the Excel resources
 
-	curl http://localhost:8080/api/{resource}/{sheet}
+	curl http://localhost:8080/eaas/api/{resource}/{sheet}
 
 === Compute or Retrieve a Cell Value
 
-	curl http://localhost:8080/api/{resource}/{sheet}/{cell}
+	curl http://localhost:8080/eaas/api/{resource}/{sheet}/{cell}
 
 == Sample Test
 
