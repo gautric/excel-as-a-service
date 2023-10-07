@@ -9,59 +9,64 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.jboss.weld.junit5.WeldInitiator;
-import org.jboss.weld.junit5.WeldJunit5Extension;
-import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Inject;
+import jakarta.enterprise.inject.se.SeContainer;
+import jakarta.enterprise.inject.se.SeContainerInitializer;
+import jakarta.enterprise.inject.spi.CDI;
 import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.model.ExcelCell;
-import net.a.g.excel.util.ExcelConfiguration;
 
-@ExtendWith(WeldJunit5Extension.class)
-@org.junit.jupiter.api.Disabled
+@DisplayName("Test with parameterized test")
 public class TypeTest {
 
-	@WeldSetup
-	public WeldInitiator weld = WeldInitiator.from(ExcelEngine.class, ExcelConfiguration.class, ExcelLoader.class)
-			.activate(RequestScoped.class, SessionScoped.class).build();;
-
-	@Inject
 	ExcelEngine engine;
 
-	@Inject
 	ExcelLoader loader;
 
+	SeContainer container;
+
 	@BeforeEach
-	public void setup() throws MalformedURLException, IOException {
-		assertNotNull(engine);
+	private void startContainer() throws IOException {
+		container = SeContainerInitializer.newInstance().initialize();
+
+		engine = (ExcelEngine) CDI.current().select(ExcelEngine.class).get();
+		loader = (ExcelLoader) CDI.current().select(ExcelLoader.class).get();
+		
 		assertTrue(
 				loader.injectResource("Type", "Type.xlsx", FileUtils.openInputStream(new File("../sample/Type.xlsx"))));
-
 		assertEquals(1, engine.countListOfResource());
-
 	}
 
 	@AfterEach
-	public void close() {
+	private void stopContainer() {
 		engine.clearAllResource();
 		assertEquals(0, engine.countListOfResource());
+		if (this.container != null) {
+			this.container.close();
+		}
 	}
 
+	@DisplayName("Should pass a non-null message to our test method")
+	@ParameterizedTest(name = "{index} => message=''{0}''")
+	@ValueSource(strings = { "Hello", "World" })
+	void shouldPassNonNullMessageAsMethodParameter(String message) {
+		assertNotNull(message);
+	}
+
+
+	@DisplayName("Test Calculation with Param")
 	@ParameterizedTest
 	@MethodSource("testCellwithParamValue")
 	void testCellwithParam(String input, Object value, String type) {
@@ -90,6 +95,7 @@ public class TypeTest {
 		);
 	}
 	// @formatter:on
+	@DisplayName("Test Calculation with Param Call")
 	@ParameterizedTest
 	@MethodSource("testCellwithParamValueCall")
 	void testCellwithParamCall(String input, Object value, String type) {
@@ -118,4 +124,5 @@ public class TypeTest {
 		);
 	}
 	// @formatter:on
+
 }
