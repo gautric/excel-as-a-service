@@ -8,6 +8,9 @@ image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.y
 
 == Dependencies
 
+* Java
+** 21
+
 * POI
 ** 5.2.5
 
