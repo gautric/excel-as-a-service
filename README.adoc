@@ -39,6 +39,10 @@ To run application
 
 	curl http://localhost:8080/eaas/api/{resource}
 
+=== Download the Excel resource
+
+  curl -J -O http://localhost:8080/eaas/api/{resource}/_download 
+
 === Retrieve all Formula from a Sheet of the Excel resources
 
 	curl http://localhost:8080/eaas/api/{resource}/{sheet}
