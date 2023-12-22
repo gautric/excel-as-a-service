@@ -27,6 +27,9 @@ To run application
 
 == Call REST API
 
+=== The OpenAPI URL 
+
+	open -a Firefox http://localhost:8080/q/swagger-ui/
 
 === Retrieve all Excel resources available
 
