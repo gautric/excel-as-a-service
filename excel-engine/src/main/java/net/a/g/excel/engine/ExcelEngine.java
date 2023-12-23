@@ -262,12 +262,14 @@ public class ExcelEngine {
 				.forEach(kv -> updateCell(kv.getKey(), kv.getValue()));
 
 		if (inputs.size() > 0) {
+			LOG.debug("some input value -> go for cell evaluation");
 			execFunction = cell -> computeCell(cell, exec);
 		} else {
-			execFunction = rawMapping;
+			LOG.debug("No input value -> no cell evaluation");
+			execFunction = rawMapping;	
 		}
+		
 		LOG.debug("Resource {} ", resource);
-
 		LOG.debug("Inputs: {}", inputs);
 		LOG.debug("Outputs: {}", outputs);
 
