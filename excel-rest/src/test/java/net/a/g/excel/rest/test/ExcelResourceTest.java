@@ -12,7 +12,7 @@ import io.quarkus.test.junit.QuarkusTest;
 public class ExcelResourceTest {
 
 	@Test
-	public void testContextRoot() {
+	public void test_ok_ContextRoot() {
 
 //		when()
 //			.get("/eaas/api")
@@ -41,7 +41,7 @@ public class ExcelResourceTest {
 	}
 
 	@Test
-	public void testKYC() {
+	public void test_ok_KYC() {
 
 		when().get("/eaas/api/KYC").then().statusCode(200)
 
@@ -72,7 +72,7 @@ public class ExcelResourceTest {
 	}
 
 	@Test
-	public void testKYCComputeKYC2() {
+	public void test_ok_KYC_Compute_KYC() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}", "KYC", "ComputeKYC")
 
@@ -105,7 +105,7 @@ public class ExcelResourceTest {
 	
 	
 	@Test
-	public void testKYCComputeKYCCells() {
+	public void test_ok_KYC_ComputeKYC_cells() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}/cells", "KYC", "ComputeKYC")
 
@@ -385,7 +385,7 @@ public class ExcelResourceTest {
 	}
 
 	@Test
-	public void testKYCComputeKYC_404() {
+	public void test_not_found_KYC_ComputeKYC_CPPL() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}/cell/{cell}", "KYC", "ComputeKYC", "CPPL").then()
 			.statusCode(404);
@@ -393,14 +393,48 @@ public class ExcelResourceTest {
 	
 	
 	@Test
-	public void testKYCComputeKYC000_404() {
+	public void test_not_found_resource() {
 
-		when().get("/eaas/api/{resource}", "KYC000").then()
-			.statusCode(404);
+		when().get("/eaas/api/{resource}", "R3SOURCE").then()
+			.statusCode(404)
+		
+			// @formatter:off
+			.body( 
+				"code", is("404"),
+				"message", is("Resource 'R3SOURCE' Not Found")
+			// @formatter:on
+				);
 	}
 	
 	@Test
-	public void testKYCComputeKYC_CompuKYCKYC_404() {
+	public void test_not_found_resource_sheet() {
+
+		when().get("/eaas/api/{resource}/sheet/{sheet}", "R3SOURCE", "ComputeKYC").then()
+			.statusCode(404)
+		
+			// @formatter:off
+			.body( 
+				"code", is("404"),
+				"message", is("Resource 'R3SOURCE' Not Found")
+			// @formatter:on
+				);
+	}
+	
+	@Test
+	public void test_not_found_KYC000() {
+
+		when().get("/eaas/api/{resource}", "KYC000").then()
+			.statusCode(404)
+			// @formatter:off
+			.body( 
+				"code", is("404"),
+				"message", is("Resource 'KYC000' Not Found")
+			// @formatter:on
+				);
+	}
+	
+	@Test
+	public void test_not_found_KYC_CompuKYCKYC() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}", "KYC", "CompuKYCKYC").then()
 			.statusCode(404);
@@ -408,7 +442,7 @@ public class ExcelResourceTest {
 	
 
 	@Test
-	public void testKYCComputeKYCC6() {
+	public void test_ok_KYC_ComputeKYC_C6() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}/cell/{cell}", "KYC", "ComputeKYC", "C6").then().statusCode(200)
 		// @formatter:off
@@ -437,7 +471,7 @@ public class ExcelResourceTest {
 	}
 
 	@Test
-	public void testKYCComputeKYCC6PEP() {
+	public void test_ok_KYC_ComputeKYC_C6_B2_TRUE() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}/cell/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6", "B2",
 				"TRUE").then().statusCode(200)
@@ -505,7 +539,7 @@ public class ExcelResourceTest {
 	}
 
 	@Test
-	public void testKYCComputeKYCAmount() {
+	public void test_ok_KYC_ComputeKYC_C6_B4_1M() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}/cell/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6", "B4",
 				"10000000").then().statusCode(200)
@@ -538,7 +572,7 @@ public class ExcelResourceTest {
 	}
 	
 	@Test
-	public void testKYCComputeKYCAPI() {
+	public void test_ok_KYC_ComputeKYC_COMPUTE_SCORE_PEP_true_COUNTRY_CY_AMOUNT_1M() {
 
 		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT/1000000").then().statusCode(200)
 	// @formatter:off
@@ -603,7 +637,7 @@ public class ExcelResourceTest {
 	
 	
 	@Test
-	public void testKYCComputeKYCAPI_KO() {
+	public void test_bad_request_KYC() {
 
 		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/AMOUNT").then().statusCode(400);
 	// @formatter:off

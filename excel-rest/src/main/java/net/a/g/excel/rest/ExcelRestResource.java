@@ -53,6 +53,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 import net.a.g.excel.engine.ExcelEngine;
 import net.a.g.excel.model.ExcelCell;
+import net.a.g.excel.model.ExcelError;
 import net.a.g.excel.model.ExcelLink;
 import net.a.g.excel.model.ExcelModel;
 import net.a.g.excel.model.ExcelRequest;
@@ -136,7 +137,8 @@ public class ExcelRestResource {
 
 	@GET
 	@Path("{resource}/_download")
-	@Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	@Produces(value = { "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+			MediaType.APPLICATION_JSON })
 	@APIResponses(value = {
 			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "200", description = "Excel Resource into OpenXmlFormats ", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
@@ -145,12 +147,21 @@ public class ExcelRestResource {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+			return resourceNotFound(resource, link);
 		}
 
 		ExcelResource file = getEngine().getResource(resource);
 
 		return Response.ok(file.getDoc()).header("content-disposition", "attachment; filename=" + file.getFile())
+				.build();
+	}
+
+	private Response resourceNotFound(String resource, Link link) {
+		ExcelError ee = new ExcelError();
+		ee.setCode("" + Response.Status.NOT_FOUND.getStatusCode());
+		ee.setError("Resource '" + resource + "' Not Found");
+
+		return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).links(link).entity(ee)
 				.build();
 	}
 
@@ -185,7 +196,7 @@ public class ExcelRestResource {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+			return resourceNotFound(resource, link);
 		}
 
 		ExcelResource ret = getEngine().getResource(resource);
@@ -274,7 +285,7 @@ public class ExcelRestResource {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+			return resourceNotFound(resource, link);
 		}
 
 		List<ExcelSheet> listOfSheet = getEngine().listOfSheet(resource);
@@ -299,7 +310,7 @@ public class ExcelRestResource {
 		ExcelSheet ret = null;
 
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+			return resourceNotFound(resource, link);
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
@@ -327,7 +338,7 @@ public class ExcelRestResource {
 		ExcelResult ret = null;
 
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).links(link).build();
+			return resourceNotFound(resource, link);
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
@@ -347,11 +358,12 @@ public class ExcelRestResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response compute(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
 			@PathParam("output") String output, @PathParam("input") List<PathSegment> input) {
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		List<String> pullParam = List.of(output.split(","));
 
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return resourceNotFound(resource, link);
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
@@ -414,8 +426,6 @@ public class ExcelRestResource {
 
 		});
 
-		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-
 		ExcelResult er = new ExcelResult(entity);
 
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
@@ -429,9 +439,11 @@ public class ExcelRestResource {
 	@Path("{resource}/sheet/{sheet}/compute")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response computeDefinition(@PathParam("resource") String resource, @PathParam("sheet") String sheet) {
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
+		
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return resourceNotFound(resource, link);
 		}
 
 		if (!getEngine().isSheetExists(resource, sheet)) {
@@ -468,8 +480,6 @@ public class ExcelRestResource {
 		UriBuilder selfBuilder = getURIBuilder().path(ExcelRestResource.class, "sheet");
 		injectLink(er, selfBuilder, () -> new String[] { resource, sheet }, "sheet");
 
-		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-
 		return ExcelRestTool.returnOK(er, link);
 	}
 
@@ -481,8 +491,11 @@ public class ExcelRestResource {
 
 		List<String> pullParam = request.getOutputs();
 
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+
+		
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return resourceNotFound(resource, link);
 		}
 
 		if (!getEngine().isSheetExists(resource, sheet)) {
@@ -514,8 +527,6 @@ public class ExcelRestResource {
 				.collect(Collectors.toList());
 
 		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheet, pullParam, injectParam, false);
-
-		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		return ExcelRestTool.returnOK(new ExcelResult(entity), link);
 
@@ -566,8 +577,9 @@ public class ExcelRestResource {
 			Map<String, String> query) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
+		
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return resourceNotFound(resource, link);
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
@@ -592,8 +604,10 @@ public class ExcelRestResource {
 		Map<String, String> query = param.entrySet().stream()
 				.collect(Collectors.toMap(e -> renameFunction(sheet).apply(e.getKey()), kv -> kv.getValue().get(0)));
 
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+
 		if (!getEngine().isResourceExists(resource)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return resourceNotFound(resource, link);
 		}
 
 		if (!getEngine().isSheetExists(resource, sheet)) {
