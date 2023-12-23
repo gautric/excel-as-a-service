@@ -224,24 +224,24 @@ public class ExcelEngine {
 
 		return cellCalculation(resource, output.stream().map(renameFunction).collect(toList()), input.entrySet()
 				.stream().collect(Collectors.toMap(e -> renameFunction.apply(e.getKey()), Map.Entry::getValue)),
-				global);
+				global, false);
 	}
 
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs) {
-		return cellCalculation(resource, outputs, Map.<String, String>of(), false);
+		return cellCalculation(resource, outputs, Map.<String, String>of(), false, false);
 
 	}
 
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, boolean global) {
-		return cellCalculation(resource, outputs, Map.<String, String>of(), global);
+		return cellCalculation(resource, outputs, Map.<String, String>of(), global, false);
 	}
 
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, Map<String, String> inputs) {
-		return cellCalculation(resource, outputs, inputs, false);
+		return cellCalculation(resource, outputs, inputs, false, false);
 	}
 
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, Map<String, String> inputs,
-			boolean global) {
+			boolean global, boolean force) {
 
 		Workbook workbook = retrieveWorkbook(resource);
 		FormulaEvaluator exec = formula(workbook);
@@ -261,8 +261,8 @@ public class ExcelEngine {
 				.map(kv -> Map.entry(retrieveCellByAdress(new CellReference(kv.getKey()), workbook), kv.getValue()))
 				.forEach(kv -> updateCell(kv.getKey(), kv.getValue()));
 
-		if (inputs.size() > 0) {
-			LOG.debug("some input value -> go for cell evaluation");
+		if (inputs.size() > 0 || force) {
+			LOG.debug("some input value || force -> go for cell evaluation");
 			execFunction = cell -> computeCell(cell, exec);
 		} else {
 			LOG.debug("No input value -> no cell evaluation");
@@ -284,7 +284,7 @@ public class ExcelEngine {
 
 	public List<ExcelCell> cellCalculation(Supplier<String> resource, Supplier<List<String>> outputs,
 			Supplier<Map<String, String>> inputs, boolean global) {
-		return cellCalculation(resource.get(), outputs.get(), inputs.get(), global);
+		return cellCalculation(resource.get(), outputs.get(), inputs.get(), global, false);
 	}
 
 	private Cell retrieveCellByAdress(CellReference cr, Workbook workbook) {

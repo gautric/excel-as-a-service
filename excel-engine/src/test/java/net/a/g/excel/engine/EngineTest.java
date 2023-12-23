@@ -128,7 +128,7 @@ public class EngineTest {
 	public void testComputeKYCC6Compute() {
 
 		List<ExcelCell> map = engine.cellCalculation("KYC", List.of("ComputeKYC!C6"), Map.of("ComputeKYC!C9", "43"),
-				false);
+				false, false);
 		assertThat(map, hasSize(1));
 
 		assertThat(map.get(0).getValue(), is(0.0));
@@ -149,7 +149,7 @@ public class EngineTest {
 	public void testComputeKYCC10Compute() {
 
 		List<ExcelCell> map = engine.cellCalculation("KYC", List.of("ComputeKYC!C10"), Map.of("ComputeKYC!C9", "42"),
-				false);
+				false, false);
 		assertThat(map, hasSize(1));
 
 		assertThat(map.get(0).getValue(), is("2021-02-12"));
@@ -159,7 +159,7 @@ public class EngineTest {
 	public void testComputeKYCC10Compute43() {
 
 		List<ExcelCell> map = engine.cellCalculation("KYC", List.of("ComputeKYC!C10"), Map.of("ComputeKYC!C9", "43"),
-				false);
+				false, false);
 		assertThat(map, hasSize(1));
 
 		assertThat(map.get(0).getValue(), is("2021-02-13"));
@@ -171,13 +171,37 @@ public class EngineTest {
 		assertTrue(loader.injectResource("newtest", null, inputStream));
 		assertEquals(2, engine.countListOfResource());
 	}
+	
+	@Test
+	public void testComputeKYCC6Compute_EmptyInput() {
 
+		Map<String, String> input = Map.of();
+
+		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, false);
+		assertThat(list, hasSize(1));
+
+		assertThat(list.get(0).getValue(), is("SUM(C2:C4)"));
+	
+	}
+	
+	@Test
+	public void testComputeKYCC6Compute_EmptyInput_force() {
+
+		Map<String, String> input = Map.of();
+
+		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, true);
+		assertThat(list, hasSize(1));
+
+		assertThat(list.get(0).getValue(), is(0.0));
+	
+	}
+	
 	@Test
 	public void testComputeKYCC6ComputeB2() {
 
 		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE");
 
-		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false);
+		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, false);
 		assertThat(list, hasSize(1));
 
 		assertThat(list.get(0).getValue(), is(50.0));
@@ -188,10 +212,21 @@ public class EngineTest {
 
 		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE", "ComputeKYC!B3", "CY");
 
-		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false);
+		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, false);
 		assertThat(list, hasSize(1));
 
 		assertThat(list.get(0).getValue(), is(75.0));
+	}
+	
+	@Test
+	public void testComputeKYCC6Compute_B2_B3_B4() {
+
+		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE", "ComputeKYC!B3", "CY",  "ComputeKYC!B4", "1000000");
+
+		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, false);
+		assertThat(list, hasSize(1));
+
+		assertThat(list.get(0).getValue(), is(125.0));
 	}
 
 }

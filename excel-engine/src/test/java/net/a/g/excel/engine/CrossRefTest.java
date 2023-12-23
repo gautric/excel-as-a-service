@@ -141,7 +141,7 @@ public class CrossRefTest {
 		assertThat(actual, is(expect));
 
 		List<ExcelCell> result = engine.cellCalculation("Primary", List.of("Feuil1!B1"), Map.of("Feuil1!C1", "10"),
-				true);
+				true, false);
 
 		assertEquals(54.0, result.get(0).getValue());
 

@@ -107,6 +107,7 @@ public class EngineAPITest {
 
 		assertThat(map.get("ComputeKYC!C6").getValue(), is("SUM(C2:C4)"));
 	}
+	
 
 	@Test
 	public void testLoading() {
@@ -120,7 +121,7 @@ public class EngineAPITest {
 
 		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE");
 
-		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false);
+		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, false);
 		assertThat(list, hasSize(1));
 
 		assertThat(list.get(0).getValue(), is(50.0));
@@ -131,7 +132,7 @@ public class EngineAPITest {
 
 		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE", "ComputeKYC!B3", "CY");
 
-		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false);
+		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, false);
 		assertThat(list, hasSize(1));
 
 		assertThat(list.get(0).getValue(), is(75.0));
