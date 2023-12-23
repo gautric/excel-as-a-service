@@ -505,7 +505,7 @@ public class ExcelResourceTest {
 	}
 
 	@Test
-	public void testKYCComputeKYCCY() {
+	public void test_ok_KYC_ComputeKYC_C6_B3_CY() {
 
 		when().get("/eaas/api/{resource}/sheet/{sheet}/cell/{cell}?{input}={value}", "KYC", "ComputeKYC", "C6", "B3",
 				"CY").then().statusCode(200)
@@ -604,7 +604,7 @@ public class ExcelResourceTest {
 	}
 	
 	@Test
-	public void testKYCComputeKYCAPI_withInvalidParam() {
+	public void test_ok_KYC_ComputeKYC_SCORE_PEP_true_COUNTRY_CY_TOTOTO_1000000() {
 
 		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true/COUNTRY/CY/TOTOTO/1000000").then().statusCode(200)
 	// @formatter:off
@@ -648,7 +648,7 @@ public class ExcelResourceTest {
 
 	
 	@Test
-	public void testKYCComputeKYCAPI_NO() {
+	public void test_server_error() {
 
 		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE").then().statusCode(500);
 	// @formatter:off
