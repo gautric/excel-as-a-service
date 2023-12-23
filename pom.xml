@@ -20,7 +20,7 @@
     <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
     <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
 
-    <quarkus.platform.version>3.6.1</quarkus.platform.version>
+    <quarkus.platform.version>3.6.4</quarkus.platform.version>
     <camel-quarkus.platform.version>${quarkus.platform.version}</camel-quarkus.platform.version>
 
     <camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
@@ -51,5 +51,6 @@
     <module>excel-rest</module>
     <module>excel-kafka</module>
     <module>excel-grpc</module>
+    <module>excel-lambda</module>
   </modules>
 </project>
