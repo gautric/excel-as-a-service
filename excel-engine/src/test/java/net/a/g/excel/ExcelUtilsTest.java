@@ -20,7 +20,7 @@ public class ExcelUtilsTest {
 	}
 
 	@Test
-	public void testAddressRedHat_Inc() {
+	public void test_ok_redhat_w_space() {
 		assertTrue(ExcelUtils.checkFullAdress("'RedHat Inc'!B2"));
 	}
 	
@@ -57,12 +57,12 @@ public class ExcelUtilsTest {
 	}
 
 	@Test
-	public void testAddressRedHat_Inc_IBM() {
+	public void test_ok_redhat_w_space_and_ibm() {
 		assertTrue(ExcelUtils.checkFullAdressStrict("'RedHat Inc'!B2,IBM!A1"));
 	}
 	
 	@Test
-	public void testAddressRedHat_Inc_IBM_Sun() {
+	public void test_ok_redhat_w_space_and_ibm_and_digital() {
 		assertTrue(ExcelUtils.checkFullAdressStrict("'RedHat Inc'!B2,IBM!A1,SUN!A2,DIGITAL!A2"));
 	}
 
