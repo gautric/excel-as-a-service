@@ -5,6 +5,7 @@ public class ExcelConstants {
 	public static final String EXCEL_STATIC_READONLY = "excel.static.readonly";
 	public static final String EXCEL_CELL_PATTERN = "([A-Z]{1,5})([0-9]{1,5})";
 	public static final String EXCEL_SHEET_CELL_PATTERN = "'?(?<sheetName>[^\\!\\']+)'?!(?<XAxis>[A-Z]{1,5})(?<YAxis>[0-9]{1,5})";
+	public static final String EXCEL_SHEET_CELL_PATTERN_V2 = "(?<sheetName>('([^\\!\\']+)')|(([^\\!\\'\\s]+)))!(?<XAxis>[A-Z]{1,5})(?<YAxis>[0-9]{1,5})";
 
 	public static final String EXCEL_SHEET_CELL_PATTERN_STRICT = "(?<first>[^,]+)(,([^,]+))*";
 
