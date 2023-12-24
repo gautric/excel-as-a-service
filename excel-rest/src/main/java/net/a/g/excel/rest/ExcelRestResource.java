@@ -414,7 +414,7 @@ public class ExcelRestResource {
 		pullParam = (List<String>) pullParam.stream().map(outputParam::get).flatMap(Stream::ofNullable)
 				.map(ExcelCell::getAddress).collect(Collectors.toList());
 
-		List<ExcelCell> entity = getEngine().cellCalculation(resource, pullParam, injectParam, false);
+		List<ExcelCell> entity = getEngine().cellCalculation(resource, pullParam, injectParam, false, false);
 
 		entity.forEach(cell -> {
 
@@ -616,7 +616,7 @@ public class ExcelRestResource {
 
 		List<ExcelCell> engineRet = null;
 
-		engineRet = getEngine().cellCalculation(resource, Arrays.asList(sheet + "!" + cell), query, global);
+		engineRet = getEngine().cellCalculation(resource, Arrays.asList(sheet + "!" + cell), query, global, false);
 
 		if (engineRet.size() == 0) {
 
