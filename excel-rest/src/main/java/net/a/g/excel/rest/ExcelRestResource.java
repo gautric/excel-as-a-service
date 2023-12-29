@@ -356,6 +356,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/sheet/{sheet}/compute/{output}/{input: .*}")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Sheet or Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "List of Cells for the sheet", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "Compute", description = "Compute")
 	public Response compute(@PathParam("resource") String resource, @PathParam("sheet") String sheetName,
 			@PathParam("output") String output, @PathParam("input") List<PathSegment> input) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
@@ -438,6 +442,10 @@ public class ExcelRestResource {
 	@GET
 	@Path("{resource}/sheet/{sheet}/compute")
 	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "404", description = "Sheet or Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "200", description = "List of Cells for the sheet", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
+	@Operation(summary = "Compute", description = "Compute")
 	public Response computeDefinition(@PathParam("resource") String resource, @PathParam("sheet") String sheet) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -533,11 +541,15 @@ public class ExcelRestResource {
 	}
 
 	private String extract(String input) {
-		Pattern p = Pattern.compile("@(input|output)\\(\"?(?<input>[A-Za-z0-9]+)\"?\\)");
+		String ret = null;
+		Pattern p = Pattern.compile("@(input|output)\\(\"?(?<match>[A-Za-z0-9]+)\"?\\)");
 		Matcher m = p.matcher(input);
 		while (m.matches()) {
-			return m.group("input");
+			ret = m.group("match");
+			LOG.debug("group match {}", ret);
+			return ret;
 		}
+		LOG.debug("no match ...");
 		return null;
 	}
 
