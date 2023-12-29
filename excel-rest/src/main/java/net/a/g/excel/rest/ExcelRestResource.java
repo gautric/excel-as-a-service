@@ -164,6 +164,15 @@ public class ExcelRestResource {
 		return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).links(link).entity(ee)
 				.build();
 	}
+	
+	private Response sheetNotFound(String resource, String sheet, Link link) {
+		ExcelError ee = new ExcelError();
+		ee.setCode("" + Response.Status.NOT_FOUND.getStatusCode());
+		ee.setError(" Sheet '" + sheet + "' Not Found in Resource '" + resource + "'");
+
+		return Response.status(Response.Status.NOT_FOUND).type(MediaType.APPLICATION_JSON).links(link).entity(ee)
+				.build();
+	}
 
 	@GET
 	@Path("")
@@ -314,7 +323,7 @@ public class ExcelRestResource {
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return sheetNotFound(resource, sheetName, link);
 		}
 
 		ret = new ExcelSheet(sheetName);
@@ -342,7 +351,7 @@ public class ExcelRestResource {
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return sheetNotFound(resource, sheetName, link);
 		}
 
 		entity = getEngine().listOfCell(resource, sheetName, cell -> true);
@@ -371,7 +380,7 @@ public class ExcelRestResource {
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return sheetNotFound(resource, sheetName, link);
 		}
 
 		if (input.size() % 2 != 0) {
@@ -455,7 +464,7 @@ public class ExcelRestResource {
 		}
 
 		if (!getEngine().isSheetExists(resource, sheet)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return sheetNotFound(resource, sheet, link);
 		}
 
 		Map<String, List<ExcelCell>> mapOfCell = getEngine().mapOfAPI(resource, sheet);
@@ -507,7 +516,7 @@ public class ExcelRestResource {
 		}
 
 		if (!getEngine().isSheetExists(resource, sheet)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return sheetNotFound(resource, sheet, link);
 		}
 
 		Map<String, List<ExcelCell>> mapOfCell = getEngine().mapOfAPI(resource, sheet);
@@ -595,7 +604,7 @@ public class ExcelRestResource {
 		}
 
 		if (!getEngine().isSheetExists(resource, sheetName)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return sheetNotFound(resource, sheetName, link);
 		}
 
 		List<ExcelCell> entity = getEngine().cellCalculation(resource, sheetName, Arrays.asList(input.split(",")),
@@ -623,7 +632,7 @@ public class ExcelRestResource {
 		}
 
 		if (!getEngine().isSheetExists(resource, sheet)) {
-			return Response.status(Response.Status.NOT_FOUND).build();
+			return sheetNotFound(resource, sheet, link);
 		}
 
 		List<ExcelCell> engineRet = null;
