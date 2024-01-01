@@ -28,6 +28,10 @@ public class ExcelRequest {
 	@Schema(name = "sheet", description = "Default sheet request")
 	private String sheet;
 
+	@JsonProperty("force")
+	@Schema(name = "force", description = "Force compute")
+	private boolean force;
+
 	@JsonProperty("outputs")
 	@Schema(name = "outputs", description = "List of cell adress")
 	private List<String> outputs = new ArrayList<String>();
@@ -38,6 +42,10 @@ public class ExcelRequest {
 
 	public ExcelRequest() {
 		uuid = UUID.randomUUID().toString();
+	}
+
+	public ExcelRequest(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public String getUuid() {
@@ -78,6 +86,20 @@ public class ExcelRequest {
 
 	public void setInputs(Map<String, String> inputs) {
 		this.inputs = inputs;
+	}
+
+	public boolean isForce() {
+		return force;
+	}
+
+	public void setForce(boolean force) {
+		this.force = force;
+	}
+
+	@Override
+	public String toString() {
+		return "ExcelRequest [uuid=" + uuid + ", resource=" + resource + ", sheet=" + sheet + ", force=" + force
+				+ ", outputs=" + outputs + ", inputs=" + inputs + "]";
 	}
 
 }
