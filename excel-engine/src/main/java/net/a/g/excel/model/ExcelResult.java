@@ -47,7 +47,7 @@ public class ExcelResult extends ExcelModel {
 		if (results.size() > 0 && results.iterator().next() instanceof ExcelSheet) {
 			this.sheets = results.stream().map(e -> (ExcelSheet) e).collect(Collectors.toList());
 
-		} else if (results.iterator().next() instanceof ExcelCell) {
+		} else if (results.size() > 0 && results.iterator().next() instanceof ExcelCell) {
 			this.cells = results.stream().map(e -> (ExcelCell) e).collect(Collectors.toList());
 
 		} else {
