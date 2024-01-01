@@ -220,11 +220,17 @@ public class ExcelEngine {
 	public List<ExcelCell> cellCalculation(String resource, String sheet, List<String> output,
 			Map<String, String> input, boolean global) {
 
+		return cellCalculation(resource, sheet, output, input, global, false);
+	}
+
+	public List<ExcelCell> cellCalculation(String resource, String sheet, List<String> output,
+			Map<String, String> input, boolean global, boolean force) {
+
 		Function<String, String> renameFunction = cn -> cn.contains("!") ? cn : sheet + "!" + cn;
 
 		return cellCalculation(resource, output.stream().map(renameFunction).collect(toList()), input.entrySet()
-				.stream().collect(Collectors.toMap(e -> renameFunction.apply(e.getKey()), Map.Entry::getValue)),
-				global, false);
+				.stream().collect(Collectors.toMap(e -> renameFunction.apply(e.getKey()), Map.Entry::getValue)), global,
+				force);
 	}
 
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs) {
@@ -266,9 +272,9 @@ public class ExcelEngine {
 			execFunction = cell -> computeCell(cell, exec);
 		} else {
 			LOG.debug("No input value -> no cell evaluation");
-			execFunction = rawMapping;	
+			execFunction = rawMapping;
 		}
-		
+
 		LOG.debug("Resource {} ", resource);
 		LOG.debug("Inputs: {}", inputs);
 		LOG.debug("Outputs: {}", outputs);
