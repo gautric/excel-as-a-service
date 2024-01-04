@@ -43,7 +43,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 	private static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
 
 	@Inject
-	ExcelParameter conf;
+	ExcelParameter param;
 	
 	@Inject
 	ExcelRepository repo;
@@ -241,7 +241,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 			case NUMERIC:
 
 				if (DateUtil.isCellDateFormatted(cell)) {
-					SimpleDateFormat sdf = new SimpleDateFormat(conf.getFormatDate());
+					SimpleDateFormat sdf = new SimpleDateFormat(param.getFormatDate());
 					ret = sdf.format(cell.getDateCellValue());
 				} else {
 					ret = cell.getNumericCellValue();
@@ -310,7 +310,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 			case NUMERIC:
 
 				if (DateUtil.isCellDateFormatted(cell)) {
-					SimpleDateFormat sdf = new SimpleDateFormat(conf.getFormatDate());
+					SimpleDateFormat sdf = new SimpleDateFormat(param.getFormatDate());
 					try {
 						cell.setCellValue(sdf.parse(value));
 					} catch (ParseException ex) {
