@@ -5,9 +5,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Named;
 import net.a.g.excel.param.ExcelParameter;
 import net.a.g.excel.util.ExcelConstants;
 
+@ApplicationScoped
+@Named
 public class ExcelParameterImpl extends net.a.g.excel.param.ExcelParameterImpl {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelParameter.class);
