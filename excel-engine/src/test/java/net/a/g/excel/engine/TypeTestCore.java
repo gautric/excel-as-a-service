@@ -9,14 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,13 +22,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import jakarta.enterprise.inject.se.SeContainer;
-import jakarta.enterprise.inject.se.SeContainerInitializer;
-import jakarta.enterprise.inject.spi.CDI;
-import net.a.g.excel.load.ExcelLoaderImpl;
 import net.a.g.excel.model.ExcelCell;
-import net.a.g.excel.repository.ExcelRepository;
-import net.a.g.excel.repository.ExcelRepositoryImpl;
 
 @DisplayName("Test with parameterized test")
 public class TypeTestCore extends ExcelUnitTest {
