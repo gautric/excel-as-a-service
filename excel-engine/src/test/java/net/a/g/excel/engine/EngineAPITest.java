@@ -1,8 +1,6 @@
 package net.a.g.excel.engine;
 
-
-import static java.util.stream.Collectors.*;
-
+import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
@@ -18,10 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Inject;
-
 import org.apache.commons.io.FileUtils;
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
@@ -31,17 +25,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
 import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
+import net.a.g.excel.repository.ExcelRepository;
+import net.a.g.excel.repository.ExcelRepositoryImpl;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ExtendWith(WeldJunit5Extension.class)
 public class EngineAPITest {
-	
+
 	@WeldSetup
-	public WeldInitiator weld = WeldInitiator.from(ExcelEngine.class, ExcelConfiguration.class, ExcelLoader.class)
+	public WeldInitiator weld = WeldInitiator
+			.from(ExcelEngineImpl.class, ExcelConfiguration.class, ExcelLoader.class, ExcelRepositoryImpl.class)
 			.activate(RequestScoped.class, SessionScoped.class).build();;
 
 	@Inject
@@ -50,6 +50,9 @@ public class EngineAPITest {
 	@Inject
 	ExcelLoader loader;
 
+	@Inject
+	ExcelRepository repo;
+
 	@BeforeEach
 	public void setup() throws Exception {
 		assertNotNull(engine);
@@ -57,29 +60,29 @@ public class EngineAPITest {
 		assertTrue(
 				loader.injectResource("KYC", "KYC.xlsx", FileUtils.openInputStream(new File("../sample/KYCAPI.xlsx"))));
 
-		assertEquals(1, engine.countListOfResource());
+		assertEquals(1, repo.count());
 
 	}
 
 	@AfterEach
 	public void close() {
-		engine.clearAllResource();
-		assertEquals(0, engine.countListOfResource());
+		repo.purge();
+		assertEquals(0, repo.count());
 	}
 
 	@Test
 	public void testEngine() {
-		assertNotNull(engine);
+		assertNotNull(repo);
 	}
 
 	@Test
 	public void testTest() {
-		assertEquals(1, engine.countListOfResource());
+		assertEquals(1, repo.count());
 	}
 
 	@Test
 	public void testResourceKYC() {
-		List<String> actual = engine.lisfOfResource().stream().map(ExcelResource::getName).collect(Collectors.toList());
+		List<String> actual = repo.listOfResources().stream().map(ExcelResource::getName).collect(Collectors.toList());
 
 		assertThat(actual, hasSize(1));
 		List<String> expect = Arrays.asList("KYC");
@@ -107,13 +110,12 @@ public class EngineAPITest {
 
 		assertThat(map.get("ComputeKYC!C6").getValue(), is("SUM(C2:C4)"));
 	}
-	
 
 	@Test
 	public void testLoading() {
 		InputStream inputStream = EngineAPITest.class.getResourceAsStream("/KYC.xlsx");
 		assertTrue(loader.injectResource("newtest", null, inputStream));
-		assertEquals(2, engine.countListOfResource());
+		assertEquals(2, repo.count());
 	}
 
 	@Test
@@ -137,13 +139,13 @@ public class EngineAPITest {
 
 		assertThat(list.get(0).getValue(), is(75.0));
 	}
-	
+
 	@Test
 	public void testListOfInput() {
 
 		List<ExcelCell> list = engine.listOfInput("KYC", "ComputeKYC");
 		assertThat(list, hasSize(3));
-		List<String> expect = Arrays.asList("@input(PEP)", "@input(COUNTRY)","@input(AMOUNT)");
+		List<String> expect = Arrays.asList("@input(PEP)", "@input(COUNTRY)", "@input(AMOUNT)");
 		assertThat(list.stream().map(ExcelCell::getMetadata).collect(toList()), is(expect));
 	}
 
@@ -155,15 +157,14 @@ public class EngineAPITest {
 		List<String> expect = Arrays.asList("@output(SCORE)");
 		assertThat(list.stream().map(ExcelCell::getMetadata).collect(toList()), is(expect));
 	}
-	
+
 	@Test
 	public void testListOfAPI() {
 
 		List<ExcelCell> list = engine.listOfAPI("KYC", "ComputeKYC");
 		assertThat(list, hasSize(4));
-		List<String> expect = Arrays.asList("@input(PEP)", "@input(COUNTRY)","@input(AMOUNT)","@output(SCORE)");
+		List<String> expect = Arrays.asList("@input(PEP)", "@input(COUNTRY)", "@input(AMOUNT)", "@output(SCORE)");
 		assertThat(list.stream().map(ExcelCell::getMetadata).collect(toList()), is(expect));
 	}
-	
-}
 
+}

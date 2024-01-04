@@ -8,19 +8,20 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Predicate;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Destroyed;
-import jakarta.enterprise.context.Initialized;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Destroyed;
+import jakarta.enterprise.context.Initialized;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
 import net.a.g.excel.engine.ExcelEngine;
+import net.a.g.excel.engine.ExcelEngineImpl;
 import net.a.g.excel.model.ExcelResource;
+import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ApplicationScoped
@@ -33,6 +34,9 @@ public class ExcelLoader {
 
 	@Inject
 	ExcelConfiguration conf;
+	
+	@Inject
+	ExcelRepository repo;
 
 	public ExcelLoader() {
 	}
@@ -50,11 +54,12 @@ public class ExcelLoader {
 	}
 
 	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
+		LOG.info("Load / Init");
 		try {
 			Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
 					&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
 
-			InputStream inputStream = ExcelEngine.class.getResourceAsStream(conf.getResouceUri());
+			InputStream inputStream = ExcelEngineImpl.class.getResourceAsStream(conf.getResouceUri());
 
 			if (inputStream != null) {
 				LOG.info("Load file from classpath:/{}", conf.getResouceUri());
@@ -79,7 +84,7 @@ public class ExcelLoader {
 	}
 
 	public boolean injectResource(String resourceName, String resourceFileName, InputStream resourceStream) {
-
+		LOG.info("Inject Resource");
 		byte[] targetArray;
 		try {
 			targetArray = IOUtils.toByteArray(resourceStream);
@@ -93,7 +98,7 @@ public class ExcelLoader {
 		excelResource.setFile(resourceFileName);
 		excelResource.setDoc(targetArray);
 
-		engine.addResource(excelResource);
+		repo.add(excelResource);
 
 		return true;
 	}

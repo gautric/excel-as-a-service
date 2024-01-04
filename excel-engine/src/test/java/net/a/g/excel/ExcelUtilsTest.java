@@ -3,10 +3,12 @@ package net.a.g.excel;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import net.a.g.excel.util.ExcelUtils;
 
+@DisplayName("Test some Excel Cell")
 public class ExcelUtilsTest {
 
 	@Test

@@ -27,6 +27,8 @@ import jakarta.enterprise.inject.se.SeContainerInitializer;
 import jakarta.enterprise.inject.spi.CDI;
 import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.model.ExcelCell;
+import net.a.g.excel.repository.ExcelRepository;
+import net.a.g.excel.repository.ExcelRepositoryImpl;
 
 @DisplayName("Test with parameterized test")
 public class TypeTest {
@@ -34,6 +36,8 @@ public class TypeTest {
 	ExcelEngine engine;
 
 	ExcelLoader loader;
+	
+	ExcelRepository repo;
 
 	SeContainer container;
 
@@ -41,18 +45,19 @@ public class TypeTest {
 	private void startContainer() throws IOException {
 		container = SeContainerInitializer.newInstance().initialize();
 
-		engine = (ExcelEngine) CDI.current().select(ExcelEngine.class).get();
+		repo = (ExcelRepository) CDI.current().select(ExcelRepositoryImpl.class).get();
+		engine = (ExcelEngine) CDI.current().select(ExcelEngineImpl.class).get();
 		loader = (ExcelLoader) CDI.current().select(ExcelLoader.class).get();
 		
 		assertTrue(
 				loader.injectResource("Type", "Type.xlsx", FileUtils.openInputStream(new File("../sample/Type.xlsx"))));
-		assertEquals(1, engine.countListOfResource());
+		assertEquals(1, repo.count());
 	}
 
 	@AfterEach
 	private void stopContainer() {
-		engine.clearAllResource();
-		assertEquals(0, engine.countListOfResource());
+		repo.purge();
+		assertEquals(0, repo.count());
 		if (this.container != null) {
 			this.container.close();
 		}

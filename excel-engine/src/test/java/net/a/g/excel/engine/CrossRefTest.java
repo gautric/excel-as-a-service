@@ -22,6 +22,7 @@ import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -31,13 +32,16 @@ import jakarta.inject.Inject;
 import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelSheet;
+import net.a.g.excel.repository.ExcelRepository;
+import net.a.g.excel.repository.ExcelRepositoryImpl;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ExtendWith(WeldJunit5Extension.class)
+@DisplayName("Test with different Excel File")
 public class CrossRefTest {
 
 	@WeldSetup
-	public WeldInitiator weld = WeldInitiator.from(ExcelEngine.class, ExcelConfiguration.class, ExcelLoader.class)
+	public WeldInitiator weld = WeldInitiator.from(ExcelEngineImpl.class, ExcelConfiguration.class, ExcelLoader.class, ExcelRepositoryImpl.class)
 			.activate(RequestScoped.class, SessionScoped.class).build();;
 
 	@Inject
@@ -45,6 +49,9 @@ public class CrossRefTest {
 
 	@Inject
 	ExcelLoader loader;
+	
+	@Inject
+	ExcelRepository repo;
 
 	@BeforeEach
 	public void setup() throws MalformedURLException, IOException {
@@ -54,14 +61,14 @@ public class CrossRefTest {
 		assertTrue(loader.injectResource("Secondary", "Secondary.xlsx",
 				FileUtils.openInputStream(new File("../sample/Secondary.xlsx"))));
 
-		assertEquals(2, engine.countListOfResource());
+		assertEquals(2, repo.count());
 
 	}
 
 	@AfterEach
 	public void close() {
-		engine.clearAllResource();
-		assertEquals(0, engine.countListOfResource());
+		repo.purge();
+		assertEquals(0, repo.count());
 	}
 
 	@Test

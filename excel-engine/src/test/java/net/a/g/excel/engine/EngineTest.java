@@ -14,10 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.context.SessionScoped;
-import jakarta.inject.Inject;
-
 import org.jboss.weld.junit5.WeldInitiator;
 import org.jboss.weld.junit5.WeldJunit5Extension;
 import org.jboss.weld.junit5.WeldSetup;
@@ -26,17 +22,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.SessionScoped;
+import jakarta.inject.Inject;
 import net.a.g.excel.load.ExcelLoader;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
+import net.a.g.excel.repository.ExcelRepository;
+import net.a.g.excel.repository.ExcelRepositoryImpl;
 import net.a.g.excel.util.ExcelConfiguration;
 
 @ExtendWith(WeldJunit5Extension.class)
 public class EngineTest {
 
 	@WeldSetup
-	public WeldInitiator weld = WeldInitiator.from(ExcelEngine.class, ExcelConfiguration.class, ExcelLoader.class)
+	public WeldInitiator weld = WeldInitiator
+			.from(ExcelEngineImpl.class, ExcelConfiguration.class, ExcelLoader.class, ExcelRepositoryImpl.class)
 			.activate(RequestScoped.class, SessionScoped.class).build();;
 
 	@Inject
@@ -44,20 +46,23 @@ public class EngineTest {
 
 	@Inject
 	ExcelLoader loader;
+	
+	@Inject
+	ExcelRepository repo;
 
 	@BeforeEach
 	public void setup() {
 		assertNotNull(engine);
 		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
 		assertTrue(loader.injectResource("KYC", null, inputStream));
-		assertEquals(1, engine.countListOfResource());
+		assertEquals(1, repo.count());
 
 	}
 
 	@AfterEach
 	public void close() {
-		engine.clearAllResource();
-		assertEquals(0, engine.countListOfResource());
+		repo.purge();
+		assertEquals(0, repo.count());
 	}
 
 	@Test
@@ -67,13 +72,13 @@ public class EngineTest {
 
 	@Test
 	public void testTest() {
-		assertEquals(1, engine.countListOfResource());
+		assertEquals(1, repo.count());
 	}
 
 	@Test
 	public void testResourceKYC() {
 		List<String> actual = new ArrayList(
-				engine.lisfOfResource().stream().map(ExcelResource::getName).collect(Collectors.toList()));
+				repo.listOfResources().stream().map(ExcelResource::getName).collect(Collectors.toList()));
 
 		assertThat(actual, hasSize(1));
 		List<String> expect = Arrays.asList("KYC");
@@ -169,9 +174,9 @@ public class EngineTest {
 	public void testLoading() {
 		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
 		assertTrue(loader.injectResource("newtest", null, inputStream));
-		assertEquals(2, engine.countListOfResource());
+		assertEquals(2, repo.count());
 	}
-	
+
 	@Test
 	public void testComputeKYCC6Compute_EmptyInput() {
 
@@ -181,9 +186,9 @@ public class EngineTest {
 		assertThat(list, hasSize(1));
 
 		assertThat(list.get(0).getValue(), is("SUM(C2:C4)"));
-	
+
 	}
-	
+
 	@Test
 	public void testComputeKYCC6Compute_EmptyInput_force() {
 
@@ -193,9 +198,9 @@ public class EngineTest {
 		assertThat(list, hasSize(1));
 
 		assertThat(list.get(0).getValue(), is(0.0));
-	
+
 	}
-	
+
 	@Test
 	public void testComputeKYCC6ComputeB2() {
 
@@ -217,11 +222,11 @@ public class EngineTest {
 
 		assertThat(list.get(0).getValue(), is(75.0));
 	}
-	
+
 	@Test
 	public void testComputeKYCC6Compute_B2_B3_B4() {
 
-		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE", "ComputeKYC!B3", "CY",  "ComputeKYC!B4", "1000000");
+		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE", "ComputeKYC!B3", "CY", "ComputeKYC!B4", "1000000");
 
 		List<ExcelCell> list = engine.cellCalculation("KYC", Arrays.asList("ComputeKYC!C6"), input, false, false);
 		assertThat(list, hasSize(1));
