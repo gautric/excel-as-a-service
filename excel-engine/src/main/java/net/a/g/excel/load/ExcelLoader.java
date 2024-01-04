@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,6 +24,7 @@ import net.a.g.excel.engine.ExcelEngineImpl;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.util.ExcelConfiguration;
+import net.a.g.excel.util.ExcelConstants;
 
 @ApplicationScoped
 public class ExcelLoader {
@@ -37,6 +39,15 @@ public class ExcelLoader {
 	
 	@Inject
 	ExcelRepository repo;
+	
+	
+	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = ExcelConstants.DOT)
+	String resouceUri;
+	
+
+	public String getResouceUri() {
+		return resouceUri;
+	}
 
 	public ExcelLoader() {
 	}
@@ -59,14 +70,14 @@ public class ExcelLoader {
 			Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
 					&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
 
-			InputStream inputStream = ExcelEngineImpl.class.getResourceAsStream(conf.getResouceUri());
+			InputStream inputStream = ExcelEngineImpl.class.getResourceAsStream(getResouceUri());
 
 			if (inputStream != null) {
-				LOG.info("Load file from classpath:/{}", conf.getResouceUri());
-				injectResource(FilenameUtils.getBaseName(conf.getResouceUri()),
-						FilenameUtils.getName(conf.getResouceUri()), inputStream);
+				LOG.info("Load file from classpath:/{}", getResouceUri());
+				injectResource(FilenameUtils.getBaseName(getResouceUri()),
+						FilenameUtils.getName(getResouceUri()), inputStream);
 			} else {
-				Path file = Paths.get(conf.getResouceUri());
+				Path file = Paths.get(getResouceUri());
 				if (Files.isRegularFile(file)) {
 					addFile(file);
 				} else if (Files.isDirectory(file)) {
