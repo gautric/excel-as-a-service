@@ -35,8 +35,8 @@ public abstract class ExcelUnitTest {
 		loader = new ExcelLoaderImpl();
 
 		loader.setRepo(repo);
-		((ExcelEngineImpl) engine).setParam(new ExcelParameterImpl());
-		((ExcelEngineImpl) engine).setRepo(repo);
+		((ExcelEngineImpl) engine).setParameter(new ExcelParameterImpl());
+		((ExcelEngineImpl) engine).setRepository(repo);
 
 		loader.init();
 	}

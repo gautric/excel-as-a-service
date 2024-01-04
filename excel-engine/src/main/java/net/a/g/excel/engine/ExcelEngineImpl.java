@@ -41,11 +41,11 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 	ExcelRepository repo;
 
-	public void setParam(ExcelParameter param) {
+	public void setParameter(ExcelParameter param) {
 		this.param = param;
 	}
 
-	public void setRepo(ExcelRepository repo) {
+	public void setRepository(ExcelRepository repo) {
 		this.repo = repo;
 	}
 
