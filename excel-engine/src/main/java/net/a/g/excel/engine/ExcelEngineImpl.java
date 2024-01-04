@@ -42,8 +42,6 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
 
-	private static final Predicate<Cell> FORMULA_PREDICATE = cell -> CellType.FORMULA == cell.getCellType();
-
 	@Inject
 	ExcelParameter conf;
 	
@@ -77,7 +75,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 	}
 
 	public Map<String, ExcelCell> mapOfFormularCell(String excelName, String sheetName) {
-		return mapOfCell(excelName, sheetName, FORMULA_PREDICATE);
+		return mapOfCell(excelName, sheetName, cell -> CellType.FORMULA == cell.getCellType());
 	}
 
 	public Map<String, ExcelCell> mapOfCell(String resource, String sheet, Predicate<Cell> predicate) {
