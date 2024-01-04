@@ -1,6 +1,6 @@
 package net.a.g.excel.load.cdi;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.config.ConfigProvider;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Destroyed;
@@ -20,12 +20,11 @@ public class ExcelLoaderImpl extends net.a.g.excel.load.ExcelLoaderImpl {
 		super.setRepository(repo);
 	}
 
-	public void setResouceUri(
-			@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = ExcelConstants.DOT) String resouceUri) {
-		super.setResouceUri(resouceUri);
-	}
-
 	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
+		String repo = ConfigProvider.getConfig().getValue(ExcelConstants.EXCEL_STATIC_RESOURCE_URI, String.class);
+
+		super.setResouceUri(repo);
+
 		super.init();
 	}
 
