@@ -115,9 +115,9 @@ public class ExcelUtils {
 		try {
 			return WorkbookFactory.create(new ByteArrayInputStream(byteArray));
 		} catch (EncryptedDocumentException ex) {
-			ExcelEngineImpl.LOG.error("Workbook  is not a XSSF file", ex);
+			LOG.error("Workbook  is not a XSSF file", ex);
 		} catch (IOException ex) {
-			ExcelEngineImpl.LOG.error("Workbook  is not a XSSF file", ex);
+			LOG.error("Workbook  is not a XSSF file", ex);
 		}
 		return null;
 	}

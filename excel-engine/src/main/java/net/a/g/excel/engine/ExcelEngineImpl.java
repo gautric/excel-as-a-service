@@ -41,18 +41,17 @@ import net.a.g.excel.util.ExcelUtils;
 @Named
 public class ExcelEngineImpl implements ExcelEngine {
 
-	public static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
 
 	private static final Predicate<Cell> FORMULA_PREDICATE = cell -> CellType.FORMULA == cell.getCellType();
+
+	private final Function<Cell, ExcelCell> rawMapping = cell -> celltoExcelCell(cell);
 
 	@Inject
 	ExcelConfiguration conf;
 	
 	@Inject
 	ExcelRepository repo;
-
-	private final Function<Cell, ExcelCell> rawMapping = cell -> celltoExcelCell(cell);
-
 
 	private FormulaEvaluator formula(Workbook wb) {
 		return wb.getCreationHelper().createFormulaEvaluator();
