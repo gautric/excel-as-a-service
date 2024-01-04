@@ -14,8 +14,6 @@ import net.a.g.excel.engine.ExcelEngineImpl;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.util.ExcelUtils;
 
-@ApplicationScoped
-@Named
 public class ExcelRepositoryImpl implements ExcelRepository {
 
 	public static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);

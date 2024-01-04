@@ -36,8 +36,7 @@ import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.util.ExcelParameter;
 import net.a.g.excel.util.ExcelUtils;
 
-@ApplicationScoped
-@Named
+
 public class ExcelEngineImpl implements ExcelEngine {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
@@ -47,6 +46,14 @@ public class ExcelEngineImpl implements ExcelEngine {
 	
 	@Inject
 	ExcelRepository repo;
+	
+	public void setParam(ExcelParameter param) {
+		this.param = param;
+	}
+
+	public void setRepo(ExcelRepository repo) {
+		this.repo = repo;
+	}
 
 	private FormulaEvaluator formula(Workbook wb) {
 		return wb.getCreationHelper().createFormulaEvaluator();

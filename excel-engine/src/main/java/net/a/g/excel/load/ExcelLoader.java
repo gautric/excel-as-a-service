@@ -1,116 +1,13 @@
 package net.a.g.excel.load;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.function.Predicate;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Destroyed;
-import jakarta.enterprise.context.Initialized;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-import net.a.g.excel.engine.ExcelEngine;
-import net.a.g.excel.engine.ExcelEngineImpl;
-import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.repository.ExcelRepository;
-import net.a.g.excel.util.ExcelParameter;
-import net.a.g.excel.util.ExcelConstants;
 
-@ApplicationScoped
-public class ExcelLoader {
+public interface ExcelLoader {
 
-	public final static Logger LOG = LoggerFactory.getLogger(ExcelLoader.class);
+	void setRepo(ExcelRepository repo);
 
-	@Inject
-	ExcelEngine engine;
+	boolean injectResource(String resourceName, String resourceFileName, InputStream resourceStream);
 
-	@Inject
-	ExcelParameter conf;
-	
-	@Inject
-	ExcelRepository repo;
-	
-	
-	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = ExcelConstants.DOT)
-	String resouceUri;
-	
-
-	public String getResouceUri() {
-		return resouceUri;
-	}
-
-	public ExcelLoader() {
-	}
-
-	private void addFile(Path file) {
-		try {
-			LOG.info("Load file from {} ({})", file.getFileName(), file.toFile().toURI());
-			injectResource(FilenameUtils.removeExtension(file.getFileName().toString()),
-					FilenameUtils.getName(file.getFileName().toString()), file.toUri().toURL().openStream());
-		} catch (MalformedURLException e) {
-			LOG.error("Error while loading file", e);
-		} catch (IOException e) {
-			LOG.error("Error while loading file", e);
-		}
-	}
-
-	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
-		LOG.info("Load / Init");
-		try {
-			Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
-					&& (f.getFileName().toString().endsWith("xls") || f.getFileName().toString().endsWith("xlsx"));
-
-			InputStream inputStream = ExcelEngineImpl.class.getResourceAsStream(getResouceUri());
-
-			if (inputStream != null) {
-				LOG.info("Load file from classpath:/{}", getResouceUri());
-				injectResource(FilenameUtils.getBaseName(getResouceUri()),
-						FilenameUtils.getName(getResouceUri()), inputStream);
-			} else {
-				Path file = Paths.get(getResouceUri());
-				if (Files.isRegularFile(file)) {
-					addFile(file);
-				} else if (Files.isDirectory(file)) {
-					Files.walk(file, 1).filter(excelFilter).forEach(this::addFile);
-				} else {
-					LOG.warn("Cannot read file or directory : {}", file.getFileName().toAbsolutePath());
-				}
-			}
-		} catch (Exception ex) {
-			LOG.debug("Error while loading file", ex);
-		}
-	}
-
-	public void destroy(@Observes @Destroyed(ApplicationScoped.class) Object init) {
-	}
-
-	public boolean injectResource(String resourceName, String resourceFileName, InputStream resourceStream) {
-		LOG.info("Inject Resource");
-		byte[] targetArray;
-		try {
-			targetArray = IOUtils.toByteArray(resourceStream);
-		} catch (IOException e) {
-			LOG.error("Workbook " + resourceName + " is not readable", e);
-			return false;
-		}
-
-		ExcelResource excelResource = new ExcelResource();
-		excelResource.setName(resourceName);
-		excelResource.setFile(resourceFileName);
-		excelResource.setDoc(targetArray);
-
-		repo.add(excelResource);
-
-		return true;
-	}
 }
