@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toList;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -44,8 +43,6 @@ public class ExcelEngineImpl implements ExcelEngine {
 	private static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
 
 	private static final Predicate<Cell> FORMULA_PREDICATE = cell -> CellType.FORMULA == cell.getCellType();
-
-	private final Function<Cell, ExcelCell> rawMapping = cell -> celltoExcelCell(cell);
 
 	@Inject
 	ExcelParameter conf;
@@ -201,7 +198,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 			execFunction = cell -> computeCell(cell, exec);
 		} else {
 			LOG.debug("No input value -> no cell evaluation");
-			execFunction = rawMapping;
+			execFunction = cell -> celltoExcelCell(cell);
 		}
 
 		LOG.debug("Resource {} ", resource);
