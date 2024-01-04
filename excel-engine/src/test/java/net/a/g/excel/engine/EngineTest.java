@@ -31,14 +31,14 @@ import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.repository.ExcelRepositoryImpl;
-import net.a.g.excel.util.ExcelConfiguration;
+import net.a.g.excel.util.ExcelParameter;
 
 @ExtendWith(WeldJunit5Extension.class)
 public class EngineTest {
 
 	@WeldSetup
 	public WeldInitiator weld = WeldInitiator
-			.from(ExcelEngineImpl.class, ExcelConfiguration.class, ExcelLoader.class, ExcelRepositoryImpl.class)
+			.from(ExcelEngineImpl.class, ExcelParameter.class, ExcelLoader.class, ExcelRepositoryImpl.class)
 			.activate(RequestScoped.class, SessionScoped.class).build();;
 
 	@Inject

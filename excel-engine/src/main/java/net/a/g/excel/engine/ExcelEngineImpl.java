@@ -34,7 +34,7 @@ import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.repository.ExcelRepository;
-import net.a.g.excel.util.ExcelConfiguration;
+import net.a.g.excel.util.ExcelParameter;
 import net.a.g.excel.util.ExcelUtils;
 
 @ApplicationScoped
@@ -48,7 +48,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 	private final Function<Cell, ExcelCell> rawMapping = cell -> celltoExcelCell(cell);
 
 	@Inject
-	ExcelConfiguration conf;
+	ExcelParameter conf;
 	
 	@Inject
 	ExcelRepository repo;

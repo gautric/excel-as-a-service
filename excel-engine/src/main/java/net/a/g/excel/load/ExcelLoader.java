@@ -23,7 +23,7 @@ import net.a.g.excel.engine.ExcelEngine;
 import net.a.g.excel.engine.ExcelEngineImpl;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.repository.ExcelRepository;
-import net.a.g.excel.util.ExcelConfiguration;
+import net.a.g.excel.util.ExcelParameter;
 import net.a.g.excel.util.ExcelConstants;
 
 @ApplicationScoped
@@ -35,7 +35,7 @@ public class ExcelLoader {
 	ExcelEngine engine;
 
 	@Inject
-	ExcelConfiguration conf;
+	ExcelParameter conf;
 	
 	@Inject
 	ExcelRepository repo;
