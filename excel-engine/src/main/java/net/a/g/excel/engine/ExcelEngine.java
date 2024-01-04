@@ -35,9 +35,6 @@ public interface ExcelEngine {
 	Map<String, ExcelCell> mapOfCellCalculated(String resource, String sheet, String[] outputs,
 			Map<String, List<String>> inputs, boolean global);
 
-	List<ExcelCell> cellCalculationOld(String resource, String sheet, List<String> outputs,
-			Map<String, List<String>> inputs, boolean global);
-
 	List<ExcelCell> cellCalculation(String resource, String sheet, List<String> output, Map<String, String> input,
 			boolean global);
 
