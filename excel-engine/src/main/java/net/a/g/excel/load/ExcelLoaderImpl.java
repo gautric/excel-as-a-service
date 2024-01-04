@@ -25,7 +25,7 @@ public class ExcelLoaderImpl implements ExcelLoader {
 
 	private String resouceUri;
 
-	public void setRepo(ExcelRepository repo) {
+	public void setRepository(ExcelRepository repo) {
 		this.repository = repo;
 	}
 
