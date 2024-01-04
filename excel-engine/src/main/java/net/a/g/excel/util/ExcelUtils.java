@@ -1,13 +1,20 @@
 package net.a.g.excel.util;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.a.g.excel.engine.ExcelEngineImpl;
 
 public class ExcelUtils {
 
@@ -97,4 +104,22 @@ public class ExcelUtils {
 				.collect(Collectors.toList());
 	}
 
+	
+	/**
+	 * Convert byte[] to Excel POI Workbook
+	 * 
+	 * @param byteArray
+	 * @return
+	 */
+	public static Workbook convertByteToWorkbook(byte[] byteArray) {
+		try {
+			return WorkbookFactory.create(new ByteArrayInputStream(byteArray));
+		} catch (EncryptedDocumentException ex) {
+			ExcelEngineImpl.LOG.error("Workbook  is not a XSSF file", ex);
+		} catch (IOException ex) {
+			ExcelEngineImpl.LOG.error("Workbook  is not a XSSF file", ex);
+		}
+		return null;
+	}
+	
 }
