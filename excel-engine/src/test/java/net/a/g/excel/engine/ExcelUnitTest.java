@@ -13,9 +13,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
 import net.a.g.excel.load.ExcelLoaderImpl;
+import net.a.g.excel.param.ExcelParameterImpl;
 import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.repository.ExcelRepositoryImpl;
-import net.a.g.excel.util.ExcelParameter;
 
 public abstract class ExcelUnitTest {
 
@@ -35,7 +35,7 @@ public abstract class ExcelUnitTest {
 		loader = new ExcelLoaderImpl();
 
 		loader.setRepo(repo);
-		((ExcelEngineImpl) engine).setParam(new ExcelParameter());
+		((ExcelEngineImpl) engine).setParam(new ExcelParameterImpl());
 		((ExcelEngineImpl) engine).setRepo(repo);
 
 		loader.init();

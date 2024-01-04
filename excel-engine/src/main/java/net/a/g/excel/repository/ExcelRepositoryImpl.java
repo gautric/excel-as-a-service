@@ -8,15 +8,12 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Named;
-import net.a.g.excel.engine.ExcelEngineImpl;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.util.ExcelUtils;
 
 public class ExcelRepositoryImpl implements ExcelRepository {
 
-	public static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
+	public static final Logger LOG = LoggerFactory.getLogger(ExcelRepositoryImpl.class);
 
 	private Map<String, ExcelResource> listOfResources = new HashMap<String, ExcelResource>();
 

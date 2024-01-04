@@ -26,27 +26,21 @@ import org.apache.poi.ss.util.CellReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
+import net.a.g.excel.param.ExcelParameter;
 import net.a.g.excel.repository.ExcelRepository;
-import net.a.g.excel.util.ExcelParameter;
 import net.a.g.excel.util.ExcelUtils;
-
 
 public class ExcelEngineImpl implements ExcelEngine {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExcelEngineImpl.class);
 
-	@Inject
 	ExcelParameter param;
-	
-	@Inject
+
 	ExcelRepository repo;
-	
+
 	public void setParam(ExcelParameter param) {
 		this.param = param;
 	}
@@ -186,9 +180,9 @@ public class ExcelEngineImpl implements ExcelEngine {
 		if (global && inputs.size() > 0) {
 			LOG.debug("mode global aka cross-ref enable");
 
-			Map<String, FormulaEvaluator> workbooks = repo.listOfResource().stream().collect(Collectors.toMap(
-					ExcelResource::getFile,
-					r -> (resource.compareTo(r.getName()) == 0) ? exec : formula(ExcelUtils.convertByteToWorkbook(r.getDoc()))));
+			Map<String, FormulaEvaluator> workbooks = repo.listOfResource().stream()
+					.collect(Collectors.toMap(ExcelResource::getFile, r -> (resource.compareTo(r.getName()) == 0) ? exec
+							: formula(ExcelUtils.convertByteToWorkbook(r.getDoc()))));
 			exec.setupReferencedWorkbooks(workbooks);
 		}
 
@@ -218,7 +212,6 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 		return ret;
 	}
-
 
 	public List<ExcelCell> cellCalculation(Supplier<String> resource, Supplier<List<String>> outputs,
 			Supplier<Map<String, String>> inputs, boolean global) {
