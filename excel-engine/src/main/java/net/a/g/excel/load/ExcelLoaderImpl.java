@@ -29,7 +29,7 @@ public class ExcelLoaderImpl implements ExcelLoader {
 		this.repository = repo;
 	}
 
-	public ExcelRepository getRepo() {
+	public ExcelRepository getRepository() {
 		return repository;
 	}
 
@@ -64,7 +64,7 @@ public class ExcelLoaderImpl implements ExcelLoader {
 
 			InputStream inputStream = null;
 			if (getResouceUri() != null) {
-				inputStream = ExcelLoaderImpl.class.getResourceAsStream(getResouceUri());
+				inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream(getResouceUri());
 
 				if (inputStream != null) {
 					LOG.info("Load file from classpath:/{}", getResouceUri());
