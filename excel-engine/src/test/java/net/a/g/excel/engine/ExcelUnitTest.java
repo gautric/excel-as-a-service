@@ -29,17 +29,16 @@ public abstract class ExcelUnitTest {
 
 	@BeforeEach
 	public void setup() throws MalformedURLException, IOException {
-		
+
 		engine = new ExcelEngineImpl();
 		repo = new ExcelRepositoryImpl();
 		loader = new ExcelLoaderImpl();
-		
+
 		loader.setRepo(repo);
-		((ExcelEngineImpl)engine).setParam(new ExcelParameter());
-		((ExcelEngineImpl)engine).setRepo(repo);
-	
-		
-		loader.init(null);
+		((ExcelEngineImpl) engine).setParam(new ExcelParameter());
+		((ExcelEngineImpl) engine).setRepo(repo);
+
+		loader.init();
 	}
 
 	@AfterEach

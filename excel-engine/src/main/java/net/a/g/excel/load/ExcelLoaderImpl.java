@@ -10,14 +10,9 @@ import java.util.function.Predicate;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Destroyed;
-import jakarta.enterprise.context.Initialized;
-import jakarta.enterprise.event.Observes;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.util.ExcelConstants;
@@ -26,14 +21,23 @@ public class ExcelLoaderImpl implements ExcelLoader {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelLoaderImpl.class);
 
-	ExcelRepository repo;
+	ExcelRepository repository;
 
+	private String resouceUri;
+
+	
 	public void setRepo(ExcelRepository repo) {
-		this.repo = repo;
+		this.repository = repo;
 	}
 
-	@ConfigProperty(name = ExcelConstants.EXCEL_STATIC_RESOURCE_URI, defaultValue = ExcelConstants.DOT)
-	String resouceUri;
+
+	public ExcelRepository getRepo() {
+		return repository;
+	}
+
+	public void setResouceUri(String resouceUri) {
+		this.resouceUri = resouceUri;
+	}
 
 	public String getResouceUri() {
 		return resouceUri;
@@ -54,7 +58,7 @@ public class ExcelLoaderImpl implements ExcelLoader {
 		}
 	}
 
-	public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
+	public void init() {
 		LOG.info("Load / Init");
 		try {
 			Predicate<Path> excelFilter = f -> !(f).getFileName().toString().startsWith("~")
@@ -63,7 +67,7 @@ public class ExcelLoaderImpl implements ExcelLoader {
 			InputStream inputStream = null;
 			if (getResouceUri() != null) {
 				inputStream = ExcelLoaderImpl.class.getResourceAsStream(getResouceUri());
-			
+
 				if (inputStream != null) {
 					LOG.info("Load file from classpath:/{}", getResouceUri());
 					injectResource(FilenameUtils.getBaseName(getResouceUri()), FilenameUtils.getName(getResouceUri()),
@@ -86,9 +90,6 @@ public class ExcelLoaderImpl implements ExcelLoader {
 		}
 	}
 
-	public void destroy(@Observes @Destroyed(ApplicationScoped.class) Object init) {
-	}
-
 	public boolean injectResource(String resourceName, String resourceFileName, InputStream resourceStream) {
 		LOG.info("Inject Resource");
 		byte[] targetArray;
@@ -104,7 +105,7 @@ public class ExcelLoaderImpl implements ExcelLoader {
 		excelResource.setFile(resourceFileName);
 		excelResource.setDoc(targetArray);
 
-		repo.add(excelResource);
+		repository.add(excelResource);
 
 		return true;
 	}
