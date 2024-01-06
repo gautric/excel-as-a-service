@@ -14,8 +14,6 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.a.g.excel.engine.ExcelEngineImpl;
-
 public class ExcelUtils {
 
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelUtils.class);
@@ -104,22 +102,5 @@ public class ExcelUtils {
 				.collect(Collectors.toList());
 	}
 
-	
-	/**
-	 * Convert byte[] to Excel POI Workbook
-	 * 
-	 * @param byteArray
-	 * @return
-	 */
-	public static Workbook convertByteToWorkbook(byte[] byteArray) {
-		try {
-			return WorkbookFactory.create(new ByteArrayInputStream(byteArray));
-		} catch (EncryptedDocumentException ex) {
-			LOG.error("Workbook  is not a XSSF file", ex);
-		} catch (IOException ex) {
-			LOG.error("Workbook  is not a XSSF file", ex);
-		}
-		return null;
-	}
-	
+
 }

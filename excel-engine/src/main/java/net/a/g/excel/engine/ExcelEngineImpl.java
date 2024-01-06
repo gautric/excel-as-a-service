@@ -31,7 +31,7 @@ import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.param.ExcelParameter;
 import net.a.g.excel.repository.ExcelRepository;
-import net.a.g.excel.util.ExcelUtils;
+import net.a.g.excel.util.POITools;
 
 public class ExcelEngineImpl implements ExcelEngine {
 
@@ -182,7 +182,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 			Map<String, FormulaEvaluator> workbooks = repo.listOfResource().stream()
 					.collect(Collectors.toMap(ExcelResource::getFile, r -> (resource.compareTo(r.getName()) == 0) ? exec
-							: formula(ExcelUtils.convertByteToWorkbook(r.getDoc()))));
+							: formula(POITools.convertByteToWorkbook(r.getDoc()))));
 			exec.setupReferencedWorkbooks(workbooks);
 		}
 

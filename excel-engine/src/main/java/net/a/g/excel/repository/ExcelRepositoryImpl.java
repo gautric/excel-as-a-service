@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.util.ExcelUtils;
+import net.a.g.excel.util.POITools;
 
 public class ExcelRepositoryImpl implements ExcelRepository {
 
@@ -21,7 +22,7 @@ public class ExcelRepositoryImpl implements ExcelRepository {
 
 		assert (resource != null);
 
-		if (ExcelUtils.convertByteToWorkbook(resource.getDoc()) == null) {
+		if (POITools.convertByteToWorkbook(resource.getDoc()) == null) {
 			LOG.error("Workbook {} is not readable", resource.getName());
 			return false;
 		}
@@ -60,7 +61,7 @@ public class ExcelRepositoryImpl implements ExcelRepository {
 		Workbook workbook = null;
 		if (contains(name)) {
 			byte[] byteArray = get(name).getDoc();
-			workbook = ExcelUtils.convertByteToWorkbook(byteArray);
+			workbook = POITools.convertByteToWorkbook(byteArray);
 		}
 		return workbook;
 	}
