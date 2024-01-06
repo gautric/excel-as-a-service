@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.a.g.excel.model.ExcelResource;
-import net.a.g.excel.util.ExcelUtils;
 import net.a.g.excel.util.POITools;
 
 public class ExcelRepositoryImpl implements ExcelRepository {
