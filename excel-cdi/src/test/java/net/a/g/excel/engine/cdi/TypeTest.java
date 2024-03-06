@@ -44,6 +44,11 @@ public class TypeTest {
 	ExcelRepository repo;
 
 	SeContainer container;
+	
+    static {
+        System.setProperty("excel.static.resouces.uri",
+                "/tmp");
+    }
 
 	@BeforeEach
 	private void startContainer() throws IOException {
