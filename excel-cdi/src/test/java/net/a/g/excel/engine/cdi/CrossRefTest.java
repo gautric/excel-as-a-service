@@ -48,6 +48,12 @@ public class CrossRefTest {
 			.from(ExcelEngineImpl.class, ExcelParameterImpl.class, ExcelLoaderImpl.class, ExcelRepositoryImpl.class)
 			.activate(RequestScoped.class, SessionScoped.class).build();
 
+
+    static {
+        System.setProperty("excel.static.resouces.uri",
+                "/tmp");
+    }
+    
 	@Inject
 	ExcelEngine engine;
 
@@ -65,7 +71,9 @@ public class CrossRefTest {
 		assertTrue(loader.injectResource("Secondary", "Secondary.xlsx",
 				FileUtils.openInputStream(new File("../sample/Secondary.xlsx"))));
 
-		assertEquals(2, repo.count());
+		
+		System.out.println(repo.listOfResource());
+		assertEquals(2, repo.count(),"Nb of repo");
 
 	}
 

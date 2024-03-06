@@ -182,7 +182,8 @@ public class EngineTest {
 
 	@Test
 	public void testLoading() {
-		InputStream inputStream = EngineTest.class.getResourceAsStream("/KYC.xlsx");
+		InputStream inputStream = this.getClass().getResourceAsStream("/KYC.xlsx");
+		assertNotNull(inputStream);
 		assertTrue(loader.injectResource("newtest", null, inputStream));
 		assertEquals(2, repo.count());
 	}
