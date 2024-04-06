@@ -1,16 +1,14 @@
 <?xml version="1.0"?>
-<project
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd"
-  xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <groupId>net.a.g.excel</groupId>
     <artifactId>excel-app</artifactId>
     <version>1.0.0-SNAPSHOT</version>
   </parent>
-  <artifactId>excel-kafka</artifactId>
-  <name>EXCEL APP :: EXCEL KAFKA</name>
+  <artifactId>excel-lambda</artifactId>
+  <name>EXCEL APP :: EXCEL Amazon λ</name>
   <dependencies>
     <dependency>
       <groupId>net.a.g.excel</groupId>
@@ -37,18 +35,13 @@
       <groupId>io.quarkus</groupId>
       <artifactId>quarkus-resteasy-multipart</artifactId>
     </dependency>
+    <!-- <dependency>
+      <groupId>io.quarkus</groupId>
+      <artifactId>quarkus-amazon-lambda-rest</artifactId>
+    </dependency> -->
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-reactive-messaging-kafka</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-websockets</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.quarkiverse.asyncapi</groupId>
-      <artifactId>quarkus-asyncapi</artifactId>
-      <version>0.2.2</version>
+      <artifactId>quarkus-amazon-lambda</artifactId>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>

@@ -17,6 +17,7 @@ import io.smallrye.mutiny.Multi;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import net.a.g.excel.engine.ExcelEngine;
+import net.a.g.excel.repository.ExcelRepository;
 
 @GrpcService
 @Singleton
@@ -37,11 +38,11 @@ public class ExcelService implements Excel {
 				case "NUMERIC":
 					message = DoubleValue.of((Double) cell.getValue());
 					break;
-					
+
 				case "STRING":
 					message = StringValue.of((String) cell.getValue());
 					break;
-					
+
 				case "FORMULA":
 					message = StringValue.of((String) cell.getValue());
 					break;
@@ -64,10 +65,13 @@ public class ExcelService implements Excel {
 	@Inject
 	ExcelEngine engine;
 
+	@Inject
+	ExcelRepository repo;
+
 	@Override
 	public Multi<net.a.g.excel.grpc.ExcelResource> listOfResource(Empty request) {
 		LOG.error("listOfResource");
-		return Multi.createFrom().items(engine.lisfOfResource().stream().map(net.a.g.excel.model.ExcelResource::getName)
+		return Multi.createFrom().items(repo.listOfResources().stream().map(net.a.g.excel.model.ExcelResource::getName)
 				.map(name -> ExcelResource.newBuilder().setName(name).build()));
 	}
 
