@@ -12,7 +12,7 @@
   <dependencies>
     <dependency>
       <groupId>net.a.g.excel</groupId>
-      <artifactId>excel-engine</artifactId>
+      <artifactId>excel-cdi</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
