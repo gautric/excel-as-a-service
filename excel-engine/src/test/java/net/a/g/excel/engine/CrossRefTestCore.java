@@ -21,11 +21,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import net.a.g.excel.load.ExcelLoaderImpl;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelSheet;
-import net.a.g.excel.param.ExcelParameterImpl;
-import net.a.g.excel.repository.ExcelRepositoryImpl;
 
 @DisplayName("Test with different Excel File")
 public class CrossRefTestCore extends ExcelUnitTest {
