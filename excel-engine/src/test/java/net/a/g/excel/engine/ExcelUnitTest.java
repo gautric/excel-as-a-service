@@ -17,18 +17,44 @@ import net.a.g.excel.param.ExcelParameterImpl;
 import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.repository.ExcelRepositoryImpl;
 
+/**
+ * Base test class providing common setup and teardown functionality for Excel engine tests.
+ * This abstract class initializes the core components needed for testing Excel operations:
+ * - ExcelEngine for Excel operations
+ * - ExcelRepository for resource management
+ * - ExcelLoader for loading Excel files
+ */
 public abstract class ExcelUnitTest {
 
-	protected ExcelEngine engine;
-	ExcelLoaderImpl loader;
-	ExcelRepository repo;
+    /** The Excel engine instance used for operations */
+    protected ExcelEngine engine;
+    
+    /** Loader for injecting Excel resources */
+    protected ExcelLoaderImpl loader;
+    
+    /** Repository for storing Excel resources */
+    protected ExcelRepository repo;
 
-	public ExcelUnitTest() {
-		super();
-	}
+    /**
+     * Default constructor.
+     */
+    public ExcelUnitTest() {
+        super();
+    }
 
-	@BeforeEach
-	public void setup() throws MalformedURLException, IOException {
+    /**
+     * Sets up the test environment before each test.
+     * Initializes:
+     * - ExcelEngine implementation
+     * - Repository for Excel resources
+     * - Loader for Excel files
+     * - Configures dependencies between components
+     *
+     * @throws MalformedURLException if resource URLs are invalid
+     * @throws IOException if there are issues reading resources
+     */
+    @BeforeEach
+    public void setup() throws MalformedURLException, IOException {
 
 		engine = new ExcelEngineImpl();
 		repo = new ExcelRepositoryImpl();
@@ -41,8 +67,12 @@ public abstract class ExcelUnitTest {
 		loader.init();
 	}
 
-	@AfterEach
-	public void close() {
+    /**
+     * Cleans up the test environment after each test.
+     * Purges all resources from the repository and verifies cleanup.
+     */
+    @AfterEach
+    public void close() {
 		repo.purge();
 		assertEquals(0, repo.count());
 	}

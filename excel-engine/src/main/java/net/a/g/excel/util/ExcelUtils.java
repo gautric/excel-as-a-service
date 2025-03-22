@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.apache.poi.EncryptedDocumentException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.ss.util.CellReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,19 +20,26 @@ public class ExcelUtils {
 	public final static Logger LOG = LoggerFactory.getLogger(ExcelUtils.class);
 
 	/**
-	 * Return X position of letter 'D' = 4
+	 * Converts Excel column letters to their numeric position (0-based index).
+	 * Examples:
+	 * - "A" -> 0
+	 * - "B" -> 1
+	 * - "Z" -> 25
+	 * - "AA" -> 26
+	 * - "AB" -> 27
 	 * 
-	 * @param a letter
-	 * @return
+	 * Note: This method assumes input contains only alphabetic characters.
+	 * Non-alphabetic input may produce unexpected results.
+	 * 
+	 * The calculation follows Excel's column naming convention:
+	 * - Single letters A-Z represent columns 1-26 (returned as 0-25)
+	 * - After Z, columns continue with AA, AB, ..., AZ, BA, etc.
+	 * 
+	 * @param a letter or sequence of letters representing an Excel column
+	 * @return 0-based position index of the column
 	 */
-	public static int position(String a) {
-		final int A = 65;
-		int result = 0;
-		for (int i = 0; i < a.length(); i++) {
-			int p = ((int) a.charAt(i) - A) + 26 * (a.length() - i - 1);
-			result = result + p;
-		}
-		return result;
+	public static int position(String column) {
+		return CellReference.convertColStringToIndex(column);
 	}
 
 	/**
@@ -104,3 +112,4 @@ public class ExcelUtils {
 
 
 }
+

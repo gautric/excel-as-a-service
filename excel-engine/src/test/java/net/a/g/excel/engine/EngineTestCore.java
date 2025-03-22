@@ -25,11 +25,32 @@ import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
 
+/**
+ * Core test suite for Excel engine functionality using KYC (Know Your Customer) test cases.
+ * Tests basic Excel operations including:
+ * - Resource management
+ * - Sheet operations
+ * - Cell calculations
+ * - Formula evaluations
+ * - Value lookups
+ * 
+ * Uses a KYC.xlsx test file that contains:
+ * - ComputeKYC sheet: Main calculation sheet
+ * - COUNTRY sheet: Lookup table for country data
+ * - AMOUNT sheet: Lookup table for amount thresholds
+ */
 @DisplayName("Test Excel KYC")
 public class EngineTestCore extends ExcelUnitTest {
 
-	@BeforeEach
-	public void setup() throws MalformedURLException, IOException {
+    /**
+     * Sets up the test environment.
+     * Loads the KYC.xlsx test file into the repository.
+     *
+     * @throws MalformedURLException if resource URLs are invalid
+     * @throws IOException if there are issues reading the test file
+     */
+    @BeforeEach
+    public void setup() throws MalformedURLException, IOException {
 		super.setup();
 		assertNotNull(engine);
 
@@ -44,8 +65,11 @@ public class EngineTestCore extends ExcelUnitTest {
 		assertEquals(0, repo.count());
 	}
 
-	@Test
-	public void testEngine() {
+    /**
+     * Verifies that the Excel engine is properly initialized.
+     */
+    @Test
+    public void testEngine() {
 		assertNotNull(engine);
 	}
 
@@ -54,8 +78,12 @@ public class EngineTestCore extends ExcelUnitTest {
 		assertEquals(1, repo.count());
 	}
 
-	@Test
-	public void testResourceKYC() {
+    /**
+     * Tests that the KYC resource is properly loaded in the repository.
+     * Verifies the resource name matches expectations.
+     */
+    @Test
+    public void testResourceKYC() {
 		List<String> actual = new ArrayList(
 				repo.listOfResources().stream().map(ExcelResource::getName).collect(Collectors.toList()));
 
@@ -65,8 +93,12 @@ public class EngineTestCore extends ExcelUnitTest {
 		assertThat(actual, is(expect));
 	}
 
-	@Test
-	public void testSheetKYC() {
+    /**
+     * Tests that all expected sheets are present in the KYC workbook.
+     * Verifies the presence and names of ComputeKYC, COUNTRY, and AMOUNT sheets.
+     */
+    @Test
+    public void testSheetKYC() {
 
 		List<String> actual = engine.listOfSheet("KYC").stream().map(ExcelSheet::getName).collect(Collectors.toList());
 		assertThat(actual, hasSize(3));
@@ -75,8 +107,12 @@ public class EngineTestCore extends ExcelUnitTest {
 		assertThat(actual, is(expect));
 	}
 
-	@Test
-	public void testComputeKYCValues() {
+    /**
+     * Tests formula cell values in the ComputeKYC sheet.
+     * Verifies VLOOKUP formulas, SUM functions, and conditional logic.
+     */
+    @Test
+    public void testComputeKYCValues() {
 
 		List<String> actual = new ArrayList(engine.mapOfFormularCell("KYC", "ComputeKYC").values().stream()
 				.map(cell -> cell.getValue()).collect(Collectors.toList()));
@@ -180,8 +216,12 @@ public class EngineTestCore extends ExcelUnitTest {
 
 	}
 
-	@Test
-	public void testComputeKYCC6ComputeB2() {
+    /**
+     * Tests cell calculation with PEP (Politically Exposed Person) flag set to TRUE.
+     * Verifies the score calculation when only the PEP input is provided.
+     */
+    @Test
+    public void testComputeKYCC6ComputeB2() {
 
 		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE");
 
@@ -191,8 +231,12 @@ public class EngineTestCore extends ExcelUnitTest {
 		assertThat(list.get(0).getValue(), is(50.0));
 	}
 
-	@Test
-	public void testComputeKYCC6ComputeB2B3() {
+    /**
+     * Tests cell calculation with both PEP flag and country code.
+     * Verifies the score calculation when both PEP and country inputs are provided.
+     */
+    @Test
+    public void testComputeKYCC6ComputeB2B3() {
 
 		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE", "ComputeKYC!B3", "CY");
 
@@ -202,8 +246,15 @@ public class EngineTestCore extends ExcelUnitTest {
 		assertThat(list.get(0).getValue(), is(75.0));
 	}
 
-	@Test
-	public void testComputeKYCC6Compute_B2_B3_B4() {
+    /**
+     * Tests complete KYC calculation with all inputs:
+     * - PEP status
+     * - Country code
+     * - Transaction amount
+     * Verifies the final risk score calculation.
+     */
+    @Test
+    public void testComputeKYCC6Compute_B2_B3_B4() {
 
 		Map<String, String> input = Map.of("ComputeKYC!B2", "TRUE", "ComputeKYC!B3", "CY", "ComputeKYC!B4", "1000000");
 
