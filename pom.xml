@@ -15,12 +15,15 @@
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
 		<org.apache.poi.version>5.3.0</org.apache.poi.version>
+
+		<quarkus.version>3.19.4</quarkus.version>
+		<quarkus.platform.version>3.19.4</quarkus.platform.version>
+
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
 		<quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
 
-		<quarkus.platform.version>3.15.1</quarkus.platform.version>
 		<camel-quarkus.platform.version>${quarkus.platform.version}</camel-quarkus.platform.version>
 
 		<camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
@@ -39,8 +42,8 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>${quarkus.platform.group-id}</groupId>
-				<artifactId>${quarkus.platform.artifact-id}</artifactId>
+				<groupId>io.quarkus.platform</groupId>
+				<artifactId>quarkus-bom</artifactId>
 				<version>${quarkus.platform.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
@@ -55,4 +58,20 @@
 		<module>excel-grpc</module>
 		<module>excel-lambda</module>
 	</modules>
+
+	<profiles>
+		<profile>
+			<id>to-update-quarkus</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>io.quarkus</groupId>
+						<artifactId>quarkus-maven-plugin</artifactId>
+						<version>${quarkus.version}</version> <!-- Make sure this matches your Quarkus version -->
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
