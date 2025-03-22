@@ -12,37 +12,69 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import net.a.g.excel.util.ExcelConstants;
 
+/**
+ * Represents the result of Excel operations.
+ * This class encapsulates various types of results including:
+ * - Cell values and calculations
+ * - Resource listings
+ * - Sheet information
+ * - Error details
+ * 
+ * It extends ExcelModel to inherit HATEOAS capabilities and supports JSON
+ * serialization with null value exclusion and OpenAPI documentation.
+ *
+ * @see ExcelModel
+ * @see ExcelCell
+ * @see ExcelResource
+ * @see ExcelSheet
+ */
 @JsonInclude(value = Include.NON_NULL)
-@Schema(name = "ExcelResult", description = "POJO that represents the result contents.")
+@Schema(name = "ExcelResult", description = "Result container for Excel operations including cells, resources, and sheets.")
 public class ExcelResult extends ExcelModel {
 
-	@JsonProperty(value = "uuid", namespace = ExcelConstants.SCHEMA_URI)
-	@Schema(name = "uuid", description = "UUID request")
-	private String uuid;
+    /** The unique identifier matching the original request */
+    @JsonProperty(value = "uuid", namespace = ExcelConstants.SCHEMA_URI)
+    @Schema(name = "uuid", description = "UUID of the corresponding request")
+    private String uuid;
 
-	@Schema(required = true, description = "Counter of result item")
-	@JsonProperty(value = "_count", namespace = ExcelConstants.SCHEMA_URI)
-	private int count;
+    /** The number of items in the result */
+    @Schema(required = true, description = "Number of items in the result")
+    @JsonProperty(value = "_count", namespace = ExcelConstants.SCHEMA_URI)
+    private int count;
 
-	@JsonProperty(value = "cells", namespace = ExcelConstants.SCHEMA_URI)
-	@Schema(oneOf = { ExcelCell[].class })
-	private Collection<ExcelCell> cells;
+    /** Collection of cell results */
+    @JsonProperty(value = "cells", namespace = ExcelConstants.SCHEMA_URI)
+    @Schema(oneOf = { ExcelCell[].class }, description = "Collection of cell results from calculations")
+    private Collection<ExcelCell> cells;
 
-	@JsonProperty(value = "resources", namespace = ExcelConstants.SCHEMA_URI)
-	@Schema(oneOf = { ExcelResource[].class })
-	private Collection<ExcelResource> resources;
+    /** Collection of Excel resources */
+    @JsonProperty(value = "resources", namespace = ExcelConstants.SCHEMA_URI)
+    @Schema(oneOf = { ExcelResource[].class }, description = "Collection of Excel resources")
+    private Collection<ExcelResource> resources;
 
-	@JsonProperty(value = "sheets", namespace = ExcelConstants.SCHEMA_URI)
-	@Schema(oneOf = { ExcelSheet[].class })
-	private Collection<ExcelSheet> sheets;
+    /** Collection of Excel sheets */
+    @JsonProperty(value = "sheets", namespace = ExcelConstants.SCHEMA_URI)
+    @Schema(oneOf = { ExcelSheet[].class }, description = "Collection of Excel sheets")
+    private Collection<ExcelSheet> sheets;
 
-	@JsonProperty(required = false, value = "error", namespace = ExcelConstants.SCHEMA_URI)
-	private ExcelError error;
+    /** Error information if operation failed */
+    @JsonProperty(required = false, value = "error", namespace = ExcelConstants.SCHEMA_URI)
+    private ExcelError error;
 
-	public ExcelResult() {
+    /**
+     * Default constructor.
+     */
+    public ExcelResult() {
 	}
 
-	public ExcelResult(Collection<? extends ExcelModel> results) {
+    /**
+     * Constructs an ExcelResult from a collection of model objects.
+     * Automatically determines the type of results (cells, sheets, or resources)
+     * based on the collection contents and populates the appropriate field.
+     *
+     * @param results collection of ExcelModel objects to include in the result
+     */
+    public ExcelResult(Collection<? extends ExcelModel> results) {
 		this.count = results.size();
 		if (results.size() > 0 && results.iterator().next() instanceof ExcelSheet) {
 			this.sheets = results.stream().map(e -> (ExcelSheet) e).collect(Collectors.toList());
@@ -56,51 +88,99 @@ public class ExcelResult extends ExcelModel {
 		}
 	}
 
-	public String getUuid() {
+    /**
+     * Gets the UUID of the result.
+     * @return the unique identifier matching the original request
+     */
+    public String getUuid() {
 		return this.uuid;
 	}
 
-	public void setUuid(String uuid) {
+    /**
+     * Sets the UUID of the result.
+     * @param uuid the unique identifier to set
+     */
+    public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
 
-	public ExcelError getError() {
+    /**
+     * Gets the error information if operation failed.
+     * @return the error details, or null if operation succeeded
+     */
+    public ExcelError getError() {
 		return error;
 	}
 
-	public void setError(ExcelError error) {
+    /**
+     * Sets the error information.
+     * @param error the error details to set
+     */
+    public void setError(ExcelError error) {
 		this.error = error;
 	}
 
-	public int getCount() {
+    /**
+     * Gets the number of items in the result.
+     * @return the count of result items
+     */
+    public int getCount() {
 		return count;
 	}
 
-	public void setCount(int count) {
+    /**
+     * Sets the number of items in the result.
+     * @param count the count to set
+     */
+    public void setCount(int count) {
 		this.count = count;
 	}
 
-	public Collection<ExcelCell> getCells() {
+    /**
+     * Gets the collection of cell results.
+     * @return collection of calculated cell values
+     */
+    public Collection<ExcelCell> getCells() {
 		return this.cells;
 	}
 
-	public void setCells(Collection<ExcelCell> cells) {
+    /**
+     * Sets the collection of cell results.
+     * @param cells collection of cell values to set
+     */
+    public void setCells(Collection<ExcelCell> cells) {
 		this.cells = cells;
 	}
 
-	public Collection<ExcelResource> getResources() {
+    /**
+     * Gets the collection of Excel resources.
+     * @return collection of Excel resources
+     */
+    public Collection<ExcelResource> getResources() {
 		return this.resources;
 	}
 
-	public void setResources(Collection<ExcelResource> resources) {
+    /**
+     * Sets the collection of Excel resources.
+     * @param resources collection of resources to set
+     */
+    public void setResources(Collection<ExcelResource> resources) {
 		this.resources = resources;
 	}
 
-	public Collection<ExcelSheet> getSheets() {
+    /**
+     * Gets the collection of Excel sheets.
+     * @return collection of Excel sheets
+     */
+    public Collection<ExcelSheet> getSheets() {
 		return this.sheets;
 	}
 
-	public void setSheets(List<ExcelSheet> sheets) {
+    /**
+     * Sets the collection of Excel sheets.
+     * @param sheets collection of sheets to set
+     */
+    public void setSheets(List<ExcelSheet> sheets) {
 		this.sheets = sheets;
 	}
 }

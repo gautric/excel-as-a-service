@@ -4,56 +4,112 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents a cell in an Excel workbook.
+ * This class encapsulates all the properties of an Excel cell including its address,
+ * value, metadata, and type. It supports JSON serialization with null value exclusion.
+ *
+ * @see ExcelModel
+ */
 @JsonInclude(value = Include.NON_NULL)
 public class ExcelCell extends ExcelModel {
-	@JsonProperty("address")
-	private String address;
 
-	@JsonProperty("value")
-	private Object value;
+    /** The cell's address in A1 notation (e.g., "A1", "B2") */
+    @JsonProperty("address")
+    private String address;
 
-	@JsonProperty("metadata")
-	private String metadata;
+    /** The cell's value, which can be a string, number, boolean, or other Excel-supported types */
+    @JsonProperty("value")
+    private Object value;
 
-	@JsonProperty("type")
-	private String type;
+    /** Additional metadata associated with the cell (e.g., comments, annotations) */
+    @JsonProperty("metadata")
+    private String metadata;
 
-	public String getAddress() {
+    /** The cell's data type (e.g., "STRING", "NUMERIC", "BOOLEAN", "FORMULA") */
+    @JsonProperty("type")
+    private String type;
+
+    /**
+     * Gets the cell's address.
+     * @return the cell address in A1 notation
+     */
+    public String getAddress() {
 		return address;
 	}
 
-	public void setAddress(String address) {
+    /**
+     * Sets the cell's address.
+     * @param address the cell address in A1 notation
+     */
+    public void setAddress(String address) {
 		this.address = address;
 	}
 
-	public Object getValue() {
+    /**
+     * Gets the cell's value.
+     * @return the cell value as an Object
+     */
+    public Object getValue() {
 		return value;
 	}
 
-	public void setValue(Object value) {
+    /**
+     * Sets the cell's value.
+     * @param value the value to set
+     */
+    public void setValue(Object value) {
 		this.value = value;
 	}
 
-	public String getMetadata() {
+    /**
+     * Gets the cell's metadata.
+     * @return the metadata string
+     */
+    public String getMetadata() {
 		return metadata;
 	}
 
-	public void setMetadata(String metadata) {
+    /**
+     * Sets the cell's metadata.
+     * @param metadata the metadata to set
+     */
+    public void setMetadata(String metadata) {
 		this.metadata = metadata;
 	}
 
-	public String getType() {
+    /**
+     * Gets the cell's data type.
+     * @return the type string
+     */
+    public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+    /**
+     * Sets the cell's data type.
+     * @param type the type to set
+     */
+    public void setType(String type) {
 		this.type = type;
 	}
 
-	public ExcelCell() {
+    /**
+     * Default constructor.
+     */
+    public ExcelCell() {
 	};
 
-	public ExcelCell(String adress, String formula, Object value, String ref, String metadata) {
+    /**
+     * Constructs an ExcelCell with specified properties.
+     *
+     * @param adress the cell address
+     * @param formula the cell formula (unused)
+     * @param value the cell value
+     * @param ref reference information (unused)
+     * @param metadata cell metadata (unused)
+     */
+    public ExcelCell(String adress, String formula, Object value, String ref, String metadata) {
 		this.address = adress;
 		this.value = value;
 	}

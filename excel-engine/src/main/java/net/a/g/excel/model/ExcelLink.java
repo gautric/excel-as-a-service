@@ -6,55 +6,97 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+/**
+ * Represents a HATEOAS-style link for Excel resources.
+ * This class implements the HATEOAS (Hypermedia as the Engine of Application State) pattern,
+ * providing navigational information between Excel resources. It supports JSON serialization
+ * with null value exclusion and OpenAPI documentation.
+ */
 @JsonInclude(value = Include.NON_NULL)
-@Schema(name = "ExcelLink", description = "POJO that represents a ExcelLink.")
+@Schema(name = "ExcelLink", description = "POJO that represents a HATEOAS-style link for Excel resources.")
 public class ExcelLink {
 
-	@JsonProperty("rel")
-	@Schema(name = "rel", description = "Rel")
-	private String rel;
+    /** The relationship type of the link (e.g., "self", "next", "previous") */
+    @JsonProperty("rel")
+    @Schema(name = "rel", description = "The relationship type of the link")
+    private String rel;
 
-	@JsonProperty("href")
-	@Schema(name = "href", description = "Link")
-	private String href;
+    /** The URL or URI of the linked resource */
+    @JsonProperty("href")
+    @Schema(name = "href", description = "The URL or URI of the linked resource")
+    private String href;
 
-	@JsonProperty("type")
-	@Schema(name = "type", description = "Type")
-	private String type;
+    /** The media type of the linked resource */
+    @JsonProperty("type")
+    @Schema(name = "type", description = "The media type of the linked resource")
+    private String type;
 
-	@JsonProperty("method")
-	@Schema(name = "method", description = "Method")
-	private String method;
+    /** The HTTP method to use when accessing the linked resource */
+    @JsonProperty("method")
+    @Schema(name = "method", description = "The HTTP method to use when accessing the resource")
+    private String method;
 
-	public String getMethod() {
+    /**
+     * Gets the HTTP method.
+     * @return the HTTP method (e.g., GET, POST, PUT)
+     */
+    public String getMethod() {
 		return method;
 	}
 
-	public void setMethod(String method) {
+    /**
+     * Sets the HTTP method.
+     * @param method the HTTP method to set
+     */
+    public void setMethod(String method) {
 		this.method = method;
 	}
 
-	public String getRel() {
+    /**
+     * Gets the relationship type.
+     * @return the relationship type of the link
+     */
+    public String getRel() {
 		return rel;
 	}
 
-	public void setRel(String rel) {
+    /**
+     * Sets the relationship type.
+     * @param rel the relationship type to set
+     */
+    public void setRel(String rel) {
 		this.rel = rel;
 	}
 
-	public String getHref() {
+    /**
+     * Gets the URL or URI of the linked resource.
+     * @return the resource URL/URI
+     */
+    public String getHref() {
 		return href;
 	}
 
-	public void setHref(String href) {
+    /**
+     * Sets the URL or URI of the linked resource.
+     * @param href the resource URL/URI to set
+     */
+    public void setHref(String href) {
 		this.href = href;
 	}
 
-	public String getType() {
+    /**
+     * Gets the media type of the linked resource.
+     * @return the media type
+     */
+    public String getType() {
 		return type;
 	}
 
-	public void setType(String type) {
+    /**
+     * Sets the media type of the linked resource.
+     * @param type the media type to set
+     */
+    public void setType(String type) {
 		this.type = type;
 	}
 
