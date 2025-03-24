@@ -10,11 +10,11 @@
 	<packaging>pom</packaging>
 	<name>EXCEL APP</name>
 	<properties>
-		<compiler-plugin.version>3.13.0</compiler-plugin.version>
+		<compiler-plugin.version>3.14.0</compiler-plugin.version>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
-		<org.apache.poi.version>5.3.0</org.apache.poi.version>
+		<org.apache.poi.version>5.4.0</org.apache.poi.version>
 
 		<quarkus.version>3.19.4</quarkus.version>
 		<quarkus.platform.version>3.19.4</quarkus.platform.version>
@@ -29,15 +29,15 @@
 		<camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
 		<camel-quarkus.platform.artifact-id>quarkus-camel-bom</camel-quarkus.platform.artifact-id>
 
-		<surefire-plugin.version>3.5.1</surefire-plugin.version>
-		<weld-se-core.version>5.1.3.Final</weld-se-core.version>
+		<surefire-plugin.version>3.5.2</surefire-plugin.version>
+		<weld-se-core.version>6.0.1.Final</weld-se-core.version>
 		<weld-junit5.version>4.0.3.Final</weld-junit5.version>
 		<hamcrest.version>3.0</hamcrest.version>
-		<jandex.version>3.2.2</jandex.version>
-		<json.version>20220320</json.version>
-		<microprofile-openapi-api.version>3.0</microprofile-openapi-api.version>
-		<slf4j.version>2.0.6</slf4j.version>
-		<logback-classic.version>1.2.11</logback-classic.version>
+		<jandex.version>3.2.7</jandex.version>
+		<json.version>20250107</json.version>
+		<microprofile-openapi-api.version>4.0.2</microprofile-openapi-api.version>
+		<slf4j.version>2.0.17</slf4j.version>
+		<logback-classic.version>1.5.18</logback-classic.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
