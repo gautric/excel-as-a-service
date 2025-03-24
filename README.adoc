@@ -2,7 +2,8 @@
 
 == Introduction
 
-This project provides an Excel Engine Executor. It loads couple of Excel file (xls, xlsx) and compute all Cells needed.
+Excel-as-a-Service (EaaS) is a modern, distributed Excel computation engine that exposes Excel workbook calculations through multiple protocols including REST, gRPC, Kafka, and AWS Lambda. 
+It enables organizations to leverage existing Excel business logic as scalable microservices without modifying the original spreadsheets.
 
 image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.yml/badge.svg[]
 
@@ -16,6 +17,20 @@ image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.y
 
 * Quarkus 
 ** 3.19.4
+
+== Repository Structure
+
+```
+excel-app/
+├── excel-engine/          # Core Excel computation engine with Apache POI integration
+├── excel-cdi/            # CDI implementation of the Excel engine components
+├── excel-rest/           # REST API implementation with OpenAPI documentation
+├── excel-grpc/           # gRPC service implementation
+├── excel-kafka/          # Kafka integration with WebSocket and SSE support
+├── excel-lambda/         # AWS Lambda implementation
+└── sample/               # Sample Excel files and API definitions
+```
+
 
 == Run Application 
 
