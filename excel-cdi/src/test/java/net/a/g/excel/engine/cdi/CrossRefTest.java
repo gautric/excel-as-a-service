@@ -72,7 +72,7 @@ public class CrossRefTest {
 				FileUtils.openInputStream(new File("../sample/Secondary.xlsx"))));
 
 		
-		System.out.println(repo.listOfResource());
+		System.out.println(repo.listOfResources());
 		assertEquals(2, repo.count(),"Nb of repo");
 
 	}
