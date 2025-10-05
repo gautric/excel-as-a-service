@@ -80,15 +80,13 @@ public class ExcelEngineImpl implements ExcelEngine {
 	}
 
 	public List<ExcelSheet> listOfSheet(String name) {
-		List<ExcelSheet> list = null;
-
 		if (repo.contains(name)) {
-
-			list = StreamSupport.stream(repo.retrieveWorkbook(name).spliterator(), false).map(Sheet::getSheetName)
-					.map(ExcelSheet::new).collect(toList());
-
+			return StreamSupport.stream(repo.retrieveWorkbook(name).spliterator(), false)
+					.map(Sheet::getSheetName)
+					.map(ExcelSheet::new)
+					.collect(toList());
 		}
-		return list;
+		return List.of();
 	}
 
 	public ExcelSheet getSheet(String resource, String sheet) {
@@ -135,13 +133,15 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 	public Map<String, List<ExcelCell>> mapOfAPI(String resource, String sheet) {
 		return listOfAPI(resource, sheet).stream()
-				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+				.collect(Collectors.groupingBy(v -> v.getMetadata().contains("@input") ? "IN" : "OUT"));
 	}
 
 	public List<ExcelCell> listOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
 		Workbook workbook = repo.retrieveWorkbook(excelName);
 
-		return streamOfCell(workbook, sheetName, predicate).map(this::celltoExcelCell).collect(Collectors.toList());
+		return streamOfCell(workbook, sheetName, predicate)
+				.map(this::celltoExcelCell)
+				.toList();
 	}
 
 	/**
@@ -160,7 +160,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 			Map<String, List<String>> inputs, boolean global) {
 
 		// Compute All cellNames
-		return cellCalculationOld(resource, sheet, Arrays.asList(outputs), inputs, global).stream()
+		return cellCalculationOld(resource, sheet, Arrays.stream(outputs).toList(), inputs, global).stream()
 				.collect(Collectors.toMap(ExcelCell::getAddress, Function.identity()));
 
 	}
@@ -171,7 +171,10 @@ public class ExcelEngineImpl implements ExcelEngine {
 		inputs = (inputs == null) ? Map.of() : inputs;
 
 		return cellCalculation(resource, sheet, outputs,
-				inputs.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().get(0))),
+				inputs.entrySet().stream().collect(Collectors.toMap(
+					Map.Entry::getKey, 
+					e -> e.getValue().get(0)
+				)),
 				global);
 
 	}
@@ -214,7 +217,7 @@ public class ExcelEngineImpl implements ExcelEngine {
 		if (global && inputs.size() > 0) {
 			LOG.debug("mode global aka cross-ref enable");
 
-			Map<String, FormulaEvaluator> workbooks = repo.listOfResource().stream()
+			Map<String, FormulaEvaluator> workbooks = repo.listOfResources().stream()
 					.collect(Collectors.toMap(ExcelResource::getFile, r -> (resource.compareTo(r.getName()) == 0) ? exec
 							: formula(POITools.convertByteToWorkbook(r.getDoc()))));
 			exec.setupReferencedWorkbooks(workbooks);
@@ -239,12 +242,16 @@ public class ExcelEngineImpl implements ExcelEngine {
 		LOG.debug("Outputs: {}", outputs);
 
 		// Compute All cellNames
-		List<ExcelCell> ret = outputs.stream().map(CellReference::new).map(cr -> retrieveCellByAdress(cr, workbook))
-				.flatMap(Stream::ofNullable).map(execFunction).collect(toList());
+		List<ExcelCell> result = outputs.stream()
+				.map(CellReference::new)
+				.map(cr -> retrieveCellByAdress(cr, workbook))
+				.flatMap(Stream::ofNullable)
+				.map(execFunction)
+				.toList();
 
-		LOG.debug("Computed: {}", ret);
+		LOG.debug("Computed: {}", result);
 
-		return ret;
+		return result;
 	}
 
 	public List<ExcelCell> cellCalculation(Supplier<String> resource, Supplier<List<String>> outputs,
@@ -431,8 +438,10 @@ public class ExcelEngineImpl implements ExcelEngine {
 	 * @return stream of cells from matching sheets
 	 */
 	private Stream<Cell> streamCell(Workbook workbook, Predicate<? super Sheet> predicate) {
-		return StreamSupport.stream(workbook.spliterator(), false).filter(predicate).flatMap(sheet -> StreamSupport
-				.stream(sheet.spliterator(), false).flatMap(r -> StreamSupport.stream(r.spliterator(), false)));
+		return StreamSupport.stream(workbook.spliterator(), false)
+				.filter(predicate)
+				.flatMap(sheet -> StreamSupport.stream(sheet.spliterator(), false))
+				.flatMap(row -> StreamSupport.stream(row.spliterator(), false));
 	}
 
 	/**
