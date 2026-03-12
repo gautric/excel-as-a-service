@@ -26,12 +26,15 @@ import org.apache.poi.ss.util.CellReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.a.g.excel.exception.ExcelCalculationException;
+import net.a.g.excel.exception.ExcelResourceNotFoundException;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelResource;
 import net.a.g.excel.model.ExcelSheet;
 import net.a.g.excel.param.ExcelParameter;
 import net.a.g.excel.repository.ExcelRepository;
 import net.a.g.excel.util.POITools;
+import net.a.g.excel.validation.InputValidator;
 
 /**
  * Implementation of the ExcelEngine interface that provides Excel workbook operations
@@ -80,37 +83,91 @@ public class ExcelEngineImpl implements ExcelEngine {
 	}
 
 	public List<ExcelSheet> listOfSheet(String name) {
-		if (repo.contains(name)) {
+		// Validate input
+		InputValidator.validateResourceName(name);
+		
+		if (!repo.contains(name)) {
+			throw new ExcelResourceNotFoundException(name);
+		}
+		
+		try {
 			return StreamSupport.stream(repo.retrieveWorkbook(name).spliterator(), false)
 					.map(Sheet::getSheetName)
 					.map(ExcelSheet::new)
 					.collect(toList());
+		} catch (Exception e) {
+			LOG.error("Failed to list sheets for resource {}: {}", name, e.getMessage());
+			throw new ExcelCalculationException(name, "Failed to list sheets", e);
 		}
-		return List.of();
 	}
 
 	public ExcelSheet getSheet(String resource, String sheet) {
-		return (isSheetExists(resource, sheet)) ? new ExcelSheet(sheet) : null;
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		InputValidator.validateSheetName(sheet);
+		
+		if (!isSheetExists(resource, sheet)) {
+			throw new ExcelResourceNotFoundException(resource, "Sheet not found: " + sheet);
+		}
+		
+		return new ExcelSheet(sheet);
 	}
 
 	public boolean isSheetExists(String resource, String sheetName) {
-		Workbook workbook = repo.retrieveWorkbook(resource);
-		Sheet sheet = workbook.getSheet(sheetName);
-		return sheet != null;
+		// Validate inputs
+		if (resource == null || resource.trim().isEmpty()) {
+			return false;
+		}
+		if (sheetName == null || sheetName.trim().isEmpty()) {
+			return false;
+		}
+		
+		try {
+			if (!repo.contains(resource)) {
+				return false;
+			}
+			
+			Workbook workbook = repo.retrieveWorkbook(resource);
+			Sheet sheet = workbook.getSheet(sheetName);
+			return sheet != null;
+		} catch (Exception e) {
+			LOG.warn("Error checking sheet existence for {}!{}: {}", resource, sheetName, e.getMessage());
+			return false;
+		}
 	}
 
 	public Map<String, ExcelCell> mapOfFormularCell(String excelName, String sheetName) {
+		// Validate inputs
+		InputValidator.validateResourceName(excelName);
+		InputValidator.validateSheetName(sheetName);
+		
 		return mapOfCell(excelName, sheetName, cell -> CellType.FORMULA == cell.getCellType());
 	}
 
 	public Map<String, ExcelCell> mapOfCell(String resource, String sheet, Predicate<Cell> predicate) {
-		Workbook workbook = repo.retrieveWorkbook(resource);
-
-		return streamOfCell(workbook, sheet, predicate)
-				.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		InputValidator.validateSheetName(sheet);
+		
+		if (predicate == null) {
+			throw new IllegalArgumentException("Predicate cannot be null");
+		}
+		
+		try {
+			Workbook workbook = repo.retrieveWorkbook(resource);
+			return streamOfCell(workbook, sheet, predicate)
+					.collect(Collectors.toMap(cell -> cell.getAddress().formatAsString(), this::celltoExcelCell));
+		} catch (Exception e) {
+			LOG.error("Failed to map cells for {}!{}: {}", resource, sheet, e.getMessage());
+			throw new ExcelCalculationException(resource + "!" + sheet, "Failed to map cells", e);
+		}
 	}
 
 	public List<ExcelCell> listOfInput(String resource, String sheet) {
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		InputValidator.validateSheetName(sheet);
+		
 		return listOfCell(resource, sheet, cell -> {
 			String content = getCellComment(cell);
 			return content != null && content.contains("@input");
@@ -118,6 +175,10 @@ public class ExcelEngineImpl implements ExcelEngine {
 	}
 
 	public List<ExcelCell> listOfOutput(String resource, String sheet) {
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		InputValidator.validateSheetName(sheet);
+		
 		return listOfCell(resource, sheet, cell -> {
 			String content = getCellComment(cell);
 			return content != null && content.contains("@output");
@@ -125,6 +186,10 @@ public class ExcelEngineImpl implements ExcelEngine {
 	}
 
 	public List<ExcelCell> listOfAPI(String resource, String sheet) {
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		InputValidator.validateSheetName(sheet);
+		
 		return listOfCell(resource, sheet, cell -> {
 			String content = getCellComment(cell);
 			return content != null && (content.contains("@output") || content.contains("@input"));
@@ -137,11 +202,23 @@ public class ExcelEngineImpl implements ExcelEngine {
 	}
 
 	public List<ExcelCell> listOfCell(String excelName, String sheetName, Predicate<Cell> predicate) {
-		Workbook workbook = repo.retrieveWorkbook(excelName);
-
-		return streamOfCell(workbook, sheetName, predicate)
-				.map(this::celltoExcelCell)
-				.toList();
+		// Validate inputs
+		InputValidator.validateResourceName(excelName);
+		InputValidator.validateSheetName(sheetName);
+		
+		if (predicate == null) {
+			throw new IllegalArgumentException("Predicate cannot be null");
+		}
+		
+		try {
+			Workbook workbook = repo.retrieveWorkbook(excelName);
+			return streamOfCell(workbook, sheetName, predicate)
+					.map(this::celltoExcelCell)
+					.toList();
+		} catch (Exception e) {
+			LOG.error("Failed to list cells for {}!{}: {}", excelName, sheetName, e.getMessage());
+			throw new ExcelCalculationException(excelName + "!" + sheetName, "Failed to list cells", e);
+		}
 	}
 
 	/**
@@ -181,12 +258,24 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 	public List<ExcelCell> cellCalculation(String resource, String sheet, List<String> output,
 			Map<String, String> input, boolean global) {
-
+		
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		InputValidator.validateSheetName(sheet);
+		
 		return cellCalculation(resource, sheet, output, input, global, false);
 	}
 
 	public List<ExcelCell> cellCalculation(String resource, String sheet, List<String> output,
 			Map<String, String> input, boolean global, boolean force) {
+		
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		InputValidator.validateSheetName(sheet);
+		
+		if (output == null) {
+			throw new IllegalArgumentException("Output list cannot be null");
+		}
 
 		Function<String, String> renameFunction = cn -> cn.contains("!") ? cn : sheet + "!" + cn;
 
@@ -210,6 +299,37 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 	public List<ExcelCell> cellCalculation(String resource, List<String> outputs, Map<String, String> inputs,
 			boolean global, boolean force) {
+		
+		// Validate inputs
+		InputValidator.validateResourceName(resource);
+		
+		if (outputs == null || outputs.isEmpty()) {
+			throw new IllegalArgumentException("Output list cannot be null or empty");
+		}
+		
+		// Validate all cell references in outputs
+		for (String output : outputs) {
+			try {
+				InputValidator.validateCellReference(output);
+			} catch (Exception e) {
+				throw new ExcelCalculationException(output, "Invalid output cell reference", e);
+			}
+		}
+		
+		// Validate and sanitize all input values
+		if (inputs != null) {
+			for (Map.Entry<String, String> entry : inputs.entrySet()) {
+				String cellRef = entry.getKey();
+				String value = entry.getValue();
+				
+				try {
+					InputValidator.validateCellReference(cellRef);
+					InputValidator.validateCellValue(value, cellRef);
+				} catch (Exception e) {
+					throw new ExcelCalculationException(cellRef, "Invalid input for cell", e);
+				}
+			}
+		}
 
 		Workbook workbook = repo.retrieveWorkbook(resource);
 		FormulaEvaluator exec = formula(workbook);
@@ -225,9 +345,20 @@ public class ExcelEngineImpl implements ExcelEngine {
 
 		Function<Cell, ExcelCell> execFunction = null;
 
-		inputs.entrySet().stream()
-				.map(kv -> Map.entry(retrieveCellByAdress(new CellReference(kv.getKey()), workbook), kv.getValue()))
-				.forEach(kv -> updateCell(kv.getKey(), kv.getValue()));
+		// Apply input values with error handling
+		try {
+			inputs.entrySet().stream()
+					.map(kv -> Map.entry(retrieveCellByAdress(new CellReference(kv.getKey()), workbook), kv.getValue()))
+					.forEach(kv -> {
+						if (kv.getKey() == null) {
+							throw new ExcelCalculationException(kv.getValue(), "Cell not found for input");
+						}
+						updateCell(kv.getKey(), kv.getValue());
+					});
+		} catch (Exception e) {
+			LOG.error("Failed to apply input values: {}", e.getMessage());
+			throw new ExcelCalculationException(resource, "Failed to apply input values", e);
+		}
 
 		if (inputs.size() > 0 || force) {
 			LOG.debug("some input value || force -> go for cell evaluation");
@@ -241,15 +372,21 @@ public class ExcelEngineImpl implements ExcelEngine {
 		LOG.debug("Inputs: {}", inputs);
 		LOG.debug("Outputs: {}", outputs);
 
-		// Compute All cellNames
-		List<ExcelCell> result = outputs.stream()
-				.map(CellReference::new)
-				.map(cr -> retrieveCellByAdress(cr, workbook))
-				.flatMap(Stream::ofNullable)
-				.map(execFunction)
-				.toList();
+		// Compute All cellNames with error handling
+		List<ExcelCell> result;
+		try {
+			result = outputs.stream()
+					.map(CellReference::new)
+					.map(cr -> retrieveCellByAdress(cr, workbook))
+					.flatMap(Stream::ofNullable)
+					.map(execFunction)
+					.toList();
 
-		LOG.debug("Computed: {}", result);
+			LOG.debug("Computed: {}", result);
+		} catch (Exception e) {
+			LOG.error("Failed to compute cell values: {}", e.getMessage());
+			throw new ExcelCalculationException(resource, "Failed to compute cell values", e);
+		}
 
 		return result;
 	}
