@@ -5,7 +5,7 @@
 Excel-as-a-Service (EaaS) is a modern, distributed Excel computation engine that exposes Excel workbook calculations through multiple protocols including REST, gRPC, Kafka, and AWS Lambda. 
 It enables organizations to leverage existing Excel business logic as scalable microservices without modifying the original spreadsheets.
 
-image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci.yml/badge.svg[]
+image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci-matrix.yml/badge.svg[]
 
 == Dependencies
 
