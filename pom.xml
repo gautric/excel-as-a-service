@@ -31,7 +31,7 @@
 
 		<surefire-plugin.version>3.6.1</surefire-plugin.version>
 		<weld-se-core.version>6.0.4.Final</weld-se-core.version>
-		<weld-junit5.version>4.0.6.Final</weld-junit5.version>
+		<weld-junit5.version>5.0.3.Final</weld-junit5.version>
 		<hamcrest.version>3.0</hamcrest.version>
 		<jandex.version>3.6.1</jandex.version>
 		<json.version>20260814</json.version>
