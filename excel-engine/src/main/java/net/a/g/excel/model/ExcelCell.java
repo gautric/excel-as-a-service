@@ -112,6 +112,7 @@ public class ExcelCell extends ExcelModel {
     public ExcelCell(String adress, String formula, Object value, String ref, String metadata) {
 		this.address = adress;
 		this.value = value;
+		this.metadata = metadata;
 	}
 
 	@Override

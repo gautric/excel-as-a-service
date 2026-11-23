@@ -8,6 +8,8 @@ import java.util.function.Supplier;
 import org.apache.poi.ss.usermodel.Cell;
 
 import net.a.g.excel.model.ExcelCell;
+import net.a.g.excel.model.ExcelRequest;
+import net.a.g.excel.model.ExcelResult;
 import net.a.g.excel.model.ExcelSheet;
 
 /**
@@ -16,6 +18,22 @@ import net.a.g.excel.model.ExcelSheet;
  * including formula evaluation and cell calculations.
  */
 public interface ExcelEngine {
+
+    /**
+     * Single compute entry point shared by every protocol (REST, gRPC, Kafka, Lambda).
+     * <p>
+     * Inputs and outputs may be given either as API names declared in cell comments
+     * ({@code @input(NAME)} / {@code @output(NAME)}) or as cell references
+     * ({@code B2} relative to {@code sheet}, or {@code Sheet!B2}). When no output is
+     * given and a sheet is set, every {@code @output} of the sheet is returned.
+     * Formulas are always evaluated.
+     *
+     * @param request the compute request
+     * @return the result, carrying the request uuid, the computed cells and their count
+     * @throws net.a.g.excel.exception.ExcelResourceNotFoundException if the resource or sheet is unknown
+     * @throws net.a.g.excel.exception.ExcelInvalidInputException if an input/output is invalid
+     */
+    ExcelResult compute(ExcelRequest request);
 
     /**
      * Lists all sheets in the specified Excel resource.

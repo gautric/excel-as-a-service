@@ -12,6 +12,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import net.a.g.excel.model.ExcelError;
 import net.a.g.excel.model.ExcelRequest;
 
 @Path("/kafka")
@@ -26,11 +27,18 @@ public class ExcelKafkaResource {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@APIResponses(value = {
-			@APIResponse(responseCode = "202", description = "Request is accepted", content = @Content(mediaType = "application/json")) })
+			@APIResponse(responseCode = "202", description = "Request is accepted", content = @Content(mediaType = "application/json")),
+			@APIResponse(responseCode = "503", description = "Kafka is unavailable", content = @Content(mediaType = "application/json")) })
 	@Operation(summary = "Post an request to Kafka Topic", description = "Retrieves and returns the list of Excel Cell")
 	public Response cellBody(final ExcelRequest request) {
-		producer.sendRequest(request);
-
+		try {
+			producer.sendRequest(request);
+		} catch (IllegalStateException e) {
+			ExcelError error = new ExcelError();
+			error.setCode("503");
+			error.setError("Request could not be sent to Kafka");
+			return Response.status(Response.Status.SERVICE_UNAVAILABLE).entity(error).build();
+		}
 		return Response.accepted().build();
 	}
 

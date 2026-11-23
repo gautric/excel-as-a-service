@@ -31,6 +31,8 @@ message ExcelRequest {
     string sheet = 2;
     repeated string outputs = 3;    
     map<string, string> inputs = 4;
+    // enable cross-workbook references (costlier: loads every resource)
+    bool global = 5;
 }
 
 message ExcelResult {

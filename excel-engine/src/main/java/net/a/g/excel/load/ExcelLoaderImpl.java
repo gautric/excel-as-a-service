@@ -51,8 +51,9 @@ public class ExcelLoaderImpl implements ExcelLoader {
 					FilenameUtils.getName(file.getFileName().toString()), file.toUri().toURL().openStream());
 		} catch (MalformedURLException e) {
 			LOG.error("Error while loading file", e);
-		} catch (IOException e) {
-			LOG.error("Error while loading file", e);
+		} catch (IOException | RuntimeException e) {
+			// one unreadable file must not stop loading the others
+			LOG.error("Error while loading file {}: {}", file.getFileName(), e.getMessage());
 		}
 	}
 
@@ -103,8 +104,6 @@ public class ExcelLoaderImpl implements ExcelLoader {
 		excelResource.setFile(resourceFileName);
 		excelResource.setDoc(targetArray);
 
-		repository.add(excelResource);
-
-		return true;
+		return repository.add(excelResource);
 	}
 }

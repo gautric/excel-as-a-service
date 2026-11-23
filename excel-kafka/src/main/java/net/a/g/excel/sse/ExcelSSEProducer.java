@@ -1,7 +1,8 @@
 package net.a.g.excel.sse;
 
 import java.io.IOException;
-import java.util.Objects;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.slf4j.Logger;
@@ -26,7 +27,7 @@ public class ExcelSSEProducer {
 	private final Logger LOG = LoggerFactory.getLogger(ExcelSSEProducer.class);
 
 	private OutboundSseEvent.Builder eventBuilder;
-	private SseEventSink sseEventSink = null;
+	private final List<SseEventSink> sinks = new CopyOnWriteArrayList<>();
 
 	@Inject
 	ObjectMapper om;
@@ -39,7 +40,7 @@ public class ExcelSSEProducer {
 	@GET
 	@Produces(MediaType.SERVER_SENT_EVENTS)
 	public void consume(@Context SseEventSink sseEventSink) {
-		this.sseEventSink = sseEventSink;
+		sinks.add(sseEventSink);
 	}
 
 	@Incoming("eaas-response-channel")
@@ -49,12 +50,15 @@ public class ExcelSSEProducer {
 
 		LOG.info("Received Result : {} ", payload);
 
-		if (Objects.nonNull(sseEventSink)) {
-
-			OutboundSseEvent sseEvent = this.eventBuilder.name("message").id(result.getUuid())
-					.mediaType(MediaType.APPLICATION_JSON_TYPE).data(payload).reconnectDelay(3000).comment(payload)
-					.build();
-			sseEventSink.send(sseEvent);
+		sinks.removeIf(SseEventSink::isClosed);
+		if (sinks.isEmpty()) {
+			return;
+		}
+		OutboundSseEvent sseEvent = this.eventBuilder.name("message").id(result.getUuid())
+				.mediaType(MediaType.APPLICATION_JSON_TYPE).data(payload).reconnectDelay(3000).comment(payload)
+				.build();
+		for (SseEventSink sink : sinks) {
+			sink.send(sseEvent);
 		}
 	}
 

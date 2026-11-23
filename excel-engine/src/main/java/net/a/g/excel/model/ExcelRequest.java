@@ -43,6 +43,11 @@ public class ExcelRequest {
     @Schema(name = "force", description = "Whether to force formula recalculation")
     private boolean force;
 
+    /** Enable cross-workbook references (loads every resource, so opt-in) */
+    @JsonProperty("global")
+    @Schema(name = "global", description = "Enable cross-workbook references (costlier: loads every resource). Default false")
+    private Boolean global;
+
     /** List of cell addresses to calculate */
     @JsonProperty("outputs")
     @Schema(name = "outputs", description = "List of cell addresses to calculate")
@@ -165,9 +170,18 @@ public class ExcelRequest {
 		this.force = force;
 	}
 
+    public Boolean getGlobal() {
+		return global;
+	}
+
+    public void setGlobal(Boolean global) {
+		this.global = global;
+	}
+
 	@Override
 	public String toString() {
 		return "ExcelRequest [uuid=" + uuid + ", resource=" + resource + ", sheet=" + sheet + ", force=" + force
+				+ ", global=" + global
 				+ ", outputs=" + outputs + ", inputs=" + inputs + "]";
 	}
 

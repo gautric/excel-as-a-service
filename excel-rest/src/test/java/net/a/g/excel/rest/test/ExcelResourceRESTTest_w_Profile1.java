@@ -544,9 +544,13 @@ public class ExcelResourceRESTTest_w_Profile1 {
 	}
 
 	@Test
-	public void test_server_error() {
+	public void test_unknown_output_is_bad_request() {
 
-		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE").then().statusCode(500);
+		// KYC has no @output(SCORE): client error, not a server crash
+		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE/PEP/true").then().statusCode(400)
+				.body("code", is("400"));
+		// no route matches: a real 404 (the old catch-all mapper turned it into 500)
+		when().get("/eaas/api/KYC/sheet/ComputeKYC/compute/SCORE").then().statusCode(404);
 	// @formatter:off
 		
 	// @formatter:on

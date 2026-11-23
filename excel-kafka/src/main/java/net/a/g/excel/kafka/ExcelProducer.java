@@ -24,16 +24,20 @@ public class ExcelProducer {
 	@Inject
 	ObjectMapper om;
 
+	/**
+	 * Publishes the request on Kafka.
+	 *
+	 * @throws IllegalStateException when the request cannot be serialized or sent
+	 */
 	public void sendRequest(ExcelRequest request) {
-		String json = null;
 		try {
-			json = om.writeValueAsString(request);
-
+			String json = om.writeValueAsString(request);
 			LOG.info("Sending {} - {}", request.getUuid(), json);
 			emitter.send(Record.of(request.getUuid(), json));
-			LOG.info("Send OK", request.getUuid(), json);
-			
+			LOG.debug("Send OK {}", request.getUuid());
 		} catch (Exception e) {
+			LOG.error("Unable to send request {}", request.getUuid(), e);
+			throw new IllegalStateException("Unable to send request " + request.getUuid(), e);
 		}
 	}
 }
