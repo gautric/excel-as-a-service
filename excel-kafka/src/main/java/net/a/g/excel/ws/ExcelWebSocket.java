@@ -1,7 +1,6 @@
 package net.a.g.excel.ws;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -10,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -22,9 +20,9 @@ import jakarta.websocket.OnOpen;
 import jakarta.websocket.Session;
 import jakarta.websocket.server.ServerEndpoint;
 import net.a.g.excel.engine.ExcelEngine;
-import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelRequest;
 import net.a.g.excel.model.ExcelResult;
+import net.a.g.excel.util.ExcelErrors;
 
 @ServerEndpoint("/eaas/ws")
 @ApplicationScoped
@@ -59,20 +57,20 @@ public class ExcelWebSocket {
 	}
 
 	@OnMessage
-	public void onWebSocketMessage(Session session, String message)
-			throws JsonMappingException, JsonProcessingException {
+	public void onWebSocketMessage(Session session, String message) throws JsonProcessingException {
 		LOG.info("onWebSocketMessage {}", message);
 
-		ExcelRequest er = om.readValue(message, ExcelRequest.class);
-
-		ExcelResult ret = new ExcelResult();
-
-		List<ExcelCell> reply = engine.cellCalculation(er.getResource(), er.getSheet(), er.getOutputs(), er.getInputs(),
-				false);
-
-		ret.setUuid(er.getUuid());
-		ret.setCount(reply.size());
-		ret.setCells(reply);
+		ExcelResult ret;
+		ExcelRequest er = null;
+		try {
+			er = om.readValue(message, ExcelRequest.class);
+			ret = engine.compute(er);
+		} catch (JsonProcessingException ex) {
+			ret = ExcelErrors.toResult(new IllegalArgumentException("Invalid JSON request: " + ex.getOriginalMessage()),
+					null);
+		} catch (Exception ex) {
+			ret = ExcelErrors.toResult(ex, er == null ? null : er.getUuid());
+		}
 
 		String result = om.writeValueAsString(ret);
 		LOG.info("{}", result);

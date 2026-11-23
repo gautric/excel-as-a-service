@@ -37,6 +37,8 @@ public class POITools {
 			LOG.error("Workbook is encrypted or password protected", ex);
 		} catch (IOException ex) {
 			LOG.error("Error reading workbook data", ex);
+		} catch (org.apache.poi.EmptyFileException ex) {
+			LOG.error("Workbook data is empty");
 		}
 		return null;
 	}

@@ -100,7 +100,8 @@ public class ExcelResource extends ExcelModel {
      */
     @Override
     public String toString() {
-		return "ExcelResource [name=" + name + ", file=" + file + ", doc=" + Arrays.toString(doc).substring(0, 10)
-				+ ".... ]";
+		String bytes = Arrays.toString(doc);
+		return "ExcelResource [name=" + name + ", file=" + file + ", doc="
+				+ (bytes.length() > 10 ? bytes.substring(0, 10) + ".... ]" : bytes + " ]");
 	}
 }

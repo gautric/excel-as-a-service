@@ -71,6 +71,20 @@ public class ExcelRepositoryImpl implements ExcelRepository, AutoCloseable {
 		return true;
 	}
 
+	@Override
+	public boolean remove(String name) {
+		checkNotClosed();
+		if (name == null) {
+			return false;
+		}
+		closeWorkbook(name);
+		boolean removed = listOfResources.remove(name) != null;
+		if (removed) {
+			LOG.info("Remove {} OK", name);
+		}
+		return removed;
+	}
+
 	public int count() {
 		return listOfResources.keySet().size();
 	}
@@ -94,7 +108,7 @@ public class ExcelRepositoryImpl implements ExcelRepository, AutoCloseable {
 	}
 
 	public boolean contains(String name) {
-		return listOfResources.containsKey(name);
+		return name != null && listOfResources.containsKey(name);
 	}
 
 	public ExcelResource get(String name) {

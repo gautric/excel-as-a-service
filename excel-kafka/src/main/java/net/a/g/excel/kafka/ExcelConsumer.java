@@ -1,9 +1,5 @@
 package net.a.g.excel.kafka;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.List;
-
 import org.eclipse.microprofile.reactive.messaging.Incoming;
 import org.eclipse.microprofile.reactive.messaging.Outgoing;
 import org.slf4j.Logger;
@@ -11,16 +7,20 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.smallrye.reactive.messaging.annotations.Blocking;
 import io.smallrye.reactive.messaging.annotations.Broadcast;
 import io.smallrye.reactive.messaging.kafka.Record;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import net.a.g.excel.engine.ExcelEngine;
-import net.a.g.excel.model.ExcelCell;
-import net.a.g.excel.model.ExcelError;
 import net.a.g.excel.model.ExcelRequest;
 import net.a.g.excel.model.ExcelResult;
+import net.a.g.excel.util.ExcelErrors;
 
+/**
+ * Consumes compute requests (same JSON as REST {@code POST /eaas/api/compute})
+ * and publishes one {@link ExcelResult} per request, correlated by {@code uuid}.
+ */
 @ApplicationScoped
 public class ExcelConsumer {
 
@@ -35,33 +35,26 @@ public class ExcelConsumer {
 	@Incoming("eaas-request-cmd-in")
 	@Broadcast
 	@Outgoing("eaas-response-channel")
+	@Blocking(ordered = false) // POI evaluation is CPU-bound: keep it off the event loop, in parallel
 	public ExcelResult receive(Record<String, String> record) {
-		LOG.info("Received {} - {}", record.key(), record.value());
-		ExcelResult ret = new ExcelResult();
+		LOG.debug("Received {} - {}", record.key(), record.value());
+		ExcelRequest er = null;
 		try {
-			ExcelRequest er = om.readValue(record.value(), ExcelRequest.class);
-			List<ExcelCell> reply = engine.cellCalculation(er.getResource(), er.getSheet(), er.getOutputs(),
-					er.getInputs(), false);
-
-			ret.setUuid(er.getUuid());
-			ret.setCount(reply.size());
-			ret.setCells(reply);
-
-			LOG.info("{}", om.writeValueAsString(reply));
+			com.fasterxml.jackson.databind.JsonNode json = om.readTree(record.value());
+			if (json == null || !json.isObject()) {
+				throw com.fasterxml.jackson.databind.exc.MismatchedInputException.from(null, ExcelRequest.class,
+						"Expected a JSON object");
+			}
+			er = om.treeToValue(json, ExcelRequest.class);
+			if (!json.hasNonNull("uuid") && record.key() != null) {
+				er.setUuid(record.key()); // keep the request correlated with its Kafka key
+			}
+			return engine.compute(er);
+		} catch (com.fasterxml.jackson.core.JsonProcessingException ex) {
+			return ExcelErrors.toResult(new IllegalArgumentException("Invalid JSON request: " + ex.getOriginalMessage()),
+					record.key());
 		} catch (Exception ex) {
-			LOG.error("Cannot execute {}", ex);
-			
-			ExcelError err = new ExcelError();
-
-			StringWriter sw = new StringWriter();
-			PrintWriter pw = new PrintWriter(sw);
-			ex.printStackTrace(pw);
-
-			err.setCode(ex.getClass().getCanonicalName());
-			err.setError(sw.toString());
-			ret.setError(err);
+			return ExcelErrors.toResult(ex, er == null ? record.key() : er.getUuid());
 		}
-		return ret;
-
 	}
 }

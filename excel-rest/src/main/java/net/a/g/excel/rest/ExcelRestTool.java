@@ -25,6 +25,16 @@ public class ExcelRestTool {
 
 	}
 
+	/**
+	 * Builds a JSON error answer {@code {"code": "<status>", "message": "..."}}.
+	 */
+	public static Response error(Status status, String message) {
+		ExcelError err = new ExcelError();
+		err.setCode("" + status.getStatusCode());
+		err.setError(message);
+		return Response.status(status).type(MediaType.APPLICATION_JSON).entity(err).build();
+	}
+
 	public static Response returnOK(ExcelResult ret, Link link) {
 
 		ExcelLink el = new ExcelLink();

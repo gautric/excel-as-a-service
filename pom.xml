@@ -10,14 +10,14 @@
 	<packaging>pom</packaging>
 	<name>EXCEL APP</name>
 	<properties>
-		<compiler-plugin.version>3.14.0</compiler-plugin.version>
+		<compiler-plugin.version>3.16.0</compiler-plugin.version>
 		<maven.compiler.parameters>true</maven.compiler.parameters>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
-		<org.apache.poi.version>5.4.0</org.apache.poi.version>
+		<org.apache.poi.version>6.0.0</org.apache.poi.version>
 
-		<quarkus.version>3.19.4</quarkus.version>
-		<quarkus.platform.version>3.19.4</quarkus.platform.version>
+		<quarkus.version>3.40.1.2</quarkus.version>
+		<quarkus.platform.version>3.40.1.2</quarkus.platform.version>
 
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -29,15 +29,15 @@
 		<camel-quarkus.platform.group-id>${quarkus.platform.group-id}</camel-quarkus.platform.group-id>
 		<camel-quarkus.platform.artifact-id>quarkus-camel-bom</camel-quarkus.platform.artifact-id>
 
-		<surefire-plugin.version>3.5.2</surefire-plugin.version>
-		<weld-se-core.version>6.0.1.Final</weld-se-core.version>
-		<weld-junit5.version>4.0.3.Final</weld-junit5.version>
+		<surefire-plugin.version>3.6.1</surefire-plugin.version>
+		<weld-se-core.version>6.0.4.Final</weld-se-core.version>
+		<weld-junit5.version>4.0.6.Final</weld-junit5.version>
 		<hamcrest.version>3.0</hamcrest.version>
-		<jandex.version>3.2.7</jandex.version>
-		<json.version>20250107</json.version>
-		<microprofile-openapi-api.version>4.0.2</microprofile-openapi-api.version>
-		<slf4j.version>2.0.17</slf4j.version>
-		<logback-classic.version>1.5.18</logback-classic.version>
+		<jandex.version>3.6.1</jandex.version>
+		<json.version>20260814</json.version>
+		<microprofile-openapi-api.version>4.2</microprofile-openapi-api.version>
+		<slf4j.version>2.0.20</slf4j.version>
+		<logback-classic.version>1.6.8</logback-classic.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -50,6 +50,26 @@
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>${surefire-plugin.version}</version>
+					<configuration>
+						<!-- Default patterns skipped *TestCore and *_w_ProfileN classes:
+						     they never ran in CI. -->
+						<includes>
+							<include>**/*Test.java</include>
+							<include>**/*Tests.java</include>
+							<include>**/*TestCore.java</include>
+							<include>**/*Test_w_*.java</include>
+						</includes>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
 	<modules>
 		<module>excel-engine</module>
 		<module>excel-cdi</module>

@@ -9,36 +9,59 @@ image::https://github.com/gautric/excel-as-a-service/actions/workflows/eaas-ci-m
 
 == Dependencies
 
-* Java
-** 21
+[cols="2,1"]
+|===
+|Component |Version
 
-* POI
-** 5.4
+|Java (Amazon Corretto in CI) |21
+|Maven (through the Maven Wrapper `./mvnw`) |3.9.16
+|Quarkus |3.40.1.2
+|Apache POI |6.0.0
+|Jakarta CDI / Weld SE (tests) |6.0.4.Final
+|weld-junit5 |4.0.6.Final
+|MicroProfile OpenAPI API |4.2
+|SLF4J |2.0.20
+|Logback |1.6.8
+|org.json |20260814
+|Quarkus AsyncAPI |1.0.6
+|maven-compiler-plugin |3.16.0
+|maven-surefire-plugin / failsafe |3.6.1
+|===
 
-* Quarkus 
-** 3.19.4
+NOTE: Weld 7 / weld-junit5 5 target CDI 5 and are not compatible with Quarkus 3 (CDI 4.1): keep Weld 6.
 
 == Repository Structure
 
 ```
 excel-app/
-├── excel-engine/          # Core Excel computation engine with Apache POI integration
+├── .claude/skills/       # Claude skills: java-dev, java-design-patterns, dev-design-patterns
+├── .mvn/wrapper/         # Maven Wrapper configuration (Maven 3.9.16)
+├── excel-engine/         # Core Excel computation engine with Apache POI integration
 ├── excel-cdi/            # CDI implementation of the Excel engine components
 ├── excel-rest/           # REST API implementation with OpenAPI documentation
 ├── excel-grpc/           # gRPC service implementation
 ├── excel-kafka/          # Kafka integration with WebSocket and SSE support
 ├── excel-lambda/         # AWS Lambda implementation
-└── sample/               # Sample Excel files and API definitions
+├── sample/               # Sample Excel files and API definitions
+└── mvnw, mvnw.cmd        # Maven Wrapper scripts (no local Maven install needed)
 ```
 
+== Build and Test
 
-== Run Application 
+Only a JDK 21 is required: the Maven Wrapper downloads Maven 3.9.16 on first use.
 
-To run application 
+    ./mvnw verify                          # build and run every test
+    ./mvnw -pl excel-engine -am test       # one module and its dependencies
 
-    mvn clean install
+On Windows use `mvnw.cmd`.
+
+== Run Application
+
+To run application
+
+    ./mvnw clean install
     cd excel-rest
-    mvn quarkus:dev -Dexcel.static.resouces.uri=../sample
+    ../mvnw quarkus:dev -Dexcel.static.resouces.uri=../sample
 
 == Call REST API
 
@@ -50,21 +73,48 @@ To run application
 
 	curl http://localhost:8080/eaas/api
 
-=== Retrieve all Sheet of the Excel resources
+=== Endpoints
 
-	curl http://localhost:8080/eaas/api/{resource}
+All paths are under `/eaas/api`.
 
-=== Download the Excel resource
+[cols="1,3,2"]
+|===
+|Method |Path |Answer
 
-  curl -J -O http://localhost:8080/eaas/api/{resource}/_download 
+|GET    |`/`                                         |list of resources
+|GET    |`/{resource}`                               |resource (404 if unknown)
+|POST   |`/{resource}` (multipart field `file`)      |201 Created + `Location`
+|PUT    |`/{resource}` (multipart field `file`)      |201 created / 200 replaced
+|DELETE |`/{resource}`                               |204 / 404
+|GET    |`/{resource}/_download`                     |workbook, `ETag` (304 with `If-None-Match`)
+|GET    |`/{resource}/sheets`                        |list of sheets
+|GET    |`/{resource}/sheet/{sheet}`                 |sheet
+|GET    |`/{resource}/sheet/{sheet}/cells`           |every cell
+|GET    |`/{resource}/sheet/{sheet}/cell/{cell}?B2=TRUE` |one cell, computed with query inputs
+|GET    |`/{resource}/sheet/{sheet}/compute`         |URI templates of the sheet API
+|GET    |`/{resource}/sheet/{sheet}/compute/{OUT}/{IN}/{value}/...` |compute by `@input`/`@output` names
+|POST   |`/{resource}/sheet/{sheet}/compute` (JSON)  |compute, see below
+|POST   |`/compute` (JSON with `resource`, `sheet`)  |same, legacy
+|===
 
-=== Retrieve all Formula from a Sheet of the Excel resources
+Errors always use the same body, without stack trace:
 
-	curl http://localhost:8080/eaas/api/{resource}/{sheet}
+  {"code": "400", "message": "Unknown output 'NOPE': not an @output name nor a cell reference"}
 
-=== Compute or Retrieve a Cell Value
+`404` unknown resource/sheet/cell, `400` invalid input or output, `500` unexpected error.
 
-	curl http://localhost:8080/eaas/api/{resource}/{sheet}/{cell}
+=== Compute with a JSON body
+
+  curl -X POST -H 'Content-Type: application/json' \
+    -d '{"inputs": {"PEP": true, "COUNTRY": "CY", "AMOUNT": 1000000}, "outputs": ["SCORE"]}' \
+    http://localhost:8080/eaas/api/KYCAPI/sheet/ComputeKYC/compute
+
+* `inputs` / `outputs` take `@input(NAME)` / `@output(NAME)` names, or cell references (`B2`, `Sheet!B2`).
+* No `outputs`: every `@output` of the sheet is returned.
+* `"global": true` enables cross-workbook references (loads every resource, so off by default; on by default for the legacy `POST /compute`).
+* The same JSON (plus `resource`, `sheet`, `uuid`) is accepted by Kafka, gRPC and Lambda, which share one engine entry point: `ExcelEngine.compute(ExcelRequest)`.
+
+Each computation works on a private copy of the workbook: concurrent requests never see each other's inputs, and formulas are never overwritten.
 
 == Sample Test
 

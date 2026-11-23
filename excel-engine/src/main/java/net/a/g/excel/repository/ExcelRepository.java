@@ -73,4 +73,31 @@ public interface ExcelRepository {
      * @see org.apache.poi.ss.usermodel.Workbook
      */
     Workbook retrieveWorkbook(String name);
+
+    /**
+     * Opens a fresh, private copy of the workbook. The caller owns it (may
+     * mutate it) and must close it. Use it for any write or formula
+     * evaluation, so concurrent requests never share state and the cached
+     * template keeps its formulas.
+     *
+     * @param name the resource name
+     * @return a new workbook parsed from the stored document
+     */
+    default Workbook openWorkbook(String name) {
+        Workbook wb = net.a.g.excel.util.POITools.convertByteToWorkbook(get(name).getDoc());
+        if (wb == null) {
+            throw new net.a.g.excel.exception.ExcelEngineException("Failed to load workbook: " + name);
+        }
+        return wb;
+    }
+
+    /**
+     * Removes a resource from the repository.
+     *
+     * @param name the resource name
+     * @return true if a resource was removed
+     */
+    default boolean remove(String name) {
+        throw new UnsupportedOperationException("remove not supported");
+    }
 }

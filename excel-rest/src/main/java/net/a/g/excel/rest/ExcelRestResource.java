@@ -6,17 +6,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.HexFormat;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 import org.eclipse.microprofile.openapi.annotations.ExternalDocumentation;
@@ -32,27 +32,35 @@ import org.jboss.resteasy.plugins.providers.multipart.MultipartFormDataInput;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.quarkus.logging.Log;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.EntityTag;
 import jakarta.ws.rs.core.Link;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.PathSegment;
+import jakarta.ws.rs.core.Request;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriInfo;
 import net.a.g.excel.engine.ExcelEngine;
+import net.a.g.excel.engine.ExcelEngineImpl;
+import net.a.g.excel.exception.ExcelEngineException;
+import net.a.g.excel.exception.ExcelInvalidInputException;
+import net.a.g.excel.validation.InputValidator;
 import net.a.g.excel.model.ExcelCell;
 import net.a.g.excel.model.ExcelError;
 import net.a.g.excel.model.ExcelLink;
@@ -148,7 +156,7 @@ public class ExcelRestResource {
 			@APIResponse(responseCode = "404", description = "Excel Resource not found", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "200", description = "Excel Resource into OpenXmlFormats ", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
 	@Operation(summary = "Retrieve the Excel Resource full file", description = "The Excel Resource into OpenXmlFormats standard (binary file)")
-	public Response download(@PathParam("resource") String resource) {
+	public Response download(@PathParam("resource") String resource, @Context Request request) {
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
 		if (!repo.contains(resource)) {
@@ -157,8 +165,32 @@ public class ExcelRestResource {
 
 		ExcelResource file = repo.get(resource);
 
-		return Response.ok(file.getDoc()).header("content-disposition", "attachment; filename=" + file.getFile())
-				.build();
+		// Conditional GET: clients re-downloading an unchanged workbook get a 304.
+		EntityTag etag = etag(file);
+		Response.ResponseBuilder notModified = request.evaluatePreconditions(etag);
+		if (notModified != null) {
+			return notModified.tag(etag).build();
+		}
+
+		return Response.ok(file.getDoc(), XLSX).tag(etag).cacheControl(revalidate())
+				.header("content-disposition", "attachment; filename=\"" + file.getFile() + "\"").build();
+	}
+
+	private static final String XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+	private static EntityTag etag(ExcelResource file) {
+		try {
+			byte[] digest = MessageDigest.getInstance("SHA-256").digest(file.getDoc());
+			return new EntityTag(HexFormat.of().formatHex(digest, 0, 16));
+		} catch (NoSuchAlgorithmException e) {
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private static CacheControl revalidate() {
+		CacheControl cc = new CacheControl();
+		cc.setNoCache(true);
+		return cc;
 	}
 
 	private Response resourceNotFound(String resource, Link link) {
@@ -232,39 +264,74 @@ public class ExcelRestResource {
 	@APIResponses(value = {
 			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
 			@APIResponse(responseCode = "202", description = "Resource is accepted", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))) })
-	@Operation(summary = "Create a new Excel Resource", description = "Create a new Excel Resource")
+	@Operation(summary = "Create a new Excel Resource", description = "Upload a workbook (multipart field 'file'). Answers 201 Created with a Location header")
 	public Response uploadFile(@PathParam("resource") String resource, MultipartFormDataInput input)
 			throws IOException {
+		return store(resource, input);
+	}
 
-		String fileName = "";
-		byte[] bytes = null;
+	@PUT
+	@Path("{resource}")
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "400", description = "Resource uploaded is not Excel file"),
+			@APIResponse(responseCode = "200", description = "Resource replaced"),
+			@APIResponse(responseCode = "201", description = "Resource created") })
+	@Operation(summary = "Create or replace an Excel Resource", description = "Idempotent upload (multipart field 'file')")
+	public Response putFile(@PathParam("resource") String resource, MultipartFormDataInput input) throws IOException {
+		return store(resource, input);
+	}
 
-		Map<String, List<InputPart>> uploadForm = input.getFormDataMap();
-		List<InputPart> inputParts = uploadForm.get("file");
+	@DELETE
+	@Path("{resource}")
+	@APIResponses(value = { @APIResponse(responseCode = "204", description = "Resource deleted"),
+			@APIResponse(responseCode = "404", description = "Excel Resource not found") })
+	@Operation(summary = "Delete an Excel Resource")
+	public Response delete(@PathParam("resource") String resource) {
+		if (!repo.remove(resource)) {
+			return resourceNotFound(resource, Link.fromUri(uriInfo.getRequestUri()).rel("self").build());
+		}
+		return Response.noContent().build();
+	}
 
-		for (InputPart inputPart : inputParts) {
+	private Response store(String resource, MultipartFormDataInput input) throws IOException {
+		List<InputPart> inputParts = input == null ? null : input.getFormDataMap().get("file");
+		if (inputParts == null || inputParts.isEmpty()) {
+			return ExcelRestTool.error(Status.BAD_REQUEST, "Multipart field 'file' is required");
+		}
 
-			MultivaluedMap<String, String> header = inputPart.getHeaders();
-			fileName = getFileName(header);
-
-			InputStream inputStream = inputPart.getBody(InputStream.class, null);
-
+		InputPart part = inputParts.get(0);
+		byte[] bytes;
+		try (InputStream inputStream = part.getBody(InputStream.class, null)) {
 			bytes = IOUtils.toByteArray(inputStream);
 		}
 
 		ExcelResource ret = new ExcelResource();
 		ret.setName(resource);
-		ret.setFile(fileName);
+		ret.setFile(getFileName(part.getHeaders()));
 		ret.setDoc(bytes);
 
-		if (!repo.add(ret)) {
-			return ExcelRestTool.returnKO(Response.Status.BAD_REQUEST,
-					"Server cannot accept/recognize format file provided");
+		boolean existed = repo.contains(resource);
+		boolean added;
+		try {
+			added = repo.add(ret);
+		} catch (ExcelInvalidInputException e) {
+			throw e;
+		} catch (ExcelEngineException e) {
+			added = false;
+		}
+		if (!added) {
+			return ExcelRestTool.error(Status.BAD_REQUEST, "Server cannot accept/recognize format file provided");
 		}
 
 		addLink(ret);
 
-		return Response.accepted(ret).build();
+		if (existed) {
+			return Response.ok(ret).build();
+		}
+		return Response.created(getURIBuilder().path(ExcelRestResource.class, "resource").build(resource))
+				.entity(ret).build();
 	}
 
 	/**
@@ -274,7 +341,11 @@ public class ExcelRestResource {
 	// get uploaded filename, is there a easy way in RESTEasy?
 	private String getFileName(MultivaluedMap<String, String> header) {
 
-		String[] contentDisposition = header.getFirst("Content-Disposition").split(";");
+		String disposition = header.getFirst("Content-Disposition");
+		if (disposition == null) {
+			return "unknown";
+		}
+		String[] contentDisposition = disposition.split(";");
 
 		for (String filename : contentDisposition) {
 			if ((filename.trim().startsWith("filename"))) {
@@ -389,7 +460,8 @@ public class ExcelRestResource {
 		}
 
 		if (input.size() % 2 != 0) {
-			return Response.status(Response.Status.BAD_REQUEST).entity("input path should be even").build();
+			return ExcelRestTool.error(Status.BAD_REQUEST,
+					"Input path should have an even number of segments (name/value pairs)");
 		}
 
 		if(LOG.isDebugEnabled()) {
@@ -402,12 +474,9 @@ public class ExcelRestResource {
 
 		}
 		
-		Map<String, List<ExcelCell>> mapOfCell = getEngine().listOfAPI(resource, sheetName).stream()
-				.collect(Collectors.groupingBy(v -> (v.getMetadata().contains("@input")) ? "IN" : "OUT"));
+		Map<String, List<ExcelCell>> mapOfCell = getEngine().mapOfAPI(resource, sheetName);
 
-		String in = mapOfCell.get("IN").stream()
-				.map(v -> "/" + extract(v.getMetadata()) + "/{" + extract(v.getMetadata()) + "}")
-				.collect(Collectors.joining("")).replaceFirst("/", "");
+		String in = inputTemplate(mapOfCell);
 
 		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
 
@@ -420,34 +489,35 @@ public class ExcelRestResource {
 
 		LOG.debug("Template {}", template);
 
-		Map<String, ExcelCell> inputParam = mapOfCell.get("IN").stream()
-				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
-		Map<String, ExcelCell> outputParam = mapOfCell.get("OUT").stream()
-				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
-
-		Map<String, String> injectParam = new HashMap<>();
+		// Path inputs keep their historical leniency: unknown names are skipped.
+		java.util.Set<String> known = mapOfCell.getOrDefault("IN", List.of()).stream()
+				.map(v -> extract(v.getMetadata())).filter(java.util.Objects::nonNull).collect(Collectors.toSet());
+		Map<String, String> injectParam = new LinkedHashMap<>();
 		for (int i = 0; i < input.size() / 2; i++) {
 			String param = input.get(i * 2).getPath();
 			String value = input.get(i * 2 + 1).getPath();
-
-			ExcelCell cell = inputParam.get(param);
-			if (cell != null) {
-				LOG.debug("Add param '{}' -> {} = '{}' ", param, cell.getAddress(), value);
-				injectParam.put(cell.getAddress(), value);
+			if (known.contains(param)) {
+				injectParam.put(param, value);
 			} else {
-				LOG.error("Param '{}' = '{}' is not found, skipped", param, value);
+				LOG.warn("Param '{}' = '{}' is not found, skipped", param, value);
 			}
 		}
 
-		pullParam = (List<String>) pullParam.stream().map(outputParam::get).flatMap(Stream::ofNullable)
-				.map(ExcelCell::getAddress).collect(Collectors.toList());
+		ExcelRequest request = new ExcelRequest();
+		request.setResource(resource);
+		request.setSheet(sheetName);
+		request.setOutputs(pullParam);
+		request.setInputs(injectParam);
 
-		List<ExcelCell> entity = getEngine().cellCalculation(resource, pullParam, injectParam, false, false);
+		List<ExcelCell> entity = List.copyOf(getEngine().compute(request).getCells());
 
 		entity.forEach(cell -> {
-
+			String href = template.get(extract(cell.getMetadata()));
+			if (href == null) {
+				return;
+			}
 			ExcelLink el = new ExcelLink();
-			el.setHref(template.get(extract(cell.getMetadata())));
+			el.setHref(href);
 			el.setRel("uri-template");
 			el.setType(MediaType.APPLICATION_JSON);
 			cell.getLinks().add(el);
@@ -484,14 +554,14 @@ public class ExcelRestResource {
 
 		Map<String, List<ExcelCell>> mapOfCell = getEngine().mapOfAPI(resource, sheet);
 
-		String in = mapOfCell.getOrDefault("IN", List.of()).stream()
-				.map(v -> "/" + extract(v.getMetadata()) + "/{" + extract(v.getMetadata()) + "}")
-				.collect(Collectors.joining("")).replaceFirst("/", "");
+		String in = inputTemplate(mapOfCell);
 
 		UriBuilder resourceBuilder = getURIBuilder().path(ExcelRestResource.class, "compute");
 
 		Map<String, String> template = mapOfCell.getOrDefault("OUT", List.of()).stream().map(ExcelCell::getMetadata)
 				.map(this::extract)
+				.filter(java.util.Objects::nonNull)
+				.distinct()
 				.collect(Collectors.toMap(Function.identity(),
 						outP -> URLDecoder.decode(
 								resourceBuilder.buildFromEncoded(resource, sheet, outP, in).toString(),
@@ -516,88 +586,54 @@ public class ExcelRestResource {
 	}
 
 	@POST
-	//@Path("{resource}/sheet/{sheet}/compute")
+	@Path("{resource}/sheet/{sheet}/compute")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	@APIResponses(value = {
+			@APIResponse(responseCode = "200", description = "Computed cells", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ExcelResult.class))),
+			@APIResponse(responseCode = "400", description = "Unknown input/output or invalid value"),
+			@APIResponse(responseCode = "404", description = "Sheet or Excel Resource not found") })
+	@Operation(summary = "Compute (JSON body)", description = "Body: {\"inputs\": {\"PEP\": \"true\"}, \"outputs\": [\"SCORE\"]}. "
+			+ "Names are @input/@output names or cell references (B2, Sheet!B2). No outputs = every @output of the sheet")
+	public Response computeSheetPOST(@PathParam("resource") String resource, @PathParam("sheet") String sheet,
+			ExcelRequest request) {
+		ExcelRequest req = request == null ? new ExcelRequest() : request;
+		req.setResource(resource);
+		req.setSheet(sheet);
+		return computeResponse(req);
+	}
+
+	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Path("compute")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response computePOST(/**@PathParam("resource") String resource, @PathParam("sheet") String sheet,*/
-			final ExcelRequest request) {
-
-		List<String> pullParam = request.getOutputs();
-		Link link = null;
-		try {
-			link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
-		}catch(Exception e) {
-			
+	@Operation(summary = "Compute (resource and sheet in the JSON body)", description = "Same as POST {resource}/sheet/{sheet}/compute; cross-workbook references enabled unless 'global' is false")
+	public Response computePOST(final ExcelRequest request) {
+		if (request == null) {
+			return ExcelRestTool.error(Status.BAD_REQUEST, "JSON body is required");
 		}
-		LOG.info("{}",request);
-		
-		if (!repo.contains(request.getResource())) {
-			return resourceNotFound(request.getResource(), link);
+		if (request.getGlobal() == null) {
+			request.setGlobal(Boolean.TRUE); // historical behaviour of this endpoint
 		}
+		return computeResponse(request);
+	}
 
-		if (!getEngine().isSheetExists(request.getResource(), request.getSheet())) {
-			return sheetNotFound(request.getResource(), request.getSheet(), link);
-		}
-
-		Map<String, List<ExcelCell>> mapOfCell = getEngine().mapOfAPI(request.getResource(), request.getSheet());
-
-		Map<String, ExcelCell> inputParam = mapOfCell.get("IN").stream()
-				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
-		Map<String, ExcelCell> outputParam = mapOfCell.get("OUT").stream()
-				.collect(Collectors.toMap(v -> extract(v.getMetadata()), Function.identity()));
-
-		Map<String, String> injectParam = new HashMap<>();
-		for (Map.Entry<String, String> entry : request.getInputs().entrySet()) {
-			String param = entry.getKey();
-			String value = entry.getValue();
-
-			ExcelCell cell = inputParam.get(param);
-			if (cell != null) {
-				LOG.debug("Add param '{}' -> {} = '{}' ", param, cell.getAddress(), value);
-				injectParam.put(cell.getAddress(), value);
-			} else {
-				LOG.error("Param '{}' = '{}' is not found, skipped", param, value);
-			}
-		}
-
-		pullParam = (List<String>) pullParam.stream().map(p -> outputParam.get(p)).map(ExcelCell::getAddress)
-				.collect(Collectors.toList());
-
-		List<ExcelCell> entity = getEngine().cellCalculation(request.getResource(), request.getSheet(), pullParam, injectParam, true, request.isForce());
-
-		return ExcelRestTool.returnOK(new ExcelResult(entity), link);
-
+	private Response computeResponse(ExcelRequest request) {
+		LOG.debug("{}", request);
+		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
+		ExcelResult result = getEngine().compute(request);
+		return ExcelRestTool.returnOK(result, link);
 	}
 
 	private String extract(String input) {
-		String ret = null;
-		Pattern p = Pattern.compile("@(input|output)\\(\"?(?<match>[A-Za-z0-9]+)\"?\\)");
-		Matcher m = p.matcher(input);
-		while (m.matches()) {
-			ret = m.group("match");
-			LOG.debug("group match {}", ret);
-			return ret;
-		}
-		LOG.debug("no match ...");
-		return null;
+		return ExcelEngineImpl.apiName(input);
 	}
 
-	private String mapType(String metadata) {
-
-		switch (metadata) {
-		case "BOOLEAN":
-			return "true|false";
-		case "STRING":
-			return "[^/]%2B";
-		case "NUMERIC":
-			return "[%2B-]?([0-9]*).?[0-9]%2B";
-		case "DATE":
-			return "\\d{4}\\-(0?[1-9]|1[012])\\-(0?[1-9]|[12][0-9]|3[01])%2A";
-		default:
-			return "";
-		}
-
+	/** "PEP/{PEP}/COUNTRY/{COUNTRY}" built from the @input cells of the sheet. */
+	private String inputTemplate(Map<String, List<ExcelCell>> mapOfCell) {
+		return mapOfCell.getOrDefault("IN", List.of()).stream().map(v -> extract(v.getMetadata()))
+				.filter(java.util.Objects::nonNull).map(n -> "/" + n + "/{" + n + "}").collect(Collectors.joining(""))
+				.replaceFirst("/", "");
 	}
 
 	@GET
@@ -606,10 +642,7 @@ public class ExcelRestResource {
 	public Response cellsQuery(@PathParam("resource") String resource, @PathParam("sheet") String sheet,
 			@PathParam("cells") String cells, @QueryParam("_global") @DefaultValue("false") boolean global) {
 
-		Map<String, List<String>> param = uriInfo.getQueryParameters();
-
-		Map<String, String> query = param.entrySet().stream()
-				.collect(Collectors.toMap(e -> renameFunction(sheet).apply(e.getKey()), kv -> kv.getValue().get(0)));
+		Map<String, String> query = queryInputs(sheet);
 
 		return computeCells(resource, sheet, cells, global, query);
 
@@ -642,9 +675,7 @@ public class ExcelRestResource {
 	public Response cell(@PathParam("resource") String resource, @PathParam("sheet") String sheet,
 			@PathParam("cell") String cell, @QueryParam("_global") @DefaultValue("false") boolean global) {
 
-		Map<String, List<String>> param = uriInfo.getQueryParameters();
-		Map<String, String> query = param.entrySet().stream()
-				.collect(Collectors.toMap(e -> renameFunction(sheet).apply(e.getKey()), kv -> kv.getValue().get(0)));
+		Map<String, String> query = queryInputs(sheet);
 
 		Link link = Link.fromUri(uriInfo.getRequestUri()).rel("self").build();
 
@@ -656,13 +687,19 @@ public class ExcelRestResource {
 			return sheetNotFound(resource, sheet, link);
 		}
 
+		try {
+			InputValidator.validateCellReference(sheet + "!" + cell);
+		} catch (ExcelInvalidInputException e) {
+			return ExcelRestTool.error(Status.NOT_FOUND, "Cell '" + cell + "' Not Found in Sheet '" + sheet + "'");
+		}
+
 		List<ExcelCell> engineRet = null;
 
 		engineRet = getEngine().cellCalculation(resource, Arrays.asList(sheet + "!" + cell), query, global, false);
 
 		if (engineRet.size() == 0) {
 
-			return Response.status(Status.NOT_FOUND).build();
+			return ExcelRestTool.error(Status.NOT_FOUND, "Cell '" + cell + "' Not Found in Sheet '" + sheet + "'");
 
 		} else {
 			ExcelCell ret = engineRet.get(0);
@@ -671,6 +708,12 @@ public class ExcelRestResource {
 
 			return Response.ok(ret).build();
 		}
+	}
+
+	/** Query parameters as engine inputs; options such as {@code _global} start with '_' and are not cells. */
+	private Map<String, String> queryInputs(String sheet) {
+		return uriInfo.getQueryParameters().entrySet().stream().filter(e -> !e.getKey().startsWith("_"))
+				.collect(Collectors.toMap(e -> renameFunction(sheet).apply(e.getKey()), kv -> kv.getValue().get(0)));
 	}
 
 	private Function<String, String> renameFunction(String sheet) {
